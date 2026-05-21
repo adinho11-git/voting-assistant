@@ -25,10 +25,12 @@ export async function getDb(): Promise<Db | null> {
     const uri = env.MONGODB_URI;
     if (!uri) return null;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const client = new MongoClient(uri, {
       serverSelectionTimeoutMS: 4000,
       connectTimeoutMS: 4000
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
     await client.connect();
     cachedClient = client;
     cachedDb = client.db(DB_NAME);

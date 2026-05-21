@@ -1,4 +1,5 @@
-import { error, fail, redirect, type Actions, type PageServerLoad } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 import {
   getAbstimmung,
   updateAbstimmung,

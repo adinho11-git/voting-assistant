@@ -4,14 +4,18 @@ import { listAbstimmungen } from '$lib/server/dataLayer';
 
 export const load: PageServerLoad = async () => {
   const all = await listAbstimmungen();
-  const sorted = all.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const upcoming = all
+    .filter((a) => a.status === 'anstehend' && a.type === 'eidgenössisch')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  const next = sorted[0];
-  const rest = sorted.slice(1);
+  const past = all
+    .filter((a) => a.status === 'vergangen' && a.type === 'eidgenössisch')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3);
 
   return {
-    next,
-    rest,
-    daysUntil: next ? getDaysUntil(next.date) : 0
+    upcoming,
+    past,
+    daysUntil: upcoming[0] ? getDaysUntil(upcoming[0].date) : 0
   };
 };

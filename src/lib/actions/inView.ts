@@ -1,3 +1,9 @@
+import type { ActionReturn } from 'svelte/action';
+
+interface InViewAttributes {
+  'on:reveal'?: (e: CustomEvent<void>) => void;
+}
+
 /**
  * Svelte use:inView action — fires a CustomEvent when the element enters the viewport.
  *
@@ -5,7 +11,10 @@
  *
  * Falls back to immediate trigger when IntersectionObserver is unavailable (SSR-safe).
  */
-export function inView(node: HTMLElement, options: IntersectionObserverInit = { threshold: 0.25 }) {
+export function inView(
+  node: HTMLElement,
+  options: IntersectionObserverInit = { threshold: 0.25 }
+): ActionReturn<IntersectionObserverInit, InViewAttributes> {
   if (typeof IntersectionObserver === 'undefined') {
     node.dispatchEvent(new CustomEvent('reveal'));
     return {};

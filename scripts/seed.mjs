@@ -47,21 +47,21 @@ async function loadDotEnv() {
   }
 }
 
-async function loadMockAbstimmungen() {
-  // Mirror of src/lib/mockData.ts — kept in sync manually.
-  // We import via a side-by-side .js shim to avoid TS-runner dependencies.
-  const mockPath = path.join(ROOT, 'src', 'lib', 'mockData.ts');
-  const raw = await readFile(mockPath, 'utf8');
-  // Heuristic extraction — only safe because the file is hand-maintained.
-  // For a hardened pipeline, switch to `tsx` and import directly.
-  const match = raw.match(/export const mockAbstimmungen[^=]*=\s*(\[[\s\S]*?\n\];)/);
+async function loadAbstimmungen() {
+  // Source-of-truth is src/lib/realData.ts. We extract realAbstimmungen literal via regex
+  // and evaluate it as JS. This avoids requiring tsx / esbuild for the seed pipeline.
+  const realPath = path.join(ROOT, 'src', 'lib', 'realData.ts');
+  const raw = await readFile(realPath, 'utf8');
+  const match = raw.match(/export const realAbstimmungen[^=]*=\s*(\[[\s\S]*?\n\];)/);
   if (!match) {
-    throw new Error('Konnte mockAbstimmungen nicht aus mockData.ts extrahieren.');
+    throw new Error('Konnte realAbstimmungen nicht aus realData.ts extrahieren.');
   }
-  // Wrap in a function to evaluate as a JS literal
   const literal = match[1].replace(/;$/, '');
+  // Resolve `TODAY` constant referenced inside the literal
+  const today = new Date().toISOString().slice(0, 10);
+  const literalResolved = literal.replace(/TODAY/g, JSON.stringify(today));
   // eslint-disable-next-line no-new-func
-  const value = new Function(`return ${literal};`)();
+  const value = new Function(`return ${literalResolved};`)();
   return value;
 }
 
@@ -87,8 +87,11 @@ async function main() {
   await communityCol.createIndex({ slug: 1, clientId: 1 }, { unique: false });
   await interesseCol.createIndex({ createdAt: -1 });
 
-  const abstimmungen = await loadMockAbstimmungen();
-  console.log(`[seed] ${abstimmungen.length} Abstimmungen aus mockData.ts geladen.`);
+  const abstimmungen = await loadAbstimmungen();
+  console.log(`[seed] ${abstimmungen.length} Abstimmungen aus realData.ts geladen.`);
+
+  // Wipe abstimmungen-Collection first so renames / removals propagate
+  await abstimmungenCol.deleteMany({});
 
   let inserted = 0;
   let updated = 0;
@@ -104,16 +107,17 @@ async function main() {
 
   console.log(`[seed] ✓ Fertig: ${inserted} neu, ${updated} aktualisiert.`);
 
-  // Optional: ensure community-vote seeds exist (without overwriting real votes)
+  // Community-vote seeds for the two upcoming June 2026 votes
+  // (only inserted if no real votes exist for that slug)
   const seedCounts = {
-    'klima-initiative-2026': { ja: 28, nein: 14 },
-    'gesundheitsreform-2026': { ja: 35, nein: 11 },
-    'mieten-initiative-2026': { ja: 19, nein: 22 },
-    'mobilitaetsfonds-2026': { ja: 30, nein: 9 }
+    'nachhaltigkeitsinitiative-2026': { ja: 38, nein: 41 },
+    'zivildienstgesetz-2026': { ja: 49, nein: 31 }
   };
   for (const [slug, { ja, nein }] of Object.entries(seedCounts)) {
-    const existing = await communityCol.countDocuments({ slug });
+    const existing = await communityCol.countDocuments({ slug, seeded: { $exists: false } });
     if (existing === 0) {
+      // Clear previous seeded entries before re-seeding
+      await communityCol.deleteMany({ slug, seeded: true });
       const docs = [];
       for (let i = 0; i < ja; i++) docs.push({ slug, position: 'JA', createdAt: new Date(), seeded: true });
       for (let i = 0; i < nein; i++) docs.push({ slug, position: 'NEIN', createdAt: new Date(), seeded: true });

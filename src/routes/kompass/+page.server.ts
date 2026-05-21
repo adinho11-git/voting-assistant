@@ -1,9 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { listAbstimmungen } from '$lib/server/dataLayer';
-import { buildKompassFragen } from '$lib/kompass';
+import { FRAGEN } from '$lib/kompass';
 
 export const load: PageServerLoad = async () => {
-  const all = await listAbstimmungen();
-  const fragen = buildKompassFragen(all);
-  return { abstimmungen: all, fragen };
+  return { fragen: FRAGEN };
 };

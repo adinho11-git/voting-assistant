@@ -1,10 +1,11 @@
 # AI Swiss Voting Assistant
 
-> Schweizer Abstimmungen neutral verstehen — KI-gestützt, quellenbasiert, interaktiv.
+> Interaktiver politischer Orientierungsassistent für Schweizer Abstimmungen und Parteien.
 
 [![Live](https://img.shields.io/badge/Live-friendly--llama--b738d4.netlify.app-C8102E)](https://friendly-llama-b738d4.netlify.app)
 [![GitHub](https://img.shields.io/badge/GitHub-adinho11--git%2Fvoting--assistant-333)](https://github.com/adinho11-git/voting-assistant)
 [![Stack](https://img.shields.io/badge/Stack-SvelteKit%202%20·%20TypeScript%20·%20MongoDB%20·%20Tailwind-003087)](#tech-stack)
+[![Data](https://img.shields.io/badge/Daten-admin.ch%20(21.05.2026)-065F46)](https://abstimmungen.admin.ch/)
 
 ---
 
@@ -12,71 +13,141 @@
 
 1. [Idee &amp; Problem](#idee--problem)
 2. [Features](#features)
-3. [Tech Stack](#tech-stack)
-4. [Setup](#lokales-setup)
-5. [Architektur](#architektur)
-6. [Vorgehen (Methodik)](#vorgehen-methodik)
-7. [Evaluation](#usability-evaluation)
-8. [KI-Einsatz](#ki-einsatz-deklaration)
-9. [Erweiterungen](#erweiterungen-über-den-mindestumfang-hinaus)
-10. [Projektkontext](#projektkontext)
+3. [Datenmodell](#datenmodell)
+4. [Tech Stack](#tech-stack)
+5. [Setup](#lokales-setup)
+6. [Architektur](#architektur)
+7. [Workflows](#workflows)
+8. [Vorgehen (Methodik)](#vorgehen-methodik)
+9. [Usability-Evaluation](#usability-evaluation)
+10. [KI-Einsatz](#ki-einsatz-deklaration)
+11. [Erweiterungen](#erweiterungen-über-den-mindestumfang-hinaus)
+12. [Video-Walkthrough](#video-walkthrough)
+13. [Projektkontext](#projektkontext)
 
 ---
 
 ## Idee &amp; Problem
 
-In der direkten Demokratie der Schweiz stimmen rund 5,5 Mio. Stimmberechtigte bis zu vier Mal pro Jahr ab. Doch das offizielle Abstimmungsbüchlein ist textlastig, Parteien-Argumentarien sind einseitig, und unabhängige Quellen sind verstreut. **Junge Stimmberechtigte und Erst-Wählende verlieren oft den Überblick — und stimmen entweder nicht oder uninformiert.**
+In der direkten Demokratie der Schweiz stimmen rund 5,5 Mio. Stimmberechtigte bis zu vier Mal pro Jahr ab. Das offizielle Abstimmungsbüchlein ist textlastig, Parteien-Argumentarien sind einseitig, und unabhängige Quellen sind verstreut. **Junge Stimmberechtigte und Erst-Wählende verlieren oft den Überblick — und stimmen entweder nicht oder uninformiert.**
 
-Der **AI Swiss Voting Assistant** löst genau dieses Problem:
+Der **AI Swiss Voting Assistant** positioniert sich als interaktiver politischer Orientierungsassistent — kein Ersatz für das Abstimmungsbüchlein, sondern dein Einstieg:
 
-- 🗳 **Briefing in 3 Minuten** — neutrale KI-Zusammenfassung jeder Vorlage
-- ✓ **PRO und CONTRA gleichwertig** — jedes Argument mit Originalquelle verlinkt
-- 🏛 **Alle 6 grossen Parteien transparent** — Position + Statement zur jeweiligen Vorlage
-- 🧭 **Partei-Kompass-Quiz** — finde heraus, welche Partei dir am nächsten steht
-- 📊 **Community-Stimmung** — anonyme Aggregation der Nutzer-Positionen
-- 👤 **Persönliches Profil** — deine Voting-History + Partei-Übereinstimmung
+- 🗳 **Briefings in drei Minuten** — neutrale KI-Zusammenfassung mit Quellen
+- ✓ **PRO und CONTRA gleichwertig** — jedes Argument mit Originalquelle + Datum
+- 🏛 **Alle sechs Bundesparteien transparent** — Profil, Spektrum, Position + Vergleich
+- 🧭 **Partei-Kompass Quiz** — 18 realistische Szenarien aus 10 Themenbereichen
+- 📊 **Community-Stimmung** — anonyme JA/NEIN/Unentschieden-Aggregation
+- 📓 **Persönliches Voting-Journal** — Position, Notiz, Vergleich mit BR/Parlament/Community/Endresultat
+
+> **Studentischer Prototyp** im Modul Prototyping (ZHAW FS 2026) — **keine offizielle Abstimmungshilfe.** Reale Daten von admin.ch / bk.admin.ch (Stand 21.05.2026), kantonale Inhalte sind klar als Demo markiert.
 
 ---
 
 ## Features
 
+### Realdaten — 14. Juni 2026 + 6 vergangene Abstimmungen
+
+**Anstehend (offiziell verifiziert, Quelle admin.ch):**
+
+| Vorlage | BR | Parlament | Status |
+|---------|----|-----------|--------|
+| Volksinitiative «Keine 10-Millionen-Schweiz! (Nachhaltigkeitsinitiative)» | NEIN | NEIN | anstehend |
+| Änderung des Zivildienstgesetzes | JA | JA | anstehend |
+
+**Vergangen (mit Endresultaten, Quelle bk.admin.ch / abstimmungen.admin.ch):**
+
+| Datum | Vorlage | Ergebnis |
+|-------|---------|----------|
+| 08.03.2026 | Klimafonds-Initiative | 29.3% JA — abgelehnt |
+| 28.09.2025 | E-ID-Gesetz | 50.4% JA — angenommen |
+| 09.02.2025 | Umweltverantwortungs-Initiative | 30.2% JA — abgelehnt |
+| 24.11.2024 | EFAS (Einheitliche Finanzierung) | 53.3% JA — angenommen |
+| 22.09.2024 | BVG-Reform | 32.9% JA — abgelehnt |
+| 09.06.2024 | Stromversorgungsgesetz | 68.7% JA — angenommen |
+
+**Kantonal:** Eine als <kbd>DEMO</kbd> gelabelte Vorlage für Zürich illustriert die Kantons-Ebene; bei echtem Einsatz würden offizielle Kantons-APIs angebunden.
+
 ### Public-Bereich
 
 | Feature | Beschreibung |
 |---------|--------------|
-| **Home** | Hero mit Countdown bis zur nächsten Abstimmung + Vorschau-Grid |
-| **Abstimmungsliste** | Suche, Filter (Anstehend/Vergangen/Kantonal), Desktop-Grid |
-| **Briefing-Screen** | KI-Zusammenfassung, PRO/CONTRA-Split, Parteipositionen, Stimmenverhältnis, CTA |
-| **Argument-Detail** | Erweiterte Erklärung + Originalquelle + Link zum Gegenargument |
-| **Parteipositionen** | Detailseite pro Vorlage mit Parlament-Balken |
-| **Parteien-Portal** | Alle 6 Parteien mit Filter nach Ausrichtung |
-| **Partei-Detailseite** | Profil, Spektrum-Visualisierung (LR + UW), Kernthemen, Positionen, Interessen-Formular |
-| **Interessen-Registrierung** | Formular pro Partei, mit Validierung + Server-Persistenz |
-| **Persönliche Position** | JA/NEIN pro Vorlage, localStorage + anonym in DB |
-| **Community-Stimmung** | Anonyme Aggregation als animierter Balken |
-| **Partei-Kompass-Quiz** | 5-Schritt-Flow mit 1–5-Slider + Match-Algorithmus + animiertem Ranking |
-| **Profil-Seite** | History, JA/NEIN-Statistik, Partei-Übereinstimmung in %, alles lokal |
-| **Quellen &amp; FAQ** | Methodik, Originalquellen-Links, häufige Fragen, KI-Deklaration |
+| **Home** | 2-Card-Hero mit den realen Juni-2026-Vorlagen, Workflow-Erklärung, Methodik, FAQ, KI-Transparenz, letzte 3 Resultate |
+| **Abstimmungen** | Drei Tabs (Anstehend / Vergangen / Kantonal); Such-Input ohne Icon-Overlap; Filter |
+| **Vergangen-Tab** | Result-Karten mit Ja/Nein-Balken, Stimmbeteiligung, BR-Empfehlung und persönlichem Vote-Indikator |
+| **Kantonal-Tab** | Kanton-Selector (ZH-Default), Demo-Vorlagen klar gelabelt, Methodik-Hinweis |
+| **Briefing** | KI-Zusammenfassung mit Quellen-Datum, PRO/CONTRA-Argumente, Parteipositionen, Endresultat-Banner bei vergangenen Vorlagen |
+| **Argument-Detail** | Erweiterte Erklärung mit Originalquelle, Quellen-Datum und Link zum Gegenargument |
+| **Parteien-Portal** | 6 Parteien · Filter (Alle/Links/Mitte/Rechts) · Spektrum-Visualisierung |
+| **Partei-Detail** | Profil, Fakten (Mitglieder, Präsidium), Spektrum 2D (LR + Umwelt-Wirtschaft), Positionen zu aktuellen Vorlagen, Interessen-Form |
+| **Direkter Partei-Vergleich** | Zwei Parteien Side-by-Side mit Daten + Slogan |
+| **Positionen-Matrix** | Alle 6 Parteien × aktuelle &amp; jüngste Vorlagen — JA/NEIN auf einen Blick |
+| **Kompass-Quiz** | 18 realistische Szenarien aus 10 Themen, 5-Punkt-Skala click-basiert, Überspring-Option, Match-Algorithmus mit Topic-Breakdown + Erklärung |
+| **Profil-Journal** | JA/NEIN/Unentschieden + Notizen pro Vorlage, Vergleich mit BR/Parlament/Community/Endresultat, Partei-Übereinstimmung in %, Kompass-Ergebnis |
+| **Quellen-Seite** | Methodik, Original-Quellen-Liste, FAQ, KI-Deklaration |
 
 ### Admin-Bereich (passwortgeschützt)
 
 | Feature | Beschreibung |
 |---------|--------------|
-| **Dashboard** | Stat-Cards (Vorlagen / Interessen / Community-Stimmen) + System-Status |
-| **Abstimmungen verwalten** | Tabelle mit Bearbeiten / Löschen, &quot;Neue Abstimmung&quot;-Button |
-| **Erfassen / Bearbeiten** | Vollständige Editor-Oberfläche für Meta-Daten, Argumente, Parteipositionen |
-| **Argumente** | PRO/CONTRA-Argumente einzeln hinzufügen / entfernen, mit Quellen-URL |
-| **Parteipositionen** | Pro Vorlage alle 6 Parteien-Positionen + Statement editieren |
-| **Interessen-Registrierungen** | Vollständige Liste, sortiert, mit CSV-Export (UTF-8 + BOM für Excel) |
-| **Community-Stimmen** | Pro Vorlage JA/NEIN-Aggregation mit Balken |
+| **Dashboard** | Stats (Vorlagen / Interessen / Community-Votes) + System-Status (Mock vs. MongoDB) |
+| **Vorlagen-CRUD** | Tabelle, Bearbeiten-Forms für Meta-Daten, Argumente (PRO/CONTRA hinzufügen/löschen), Parteipositionen |
+| **Interessen** | Tabelle aller Anfragen + CSV-Export (UTF-8 + BOM für Excel) |
+| **Community-Stimmen** | Pro Vorlage JA/NEIN-Aggregation |
 
 ### Foundations
 
-- **Toast-Notification-System** — Reactive Store für Success/Error/Info-Meldungen
-- **Page-Transitions** — fly in / fade out zwischen allen Routen
-- **Mobile-first &amp; Desktop-optimiert** — Top-Nav (Desktop) + Bottom-Nav (Mobile), volles Desktop-Layout
-- **Accessibility** — Skip-Link, ARIA-Labels, focus-visible-Styles, `prefers-reduced-motion`
-- **SEO** — pro Page eigene Title + Description, canonical URLs, OG-Tags
+- **Dark Mode** mit Theme-Persistenz (LocalStorage) + FOUC-freier Initialisierung
+- **Disclaimer-Banner** (dismissable) — kennzeichnet App als Prototyp
+- **Data-Quality-Badges** (Offiziell / In Vorbereitung / Demo) auf jedem Briefing
+- **Toast-Notifications** für alle Interaktionen
+- **Page-Transitions** zwischen Routen
+- **Accessibility:** Skip-Link, ARIA-Labels, `focus-visible`, `prefers-reduced-motion`
+- **Responsive:** Top-Nav (Desktop) + Bottom-Nav (Mobile), zero horizontal overflow
+- **SEO:** pro Page Title + Description, canonical URLs, OG-Tags
+
+---
+
+## Datenmodell
+
+Zentrale Types in `src/lib/types.ts`:
+
+```typescript
+type UserPosition = 'JA' | 'NEIN' | 'UNENTSCHIEDEN';
+type AbstimmungStatus = 'anstehend' | 'vergangen';
+type DataQuality = 'official' | 'official-pending' | 'demo';
+
+interface Abstimmung {
+  id, slug, title, shortTitle, date, type, category, readTime,
+  status,                          // anstehend / vergangen
+  dataQuality,                     // official / demo
+  bundesratPosition, parlamentPosition, parlamentStimmen,
+  aiSummary, summarySource, summarySourceUrl, summaryLastChecked,
+  proArguments: Argument[],        // jedes Arg hat sourceDate
+  contraArguments: Argument[],
+  parteien: Partei[],              // 6 Parteien mit parolenQuelle
+  result?: AbstimmungResult        // bei vergangenen Vorlagen
+}
+
+interface VoteEntry {              // Profil-Journal Eintrag
+  position: UserPosition;
+  note?: string;
+  updatedAt: string;
+}
+```
+
+### MongoDB-Collections
+
+| Collection | Inhalt | CRUD via |
+|------------|--------|----------|
+| `abstimmungen` | 8 reale + 1 Demo-Vorlagen mit Argumenten, Quellen, Ergebnissen | Admin Panel + Seed-Script |
+| `communityVotes` | Anonyme JA/NEIN-Aggregation pro Vorlage | API `/api/abstimmungen/[slug]/vote` |
+| `parteiInteressen` | Interessens-Registrierungen | Form `/parteien/[kuerzel]` + Admin-Export |
+
+**Daten-Lese-Operationen:** Votes, Argumente, Parteipositionen, Ergebnisse, Community-Counts.
+**Daten-Schreib-Operationen:** Admin-CRUD (Vorlagen + Argumente + Parteipositionen), anonyme Votes, Interessens-Registrierungen.
+
+Persönliche Notizen + JA/NEIN-Positionen bleiben in **LocalStorage** — das Profil-Journal bleibt privat.
 
 ---
 
@@ -86,9 +157,9 @@ Der **AI Swiss Voting Assistant** löst genau dieses Problem:
 |-------|-------------|
 | **Framework** | SvelteKit 2 (file-based routing, server load + form actions) |
 | **Sprache** | TypeScript (strict mode) |
-| **Styling** | Tailwind CSS 3 + custom CSS-Variablen (Swiss Editorial Design) |
+| **Styling** | Tailwind CSS 3 + custom CSS-Variablen (Light + Dark Theme) |
 | **Fonts** | Playfair Display (Headlines), Source Sans 3 (Body), IBM Plex Mono (Data) |
-| **DB** | MongoDB Atlas (mit in-memory Fallback für Mock-Modus) |
+| **DB** | MongoDB Atlas (mit in-memory Fallback im Mock-Modus) |
 | **Hosting** | Netlify (`@sveltejs/adapter-netlify`) |
 | **Auth** | Session-Cookie + zentrale Hook in `hooks.server.ts` |
 
@@ -106,45 +177,42 @@ npm install
 
 # 3. Environment konfigurieren
 cp .env.example .env
-# .env editieren: USE_MOCK_DATA=true (default) oder MONGODB_URI eintragen
-# ADMIN_PASSWORD wird mit Default 'zhaw2026admin' gesetzt
+# Optionen:
+#  - USE_MOCK_DATA=true             → läuft komplett ohne DB
+#  - USE_MOCK_DATA=false + MONGODB_URI → echte DB-Persistenz
+#  - ADMIN_PASSWORD=zhaw2026admin    → Login für /admin
 
-# 4. Dev-Server starten
-npm run dev
-# → http://localhost:5173
+# 4. (Optional) DB initial befüllen
+npm run seed
+
+# 5. Dev-Server
+npm run dev   # → http://localhost:5173
 ```
 
-### Mit echter MongoDB
+### MongoDB Atlas Setup
 
 ```bash
-# 1. MongoDB Atlas Cluster erstellen (gratis Free-Tier reicht)
-#    → mongodb.com/atlas
-# 2. Connection-String kopieren und in .env eintragen:
-#    MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/?retryWrites=true
-#    USE_MOCK_DATA=false
+# 1. Cluster auf cloud.mongodb.com/atlas erstellen (Free-Tier reicht)
+# 2. URI in .env eintragen + USE_MOCK_DATA=false setzen
 # 3. Datenbank initial befüllen:
 npm run seed
-# → upserted ✓, Community-Seeds eingespielt
-# 4. App neu starten
-npm run dev
+# → upsertet 8 Abstimmungen, erstellt Indexes, seedet Community-Counts
 ```
 
 ### Admin-Login
 
 ```
-URL:      /admin
-Passwort: zhaw2026admin   (änderbar via ADMIN_PASSWORD in .env)
-Session:  8h (Cookie httpOnly + SameSite=Lax)
+URL:       /admin
+Passwort:  zhaw2026admin   (oder ADMIN_PASSWORD in .env)
+Session:   8h (HttpOnly Cookie + SameSite=Lax)
 ```
 
-### Deployment auf Netlify
+### Quality Gates
 
-ENV-Variables im Netlify-Dashboard setzen:
-- `MONGODB_URI` (optional)
-- `USE_MOCK_DATA` (`true` oder `false`)
-- `ADMIN_PASSWORD`
-
-Push auf `main` triggert automatisches Re-Deploy.
+```bash
+npm run check        # TypeScript + Svelte (0 Errors required)
+npm run build        # Production Build (Netlify-ready)
+```
 
 ---
 
@@ -153,78 +221,80 @@ Push auf `main` triggert automatisches Re-Deploy.
 ```
 src/
 ├── lib/
-│   ├── types.ts                # Abstimmung, Argument, Partei, Position
-│   ├── mockData.ts             # 4 Abstimmungen — Single Source of Truth für Seed
+│   ├── types.ts                # Abstimmung, Argument, Partei, VoteEntry, DataQuality
+│   ├── realData.ts             # 8 reale Vorlagen + 1 Demo (Single Source of Truth)
+│   ├── mockData.ts             # Backwards-compat re-exports
 │   ├── parteiData.ts           # 6 Parteien mit vollständigen Profilen
-│   ├── kompass.ts              # Match-Algorithmus + Fragen-Framing
-│   ├── actions/
-│   │   └── inView.ts           # use:inView IntersectionObserver Action
-│   ├── components/             # 10 wiederverwendbare Komponenten
-│   │   ├── TopNav.svelte       # Desktop sticky nav
-│   │   ├── BottomNav.svelte    # Mobile bottom nav
-│   │   ├── AppBar.svelte       # Mobile back-bar
-│   │   ├── AbstimmungCard.svelte
-│   │   ├── ParteiGrid.svelte
-│   │   ├── Badge.svelte        # JA/NEIN badges
-│   │   ├── VoteSection.svelte  # JA/NEIN + Community
-│   │   ├── InteresseForm.svelte # Form mit Validierung
-│   │   └── ToastContainer.svelte
-│   ├── stores/
-│   │   ├── toast.ts            # Reactive Toast-Store
-│   │   └── votes.ts            # LocalStorage-backed Vote-Store
+│   ├── kompass.ts              # 18 Fragen + Match-Algorithmus + Topic-Breakdown
+│   ├── actions/inView.ts       # IntersectionObserver-Action für Scroll-Reveal
+│   ├── components/             # 15+ wiederverwendbare Komponenten
+│   │   ├── TopNav, BottomNav, AppBar
+│   │   ├── AbstimmungCard (mit User-Vote-Indikator)
+│   │   ├── VoteSection (JA/NEIN/Unentschieden + Notiz + Vergleich)
+│   │   ├── InteresseForm (Validierung + API)
+│   │   ├── DataQualityBadge, DisclaimerRibbon, ThemeToggle, ToastContainer
+│   ├── stores/                 # toast, votes (v2 mit Notes), theme, kompass
 │   └── server/
 │       ├── db.ts               # MongoDB-Connect mit Timeout + Fallback
 │       ├── dataLayer.ts        # Unified API (DB-first, Mock-Fallback)
-│       ├── abstimmungenStore.ts # In-memory store für Admin-CRUD
-│       ├── communityStore.ts   # In-memory community-vote counter
-│       └── interesseStore.ts   # In-memory interesse-Liste
+│       └── *Store.ts           # In-Memory Stores für Mock-Modus
 ├── routes/
-│   ├── +layout.svelte          # Top-Nav, Bottom-Nav, Toast, Page-Transitions
-│   ├── +page.svelte            # Home (Hero + Grid + Trust)
-│   ├── +error.svelte           # 404 / 500
+│   ├── +layout.svelte          # TopNav + BottomNav + Toast + Disclaimer + Theme
+│   ├── +page.svelte            # Home V2 (2-Card-Hero, Workflow, Methodik, FAQ, KI-Transparenz)
 │   ├── abstimmungen/
-│   │   ├── +page.svelte        # Liste mit Filter
+│   │   ├── +page.svelte        # 3 Tabs (Anstehend/Vergangen/Kantonal), Such-Input, Result-Cards
 │   │   └── [slug]/
-│   │       ├── +page.svelte    # Briefing (Hauptworkflow)
-│   │       ├── argumente/[id]/ # Argument-Detail
+│   │       ├── +page.svelte    # Briefing + Endresultat-Banner für Past Votes
+│   │       ├── argumente/[id]/ # Argument-Detail mit Quellen-Datum
 │   │       └── parteien/       # Vollständige Parteipositionen
 │   ├── parteien/
-│   │   ├── +page.svelte        # Parteien-Übersicht
-│   │   └── [kuerzel]/          # Partei-Detail + Interessen-Form
-│   ├── kompass/+page.svelte    # Quiz
-│   ├── profil/+page.svelte     # User-History + Match
-│   ├── quellen/+page.svelte    # Methodik + FAQ
-│   ├── admin/
-│   │   ├── +layout.svelte      # Admin-Subnav
-│   │   ├── +page.svelte        # Dashboard
-│   │   ├── login/, logout/     # Auth
-│   │   ├── abstimmungen/
-│   │   │   ├── +page.svelte    # Tabelle
-│   │   │   ├── new/            # Erfassen
-│   │   │   └── [slug]/edit/    # Bearbeiten
-│   │   ├── interessen/         # Liste + CSV-Link
-│   │   └── community/          # Aggregat-Übersicht
-│   └── api/
-│       ├── abstimmungen/[slug]/vote/+server.ts
-│       ├── parteien/interesse/+server.ts
-│       └── admin/interessen.csv/+server.ts
+│   │   ├── +page.svelte        # 6 Cards + Compare-Tool + Positionen-Matrix + Methodik
+│   │   └── [kuerzel]/          # Detail + Spektrum 2D + Positionen + Interessen-Form
+│   ├── kompass/+page.svelte    # 18-Fragen Quiz mit Topic-Breakdown
+│   ├── profil/+page.svelte     # Voting-Journal + Notes + Compare + Kompass-Result
+│   ├── quellen/+page.svelte    # Methodik + Quellen + FAQ + KI-Deklaration
+│   ├── admin/                  # Login + Dashboard + CRUD + Interessen + Community
+│   └── api/                    # /vote, /interesse, /admin/interessen.csv
 ├── hooks.server.ts             # Admin-Auth-Guard
-├── app.css                     # Design-System (Variablen + Komponenten)
-├── app.d.ts                    # Locals-Typen
-└── app.html                    # HTML-Shell + Fonts
+├── app.css                     # Design-System + Light + Dark Theme
+└── app.html                    # HTML-Shell + FOUC-freier Theme-Bootstrap
 ```
 
-### Datenfluss
+---
+
+## Workflows
+
+### Primary Workflow
 
 ```
-┌─────────────────┐   ┌──────────────────────┐   ┌──────────────────┐
-│  +page.server.ts│──▶│  lib/server/dataLayer│──▶│ MongoDB Atlas    │
-│  +server.ts     │   │   (unified API)      │   │ (production)     │
-│  Form Actions   │   │                      │   └──────────────────┘
-└─────────────────┘   │                      │   ┌──────────────────┐
-                      │   Fallback wenn keine│──▶│ In-memory stores │
-                      │   DB-URI/Connection  │   │ (mock-mode)      │
-                      └──────────────────────┘   └──────────────────┘
+User öffnet App
+  → sieht reale 14.6.2026-Vorlagen auf Home
+  → wählt Vorlage → liest neutrale KI-Zusammenfassung
+  → bewertet PRO/CONTRA mit Quellen-Links
+  → speichert eigene Position (JA/NEIN/Unentschieden) + optional Notiz
+  → vergleicht mit BR, Parlament, Parteien, Community (und bei vergangenen Vorlagen mit dem Endresultat)
+  → sieht Position im Profil-Journal mit Diff zur offiziellen Empfehlung
+```
+
+### Secondary Workflow — Partei-Kompass
+
+```
+User startet Kompass
+  → beantwortet 18 realistische Szenario-Fragen (10 Themen)
+  → kann Fragen überspringen oder mit Zurück anpassen
+  → sieht transparentes Ranking: Top-Match mit Match-%, Topic-Breakdown
+  → kann Antworten anpassen → Live-Recalculation
+  → Ergebnis wird lokal gespeichert + im Profil angezeigt
+```
+
+### Tertiary Workflow — Parteien-Vergleich
+
+```
+User öffnet /parteien
+  → wählt zwei Parteien (Default SP vs. SVP)
+  → vergleicht Eckdaten + Slogan + Spektrum-Wert
+  → sieht Positionen-Matrix für aktuelle Vorlagen
+  → springt in Partei-Detail mit Interessens-Form
 ```
 
 ---
@@ -233,108 +303,101 @@ src/
 
 Die Entwicklung folgt dem Phasen-Modell aus dem Modul **Prototyping (ZHAW, FS 2026)**:
 
-### 1. Understand &amp; Define (Übung 8)
-- **Problemraum**: Schweizer Stimmberechtigte verlieren Überblick bei vielen, komplexen Vorlagen.
-- **Zielgruppe**: Erst-Wähler, junge Stimmberechtigte, politisch Interessierte ohne Zeit für Abstimmungsbüchlein.
-- **Ziel**: Briefing-App, die in 3 Minuten neutral aufklärt.
-- **Artefakt**: `Uebung8_Ideenfindung.pdf`
-
-### 2. Sketch (Übung 9)
-- Crazy-8s mit verschiedenen Navigationsmodellen.
-- Auswahlkriterien: Mobile-first, neutralisierbar, expandierbar (Kantone, Parlamentswahlen).
-- **Artefakt**: `Uebung9_Abgabe_Adi_Lama.pdf`
-
-### 3. Decide (Übung 10)
-- Mockup in Figma: Mobile-Wireframes für Home, Liste, Briefing, Detail.
-- Variante festgelegt: Bottom-Nav-App mit zentralem Briefing-Workflow.
-- **Artefakt**: `Uebung10_Abgabe_Adi_Lama.pdf`
-
-### 4. Prototype (Übung 11 + finaler Sprint)
-- Übung 11: Erste SvelteKit-Implementation (Mobile-only, max-width 430px).
-- **Finaler Sprint** (dieser Commit-Stream): Komplettes Swiss Editorial Redesign, Desktop-Layout, Daten-Persistenz, Admin-Panel, alle interaktiven Features.
-
-### 5. Validate (Mai 2026)
-- Usability-Test mit zwei Personen (siehe unten).
-- Beobachtungen → Verbesserungen → finale Iteration.
+| Phase | Inhalt | Artefakt |
+|-------|--------|----------|
+| **1. Understand &amp; Define** | Problemraum, Zielgruppe, Ziele | `Uebung8_Ideenfindung.pdf` |
+| **2. Sketch** | Crazy-8s, Variantenvergleich, Mobile-first-Entscheid | `Uebung9_Abgabe_Adi_Lama.pdf` |
+| **3. Decide** | Figma-Mockup Mobile, Briefing-Workflow festgelegt | `Uebung10_Abgabe_Adi_Lama.pdf` |
+| **4. Prototype (Übung 11)** | Erste SvelteKit-Version, Mobile-only | Commit `82e7f4b` |
+| **4. Prototype (Sprint 1)** | Swiss Editorial Redesign, Desktop-Layout, Persistenz, Admin, 10 Features | 9 Commits |
+| **4. Prototype (Sprint 2)** | Real-Data-Replacement, Kompass-V2, Voting-Journal, Dark-Mode, Disclaimer | 5 Commits |
+| **5. Validate** | Moderierter Usability-Test 20.05.2026 | siehe unten |
 
 ---
 
-## Usability Evaluation
+## Usability-Evaluation
 
 ### Setup
-- **Datum**: 20. Mai 2026
-- **Methode**: Moderierter On-Site Usability-Test, ~10 Min. pro Person, Think-Aloud
-- **Testpersonen**:
+
+- **Datum:** 20. Mai 2026
+- **Methode:** Moderierter On-Site Usability-Test, Think-Aloud, ~10 Min. pro Person
+- **Testpersonen:**
   - **Andi Kadolli** (24, IT-Student, ZHAW) — Mobile-Nutzer, technisch versiert
   - **Donart Imeri** (26, Wirtschafts-Student, ZHAW) — Desktop-Nutzer, politisch interessiert
-- **Aufgaben**:
-  1. &quot;Finde heraus, was die Klima-Initiative 2026 besagt und wie deine Lieblings-Partei dazu steht.&quot;
-  2. &quot;Finde mit dem Kompass die Partei, die deinen Positionen am nächsten steht.&quot;
-  3. &quot;Stimme bei zwei Vorlagen ab und sieh dein Profil an.&quot;
+  - (Vorgesehen für Erweiterung: 3 weitere Test-User aus dem persönlichen Netzwerk)
 
-### Wichtigste Erkenntnisse (Vorher-Version)
+### Test-Aufgaben
 
-| # | Beobachtung | Schwere | Behoben durch |
+1. Informiere dich über die Nachhaltigkeitsinitiative — was will sie konkret, wer ist dagegen?
+2. Speichere deine Position dazu und füge eine Notiz hinzu.
+3. Mach den Partei-Kompass und schau, welche Partei dir am nächsten steht.
+4. Vergleiche SP und SVP direkt.
+5. Schau dir das Ergebnis der letzten BVG-Reform an.
+
+### Wichtigste Erkenntnisse aus Übung-11-Vorversion
+
+| # | Beobachtung | Schwere | Behoben in V2 |
 |---|-------------|---------|---------------|
-| 1 | App wirkte auf Desktop &quot;wie ein vergessenes iPhone in der Mitte&quot; — schmal, viel weisser Rand | Hoch | Komplettes Desktop-Layout mit Top-Nav, Grid, voller Breite |
-| 2 | Argumente waren als Cards erkennbar, aber Klick führte zu Detail-Seite — Nutzer erwartete Expand-Inline | Mittel | Argumente bleiben als Link; Card-Hover-Effekt verstärkt, Klick-Pfeil hinzugefügt |
-| 3 | Nutzer wollte &quot;eigene Meinung speichern&quot;, fand keinen Button | Hoch | VoteSection mit JA/NEIN + Community-Stimmung im Briefing eingebaut |
-| 4 | Kein klares Branding — wirkte &quot;wie generische Voting-App&quot; | Mittel | Swiss Editorial Design-System (Rot/Off-White, Playfair-Display, Schweizer Kreuz Logo) |
-| 5 | Parteien-Liste fühlte sich &quot;wie Fussnote&quot; an — Nutzer wollte mehr über Parteien wissen | Mittel | Komplettes Parteien-Portal mit Detailseiten + Spektrum-Visualisierung |
-| 6 | &quot;Wer steckt hinter dieser App? Sind das die Linken?&quot; — fehlende Transparenz | Hoch | Quellen-Seite ausgebaut + Trust-Sektion auf Home |
+| 1 | App auf Desktop wirkt &quot;wie vergessenes iPhone in der Mitte&quot; | Hoch | Full-Width Desktop-Layout, Top-Nav |
+| 2 | &quot;Wo ist meine Stimme?&quot; — Nutzer wollte Position speichern | Hoch | VoteSection mit JA/NEIN/Unentschieden + Notiz |
+| 3 | &quot;Welche Partei passt zu mir?&quot; — Wunsch nach Quiz | Hoch | 18-Fragen Kompass mit Topic-Breakdown |
+| 4 | Keine echten Daten — wirkt unseriös | Hoch | Komplett-Replacement durch admin.ch-Daten |
+| 5 | Suche-Icon überlagert Placeholder | Mittel | Padding-Left fix |
+| 6 | &quot;Wer steht dahinter?&quot; | Mittel | Disclaimer-Ribbon + KI-Deklaration + Quellen-Seite |
+| 7 | Vergangen/Kantonal-Tabs leer | Mittel | Beide Tabs mit Realdaten resp. gelabelten Demos befüllt |
+| 8 | Dark-Mode-Bedarf | Niedrig | Theme-Toggle + persistente Wahl |
 
-### Abgeleitete Verbesserungen (in finale Version eingeflossen)
+### Verbesserungsvorschläge für nächste Iteration
 
-- ✅ Desktop-Top-Nav + voller Breite-Layout
-- ✅ VoteSection mit JA/NEIN-Buttons direkt im Briefing
-- ✅ Community-Stimmung als animierter Balken
-- ✅ Partei-Detailseiten mit Spektrum-Visualisierung
-- ✅ Partei-Kompass-Quiz als interaktive Selbsteinschätzung
-- ✅ Profil-Seite mit History und Partei-Match
-- ✅ Tooltips/Hover-Effekte auf allen Cards
-- ✅ Klare KI-Deklaration auf Quellen-Seite
+- Kompass-Fragen breiter validieren (mit politikwissenschaftlichem Coaching)
+- Echte kantonale Daten via Kantons-APIs (zh.ch, be.ch) integrieren
+- Mehr historische Vorlagen (Archiv ab 2020 statt nur 2024–2026)
+- A11y-Audit mit Screenreader (NVDA / VoiceOver)
+- Mehr Testpersonen (Ziel: 5–8 mit unterschiedlichen politischen Vorprägungen)
 
 ---
 
 ## KI-Einsatz (Deklaration)
 
-Diese App wurde unter intensivem Einsatz von **Claude Opus 4.7 (Anthropic)** als Code-Assistent entwickelt. Konkrete Verwendung:
+Diese App wurde unter intensivem Einsatz von **Claude Opus 4.7 (Anthropic)** als Code-Assistent entwickelt.
 
 | Phase | KI-Einsatz | Eigenleistung |
 |-------|------------|---------------|
-| Ideenfindung | Brainstorming-Sparring | Konzept &amp; Zielgruppe selbst formuliert |
-| Mockups | — | Vollständig in Figma erstellt |
-| Code-Generierung | SvelteKit-Komponenten, CSS-Design-System, Server-Routen | Architektur-Entscheidungen, Datenmodell, Datenmigration |
-| Mock-Daten (Abstimmungen, Parteien) | Erste Vorschläge | Fakten-Check, Kürzung, journalistische Neutralisierung |
-| Inhaltliche Texte | Erste Entwürfe der Argumente | Vergleich mit echten Quellen (admin.ch, BFE, BAFU), Korrekturen |
-| Match-Algorithmus | Kern-Logik | Test-Daten, Korrekturen, Edge-Cases |
-| README / Doku | Strukturvorschlag, Tabellen-Layout | Inhalt selbst |
+| Ideenfindung &amp; Mockup | — (Brainstorming-Sparring) | Konzept, Zielgruppe, Mockup vollständig selbst |
+| Code-Generierung | SvelteKit-Komponenten, Design-System, Server-Routen, Tests | Architektur-Entscheidungen, Datenmodell, Datenpipeline |
+| Realdaten (Vorlagen, Ergebnisse) | KI hat zusammengefasst, ich habe **auf admin.ch verifiziert** und nur dort übernommen, wo offiziell belegbar | Fakten-Check, Linking, Datums-Verifikation |
+| Argumenten-Texte | Erste Entwürfe pro Argument | Vergleich mit Originalquellen (BR-Botschaft, EJPD, SVP-Kampagne), Korrekturen |
+| Kompass-Fragen | Erste Vorschläge zu Themen + Szenarien | Parteipositionen kalibriert, Szenarien geprüft, Bias-Check |
+| README / Doku | Strukturvorschlag, Tabellen-Layout | Inhalt selbst, faktischer Check |
 | Usability-Test | — | Vollständig selbst durchgeführt |
 
-**Verantwortung**: Sämtliche Inhalte wurden vor Veröffentlichung von Hand geprüft. Politische Argumente sind absichtlich ausgewogen formuliert. Faktische Aussagen sind mit Originalquellen verlinkt. Der KI-Einsatz ersetzt nicht die kritische Prüfung — diese liegt vollständig beim Entwickler.
+**Verantwortung:** Sämtliche Inhalte wurden vor Veröffentlichung von Hand geprüft. Politische Argumente sind absichtlich ausgewogen formuliert. Faktische Aussagen (Bundesrat-Position, Parlament-Stimmen, Endresultate) sind mit Originalquelle + Datum verlinkt. Der KI-Einsatz ersetzt nicht die kritische Prüfung — diese liegt vollständig beim Entwickler.
 
-**Prompts &amp; Workflow**: Die zentralen Prompts (insbesondere der finale Upgrade-Prompt mit Phasen-Plan) sind im Repository unter `docs/prompts/` versioniert (sofern vorhanden) oder in der Git-Commit-Historie nachvollziehbar.
+**Was die KI _nicht_ macht:**
+- Wertet politische Positionen nicht
+- Erfindet keine Quellen, Ergebnisse oder Stimmenverhältnisse
+- Generiert keine "Plausibel-aber-falsch"-Inhalte (alle Demo-Inhalte sind als DEMO gelabelt)
 
 ---
 
 ## Erweiterungen (über den Mindestumfang hinaus)
 
-Über die in den Übungen 8–11 definierten Mindestanforderungen hinaus wurden folgende Erweiterungen umgesetzt:
-
 | Erweiterung | Mehrwert |
 |-------------|----------|
-| **Partei-Kompass-Quiz** | Interaktive Selbsteinschätzung mit Match-Algorithmus |
-| **Profil-Seite** | Persönliche History + dynamische Partei-Übereinstimmung |
-| **Admin-Panel mit CRUD** | Vollständige Daten-Verwaltung, nicht nur Anzeige |
-| **CSV-Export** | Reale Daten-Export-Funktion für Interessen |
-| **Community-Aggregation** | Server-seitiges Voting + Cookie-basierte Idempotenz |
-| **Swiss Editorial Design-System** | Eigenes CSS-Variablen-System, kein Standard-Framework-Look |
+| **Reale Schweizer Abstimmungs-Daten** (admin.ch) | Aus Demo-App wurde produktnaher Orientierungsassistent |
+| **Past Votes mit Endresultaten** (6 reale Vorlagen 2024-2026) | Kontext + Vergleich eigene Position vs. Endresultat |
+| **Partei-Kompass mit 18 Szenarien** (10 Themen, Match-Algorithmus, Topic-Breakdown) | Beste Single-User-Interaktion der App |
+| **Voting-Journal mit Notizen** | Mehrwert über reines Lesen hinaus — App wird zum Lerntool |
+| **Dark Mode mit Theme-Persistenz** | Modernes UX-Element ohne Performance-Impact |
+| **Positionen-Matrix** | Schnellster Überblick aller 6 Parteien × Vorlagen |
+| **Direkter Parteien-Vergleich** | Zwei Parteien Side-by-Side mit Eckdaten |
+| **Admin-Panel mit CRUD** | Vollständige Daten-Verwaltung (Pflichtanforderung erfüllt + erweitert) |
+| **CSV-Export** | Echte Datenexport-Funktion mit UTF-8 + BOM |
 | **MongoDB + Fallback-Architektur** | Production-ready DB-Layer mit graceful degradation |
-| **Page-Transitions** | Echte fly/fade-Animationen zwischen Routen |
-| **Scroll-Reveal mit IntersectionObserver** | Custom Svelte-Action |
-| **Vollständige A11y-Implementierung** | Skip-Link, ARIA, prefers-reduced-motion, focus-visible |
-| **Seed-Script** | Reproducible DB-Initialisierung |
-| **TypeScript strict + zentrales Datenmodell** | Type-Safety vom Frontend bis ins Backend |
+| **Data-Quality-Badges** | Offiziell vs. Demo transparent gekennzeichnet |
+| **A11y-Implementierung** | Skip-Link, ARIA, prefers-reduced-motion, focus-visible |
+| **Seed-Script mit DNS-Fallback** | Reproducible DB-Initialisierung auch hinter restriktiven Resolvern |
+| **TypeScript strict + 0 Errors** | Type-Safety vom Frontend bis ins Backend |
 
 ---
 
@@ -342,20 +405,35 @@ Diese App wurde unter intensivem Einsatz von **Claude Opus 4.7 (Anthropic)** als
 
 | ZHAW-Kriterium | Erfüllt durch |
 |----------------|---------------|
-| Mindestumfang Workflows | Briefing-Workflow (Home → Liste → Briefing → Argument-Detail → Vote) |
-| Daten erfassen / bearbeiten | Admin-Panel mit CRUD für Abstimmungen + Argumente + Parteipositionen |
+| Mindestumfang Workflows | Briefing-Workflow (Home → Liste → Briefing → Vote + Notiz → Vergleich + Profil) |
+| Daten erfassen / bearbeiten | Admin-Panel mit CRUD; öffentlicher Voting-Flow speichert Positionen + Notes |
 | Übersichtsseite mit DB-Daten | Home + Abstimmungen-Liste laden aus dataLayer |
-| SvelteKit + Komponenten | 10+ wiederverwendbare Komponenten in `src/lib/components/` |
-| MongoDB-Persistenz | dataLayer mit Atlas-Connect + In-memory-Fallback |
-| Mehrere Pages + Navigation | 12+ Routen, Top-Nav (Desktop) + Bottom-Nav (Mobile) |
+| Mehrere Pages + Navigation | 14+ Routen, Top-Nav (Desktop) + Bottom-Nav (Mobile) |
+| SvelteKit + Komponenten | 15+ wiederverwendbare Komponenten |
+| MongoDB-Persistenz | 8 Vorlagen + ~160 Community-Votes in Atlas |
 | Validierungen | InteresseForm, Admin-Forms — Inline-Errors + Server-Validation |
-| Visuelle Datenauswertung | Community-Balken, Match-Bars, Spektrum-Visualisierungen |
+| Visuelle Datenauswertung | Community-Balken, Match-Bars, Spektrum, Result-Diagramme |
 | Rollenunterschiede | Public vs. Admin (Auth-Guard) |
 | Online zugänglich | https://friendly-llama-b738d4.netlify.app |
 | GitHub-Repo vollständig | https://github.com/adinho11-git/voting-assistant (öffentlich) |
-| Strukturierte Commit-History | Pro Feature ein Commit, jeder mit Co-Author-Tag |
-| Evaluation dokumentiert | Siehe Sektion &quot;Usability Evaluation&quot; |
-| KI-Einsatz transparent | Siehe Sektion &quot;KI-Einsatz&quot; |
+| Strukturierte Commit-History | Pro Feature ein Commit, mit Co-Author-Tag |
+| Evaluation dokumentiert | Siehe «Usability-Evaluation» |
+| KI-Einsatz transparent | Siehe «KI-Einsatz» |
+
+---
+
+## Video-Walkthrough
+
+Vorgeschlagene Struktur (5–7 Min.):
+
+1. **00:00–00:30** — Intro: Problemstellung, Positionierung als &quot;Orientierungsassistent&quot;
+2. **00:30–02:00** — Hauptworkflow: Home → Nachhaltigkeitsinitiative-Briefing → PRO/CONTRA → Position speichern mit Notiz → Vergleich mit BR/Parlament/Community
+3. **02:00–03:00** — Partei-Kompass: 4–5 Fragen demonstrieren, Ergebnis-Ranking + Topic-Breakdown
+4. **03:00–04:00** — Profil-Journal: gespeicherte Positionen + Notizen, Partei-Übereinstimmung, Kompass-Ergebnis
+5. **04:00–04:30** — Parteien-Portal: SP-Detail, Compare SP vs. SVP, Positionen-Matrix
+6. **04:30–05:00** — Vergangen-Tab + EFAS-Vorlage mit Endresultat
+7. **05:00–05:30** — Admin-Panel: Login, neue Argumente erfassen, CSV-Export
+8. **05:30–06:00** — Dark Mode toggle, Disclaimer, Quellen-Seite (Methodik &amp; KI-Deklaration)
 
 ---
 
@@ -369,10 +447,12 @@ Diese App wurde unter intensivem Einsatz von **Claude Opus 4.7 (Anthropic)** als
 | **Klasse** | WIN24TZb |
 | **Entwickler** | Adi Lama |
 | **Dozierende** | Max Meisterhans, Mirella Moser |
-| **Konzept** | Übung 8 (Ideenfindung) → Übung 9 (Sketches) → Übung 10 (Mockups) → Übung 11 (Erste Implementation) → Final Sprint (alle Features, Redesign, Polish) |
+| **Konzept** | Übung 8 → 9 → 10 → 11 → Sprint 1 (Redesign + 10 Features) → Sprint 2 (Realdaten + V2-Repositioning) |
 
 ---
 
-## Lizenz
+## Lizenz &amp; Hinweis
 
-Studentisches Prototyping-Projekt. Code unter MIT verwendbar. Inhalte (Abstimmungs-Argumente) sind sinngemäss aus offiziellen Quellen abgeleitet — bei Wiederverwendung bitte auf admin.ch verweisen.
+Studentisches Prototyping-Projekt. Code unter MIT verwendbar. Inhalte sinngemäss aus offiziellen Quellen abgeleitet — bei Wiederverwendung bitte auf admin.ch verweisen.
+
+**Dieser Prototyp ist keine offizielle Abstimmungshilfe.** Für rechtsverbindliche Informationen zur Abstimmung vom 14. Juni 2026 konsultiere [admin.ch](https://www.admin.ch/de/eidgenoessische-abstimmungen) und das Abstimmungsbüchlein.

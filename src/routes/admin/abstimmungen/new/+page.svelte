@@ -3,8 +3,14 @@
   export let form: ActionData;
 
   function val(name: string): string {
-    const v = form?.values?.[name];
+    const values = (form as { values?: Record<string, unknown> } | null)?.values;
+    const v = values?.[name];
     return typeof v === 'string' ? v : '';
+  }
+
+  function err(name: string): string | undefined {
+    const errors = (form as { errors?: Record<string, string> } | null)?.errors;
+    return errors?.[name];
   }
 </script>
 
@@ -30,28 +36,28 @@
       <div class="grid sm:grid-cols-2 gap-4">
         <div class="sm:col-span-2">
           <label for="title" class="label-field">Vollständiger Titel <span class="text-brand">*</span></label>
-          <input id="title" name="title" type="text" required value={val('title')} class="input-field {form?.errors?.title ? 'input-error' : ''}" />
-          {#if form?.errors?.title}<p class="text-error">{form.errors.title}</p>{/if}
+          <input id="title" name="title" type="text" required value={val('title')} class="input-field {err('title') ? 'input-error' : ''}" />
+          {#if err('title')}<p class="text-error">{err('title')}</p>{/if}
         </div>
         <div>
           <label for="shortTitle" class="label-field">Kurztitel <span class="text-brand">*</span></label>
-          <input id="shortTitle" name="shortTitle" type="text" required value={val('shortTitle')} class="input-field {form?.errors?.shortTitle ? 'input-error' : ''}" />
-          {#if form?.errors?.shortTitle}<p class="text-error">{form.errors.shortTitle}</p>{/if}
+          <input id="shortTitle" name="shortTitle" type="text" required value={val('shortTitle')} class="input-field {err('shortTitle') ? 'input-error' : ''}" />
+          {#if err('shortTitle')}<p class="text-error">{err('shortTitle')}</p>{/if}
         </div>
         <div>
           <label for="slug" class="label-field">URL-Slug <span class="text-ink-subtle text-xs">(optional, wird sonst auto-generiert)</span></label>
-          <input id="slug" name="slug" type="text" value={val('slug')} class="input-field {form?.errors?.slug ? 'input-error' : ''}" placeholder="z.b. neue-vorlage-2026" />
-          {#if form?.errors?.slug}<p class="text-error">{form.errors.slug}</p>{/if}
+          <input id="slug" name="slug" type="text" value={val('slug')} class="input-field {err('slug') ? 'input-error' : ''}" placeholder="z.b. neue-vorlage-2026" />
+          {#if err('slug')}<p class="text-error">{err('slug')}</p>{/if}
         </div>
         <div>
           <label for="date" class="label-field">Abstimmungsdatum <span class="text-brand">*</span></label>
-          <input id="date" name="date" type="date" required value={val('date')} class="input-field {form?.errors?.date ? 'input-error' : ''}" />
-          {#if form?.errors?.date}<p class="text-error">{form.errors.date}</p>{/if}
+          <input id="date" name="date" type="date" required value={val('date')} class="input-field {err('date') ? 'input-error' : ''}" />
+          {#if err('date')}<p class="text-error">{err('date')}</p>{/if}
         </div>
         <div>
           <label for="category" class="label-field">Kategorie <span class="text-brand">*</span></label>
-          <input id="category" name="category" type="text" required value={val('category')} placeholder="z.B. Klimaschutz · Energiepolitik" class="input-field {form?.errors?.category ? 'input-error' : ''}" />
-          {#if form?.errors?.category}<p class="text-error">{form.errors.category}</p>{/if}
+          <input id="category" name="category" type="text" required value={val('category')} placeholder="z.B. Klimaschutz · Energiepolitik" class="input-field {err('category') ? 'input-error' : ''}" />
+          {#if err('category')}<p class="text-error">{err('category')}</p>{/if}
         </div>
         <div>
           <label for="readTime" class="label-field">Lesezeit (Minuten)</label>
@@ -62,8 +68,8 @@
 
     <div class="card p-6">
       <p class="section-eyebrow mb-4">KI-Zusammenfassung</p>
-      <textarea name="aiSummary" rows="5" required class="input-field {form?.errors?.aiSummary ? 'input-error' : ''}" placeholder="Neutrale, faktenbasierte Zusammenfassung der Vorlage in 3–5 Sätzen.">{val('aiSummary')}</textarea>
-      {#if form?.errors?.aiSummary}<p class="text-error">{form.errors.aiSummary}</p>{/if}
+      <textarea name="aiSummary" rows="5" required class="input-field {err('aiSummary') ? 'input-error' : ''}" placeholder="Neutrale, faktenbasierte Zusammenfassung der Vorlage in 3–5 Sätzen.">{val('aiSummary')}</textarea>
+      {#if err('aiSummary')}<p class="text-error">{err('aiSummary')}</p>{/if}
     </div>
 
     <div class="card p-6">

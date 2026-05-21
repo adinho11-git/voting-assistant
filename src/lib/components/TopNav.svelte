@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import ThemeToggle from './ThemeToggle.svelte';
 
   const links = [
     { href: '/abstimmungen', label: 'Abstimmungen', match: (p: string) => p.startsWith('/abstimmungen') },
@@ -37,11 +38,14 @@
     </nav>
 
     <div class="flex items-center gap-2">
-      <a href="/admin" class="btn-ghost text-sm" aria-label="Admin-Bereich">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0 0v3m0-3h-3m3 0h3M5 8a7 7 0 0114 0v3a2 2 0 002 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 002-2V8z" />
-        </svg>
-        Admin
+      <ThemeToggle />
+      <a
+        href="/admin"
+        class="text-xs text-ink-subtle hover:text-ink-muted transition-colors"
+        aria-label="Admin-Bereich (passwortgeschützt)"
+        title="Admin-Bereich"
+      >
+        ·
       </a>
     </div>
   </div>
