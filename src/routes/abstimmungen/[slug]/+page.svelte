@@ -2,191 +2,182 @@
   import type { PageData } from './$types';
   import AppBar from '$lib/components/AppBar.svelte';
   import Badge from '$lib/components/Badge.svelte';
-  import ParteiGrid from '$lib/components/ParteiGrid.svelte';
+  import VoteSection from '$lib/components/VoteSection.svelte';
   import { formatDate } from '$lib/mockData';
-  import { goto } from '$app/navigation';
 
   export let data: PageData;
 
-  let activeTab: 'pro-contra' | 'parteien' | 'quellen' | 'faq' = 'pro-contra';
-
   $: a = data.abstimmung;
   $: dateStr = formatDate(a.date);
-  $: todayStr = new Date().toLocaleDateString('de-CH', { day: 'numeric', month: 'long', year: 'numeric' });
-
-  const tabs = [
-    { id: 'pro-contra', label: 'Pro / Contra' },
-    { id: 'parteien', label: 'Parteien' },
-    { id: 'quellen', label: 'Quellen' },
-    { id: 'faq', label: 'FAQ' }
-  ] as const;
+  $: parlamentTotal = a.parlamentStimmen.ja + a.parlamentStimmen.nein;
+  $: jaPercent = parlamentTotal > 0 ? Math.round((a.parlamentStimmen.ja / parlamentTotal) * 100) : 0;
 </script>
 
 <svelte:head>
-  <title>{a.shortTitle} – Briefing</title>
+  <title>{a.shortTitle} – Briefing | Voting Assistant</title>
+  <meta name="description" content="{a.aiSummary.slice(0, 155)}" />
+  <meta property="og:title" content="{a.title}" />
+  <meta property="og:description" content="{a.aiSummary.slice(0, 200)}" />
 </svelte:head>
 
-<AppBar title="Abstimmung {dateStr}" backHref="/abstimmungen" showBookmark={true} />
+<AppBar title="Briefing {dateStr}" backHref="/abstimmungen" showBookmark={true} />
 
-<div class="px-4 pt-4 pb-2">
-  <!-- Title Card -->
-  <div class="card p-4 mb-4">
-    <h1 class="font-serif text-xl leading-snug text-gray-900 mb-1">{a.title}</h1>
-    <p class="text-xs text-gray-500 font-mono">KI-Zusammenfassung · Quelle: admin.ch · Stand {todayStr}</p>
-    <p class="text-sm text-gray-700 mt-3 leading-relaxed">{a.aiSummary}</p>
+<!-- HEADER (full width on desktop) -->
+<section class="container-app pt-6 md:pt-10 pb-4">
+  <a href="/abstimmungen" class="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark mb-6">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+    Alle Abstimmungen
+  </a>
+
+  <div class="flex flex-wrap items-center gap-2 mb-3">
+    <span class="badge-brand">Eidg. {dateStr}</span>
+    <span class="text-xs font-mono-data text-ink-muted uppercase tracking-wider">{a.category}</span>
   </div>
 
-  <!-- Tabs -->
-  <div class="flex gap-0 border-b border-gray-200 mb-4 -mx-1 overflow-x-auto">
-    {#each tabs as tab}
-      <button
-        on:click={() => activeTab = tab.id}
-        class="px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0
-          {activeTab === tab.id
-            ? 'text-brand-blue border-b-2 border-brand-blue -mb-px'
-            : 'text-gray-500'}"
-      >
-        {tab.label}
-      </button>
-    {/each}
+  <h1 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] text-ink mb-5 max-w-4xl">
+    {a.title}
+  </h1>
+
+  <div class="flex flex-wrap items-center gap-4 text-xs font-mono-data text-ink-muted uppercase tracking-wider">
+    <span>{a.readTime} MIN LESEZEIT</span>
+    <span aria-hidden="true">·</span>
+    <span>BUNDESRAT: <Badge position={a.bundesratPosition} size="sm" /></span>
+    <span aria-hidden="true">·</span>
+    <span>PARLAMENT: <Badge position={a.parlamentPosition} size="sm" /> ({a.parlamentStimmen.ja}:{a.parlamentStimmen.nein})</span>
   </div>
+</section>
 
-  <!-- PRO / CONTRA -->
-  {#if activeTab === 'pro-contra'}
-    <div class="grid grid-cols-2 gap-2.5 mb-4">
-      <!-- PRO -->
-      <div class="rounded-2xl border border-green-200 bg-green-50 p-3">
-        <div class="flex items-center gap-1.5 mb-3">
-          <span class="w-5 h-5 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">✓</span>
-          <span class="text-xs font-bold text-green-700 uppercase tracking-wider">PRO</span>
-        </div>
-        <div class="space-y-3">
-          {#each a.proArguments as arg}
-            <a href="/abstimmungen/{a.slug}/argumente/{arg.id}" class="block group">
-              <p class="text-xs text-gray-800 leading-snug group-hover:text-green-700 transition-colors">{arg.text}</p>
-              <p class="text-[10px] text-green-600 mt-0.5 underline underline-offset-2">{arg.source} ›</p>
-            </a>
-          {/each}
-        </div>
+<!-- AI SUMMARY (full width) -->
+<section class="container-app pb-8">
+  <div class="card p-6 md:p-8 hero-accent">
+    <p class="section-eyebrow mb-3">KI-Zusammenfassung · Quelle admin.ch</p>
+    <p class="text-base md:text-lg text-ink leading-relaxed">{a.aiSummary}</p>
+  </div>
+</section>
+
+<!-- PRO / CONTRA SPLIT -->
+<section class="container-app pb-10">
+  <div class="grid md:grid-cols-2 gap-5">
+    <!-- PRO -->
+    <div>
+      <div class="flex items-center gap-2 mb-4 border-b border-pro/30 pb-2">
+        <span class="w-7 h-7 rounded-full bg-pro flex items-center justify-center text-white text-sm font-bold" aria-hidden="true">✓</span>
+        <h2 class="font-display text-xl text-pro uppercase tracking-wider font-bold">PRO</h2>
+        <span class="text-xs font-mono-data text-ink-muted ml-auto">{a.proArguments.length} ARGUMENTE</span>
       </div>
-
-      <!-- CONTRA -->
-      <div class="rounded-2xl border border-red-200 bg-red-50 p-3">
-        <div class="flex items-center gap-1.5 mb-3">
-          <span class="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold">✗</span>
-          <span class="text-xs font-bold text-red-700 uppercase tracking-wider">CONTRA</span>
-        </div>
-        <div class="space-y-3">
-          {#each a.contraArguments as arg}
-            <a href="/abstimmungen/{a.slug}/argumente/{arg.id}" class="block group">
-              <p class="text-xs text-gray-800 leading-snug group-hover:text-red-700 transition-colors">{arg.text}</p>
-              <p class="text-[10px] text-red-500 mt-0.5 underline underline-offset-2">{arg.source} ›</p>
-            </a>
-          {/each}
-        </div>
+      <div class="space-y-3">
+        {#each a.proArguments as arg}
+          <a href="/abstimmungen/{a.slug}/argumente/{arg.id}" class="argument-card pro group">
+            <p class="text-sm text-ink leading-snug group-hover:text-pro transition-colors mb-2">
+              {arg.text}
+            </p>
+            <p class="text-xs source-link inline-flex items-center gap-1">
+              {arg.source}
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </p>
+          </a>
+        {/each}
       </div>
     </div>
 
-    <!-- Party overview mini -->
-    <div class="card p-4 mb-3">
-      <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Parteipositionen</h3>
-      <ParteiGrid parteien={a.parteien} />
-      <p class="text-[10px] text-gray-400 mt-2 text-center">
-        Bundesrat: <span class="font-bold {a.bundesratPosition === 'JA' ? 'text-green-600' : 'text-red-600'}">{a.bundesratPosition}</span>
-        &nbsp;·&nbsp;
-        Parlament: <span class="font-bold {a.parlamentPosition === 'JA' ? 'text-green-600' : 'text-red-600'}">{a.parlamentPosition}</span>
-        ({a.parlamentStimmen.ja}:{a.parlamentStimmen.nein})
-      </p>
+    <!-- CONTRA -->
+    <div>
+      <div class="flex items-center gap-2 mb-4 border-b border-contra/30 pb-2">
+        <span class="w-7 h-7 rounded-full bg-contra flex items-center justify-center text-white text-sm font-bold" aria-hidden="true">✗</span>
+        <h2 class="font-display text-xl text-contra uppercase tracking-wider font-bold">CONTRA</h2>
+        <span class="text-xs font-mono-data text-ink-muted ml-auto">{a.contraArguments.length} ARGUMENTE</span>
+      </div>
+      <div class="space-y-3">
+        {#each a.contraArguments as arg}
+          <a href="/abstimmungen/{a.slug}/argumente/{arg.id}" class="argument-card contra group">
+            <p class="text-sm text-ink leading-snug group-hover:text-contra transition-colors mb-2">
+              {arg.text}
+            </p>
+            <p class="text-xs source-link inline-flex items-center gap-1">
+              {arg.source}
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </p>
+          </a>
+        {/each}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTEIPOSITIONEN (full width) -->
+<section class="container-app pb-10">
+  <div class="card p-6 md:p-8">
+    <div class="flex items-end justify-between mb-5 border-b border-border-light pb-3">
+      <div>
+        <p class="section-eyebrow mb-1">Politische Landkarte</p>
+        <h2 class="font-display text-2xl text-ink">Parteipositionen</h2>
+      </div>
+      <a href="/abstimmungen/{a.slug}/parteien" class="text-sm font-semibold text-brand hover:text-brand-dark">
+        Details →
+      </a>
     </div>
 
-    <!-- Source footer -->
-    <div class="flex items-center gap-2 py-2 px-3 bg-blue-50 rounded-xl mb-4">
-      <svg class="w-4 h-4 text-brand-blue flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p class="text-[10px] text-blue-700">Alle Argumente mit Originalquellen hinterlegt · Stand: {todayStr}</p>
-    </div>
-
-    <!-- CTA -->
-    <a href="https://www.ch.ch/de/abstimmungen/" target="_blank" rel="noopener" class="btn-primary block mb-2 text-sm">
-      Jetzt informiert abstimmen →
-    </a>
-
-  <!-- PARTEIEN TAB -->
-  {:else if activeTab === 'parteien'}
-    <div class="space-y-2.5 mb-4">
+    <div class="space-y-2 mb-6">
       {#each a.parteien as partei}
-        <div class="card px-4 py-3 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-            style="background-color: {partei.color}">
-            {partei.kuerzel.slice(0, 3)}
+        <a
+          href="/parteien/{partei.kuerzel.toLowerCase()}"
+          class="card card-interactive flex items-center gap-4 p-4"
+          style="border-left: 4px solid {partei.color};"
+        >
+          <div
+            class="w-11 h-11 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+            style="background-color: {partei.color}"
+            aria-hidden="true"
+          >
+            {partei.kuerzel.slice(0, 4)}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-sm text-gray-900">{partei.name}</p>
-            <p class="text-xs text-gray-500 italic leading-snug mt-0.5">{partei.statement}</p>
+            <p class="font-semibold text-sm text-ink">{partei.name}</p>
+            <p class="text-xs text-ink-muted italic leading-snug mt-0.5">«{partei.statement}»</p>
           </div>
           <Badge position={partei.position} size="md" />
-        </div>
-      {/each}
-    </div>
-    <!-- Parliament bar -->
-    <div class="card p-4 mb-4">
-      <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stimmenverhältnis Parlament</p>
-      <div class="h-3 rounded-full bg-red-200 overflow-hidden mb-1">
-        <div class="h-full bg-green-500 rounded-full transition-all"
-          style="width: {Math.round(a.parlamentStimmen.ja / (a.parlamentStimmen.ja + a.parlamentStimmen.nein) * 100)}%">
-        </div>
-      </div>
-      <div class="flex justify-between text-[10px] font-mono">
-        <span class="text-green-600 font-semibold">JA {a.parlamentStimmen.ja} ({Math.round(a.parlamentStimmen.ja / (a.parlamentStimmen.ja + a.parlamentStimmen.nein) * 100)}%)</span>
-        <span class="text-red-600 font-semibold">NEIN {a.parlamentStimmen.nein} ({Math.round(a.parlamentStimmen.nein / (a.parlamentStimmen.ja + a.parlamentStimmen.nein) * 100)}%)</span>
-      </div>
-    </div>
-
-  <!-- QUELLEN TAB -->
-  {:else if activeTab === 'quellen'}
-    <div class="card p-4 mb-3">
-      <div class="flex items-start gap-3">
-        <span class="text-2xl">📚</span>
-        <div>
-          <p class="font-semibold text-sm text-gray-900">Wie wir arbeiten</p>
-          <p class="text-xs text-gray-500 mt-1 leading-relaxed">Alle Argumente stammen aus offiziellen, öffentlich zugänglichen Quellen. Die KI-Zusammenfassung ist darauf ausgelegt, neutral und faktenbasiert zu sein — ohne politische Wertung.</p>
-        </div>
-      </div>
-    </div>
-    <div class="space-y-2 mb-4">
-      {#each [['Bundeskanzlei (admin.ch)', 'Abstimmungsbüchlein · offiziell'], ['Initiativtext', 'Originalwortlaut der Vorlage'], ['Parteien-Argumentarien', 'SP · GP · GLP · Mitte · FDP · SVP'], ['Studien & Gutachten', 'BFE · BAFU · Seco · Wirtschaftsverbände']] as [title, sub]}
-        <div class="card px-4 py-3 flex items-center justify-between">
-          <div>
-            <p class="font-semibold text-sm text-gray-900">{title}</p>
-            <p class="text-xs text-gray-400">{sub}</p>
-          </div>
-          <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
+        </a>
       {/each}
     </div>
 
-  <!-- FAQ TAB -->
-  {:else if activeTab === 'faq'}
-    <div class="space-y-2 mb-4">
-      {#each [
-        ['Wie neutral ist die KI-Zusammenfassung?', 'Die KI-Zusammenfassung basiert auf offiziellen Dokumenten und ist so kalibriert, dass sie Argumente aller Seiten gleichwertig darstellt. Es werden keine eigenen Wertungen eingebracht.'],
-        ['Wer steht hinter dieser App?', 'Diese App wurde als Prototyp im Rahmen des ZHAW Prototyping-Moduls (FS 2026) entwickelt. Sie ist kein kommerzielles Produkt und hat keine politische Agenda.'],
-        ['Werden meine Daten gespeichert?', 'Nein. Die App speichert keine persönlichen Nutzerdaten. Es werden keine Cookies gesetzt und kein Tracking durchgeführt.'],
-        ['Kann ich Fehler melden?', 'Ja — bitte melde Fehler oder inhaltliche Ungenauigkeiten über GitHub Issues. Der Link befindet sich im Footer der Quellen-Seite.']
-      ] as [q, a_text]}
-        <details class="card px-4 py-3 group">
-          <summary class="font-semibold text-sm text-gray-900 cursor-pointer list-none flex justify-between items-center">
-            {q}
-            <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </summary>
-          <p class="text-xs text-gray-500 leading-relaxed mt-2">{a_text}</p>
-        </details>
-      {/each}
+    <!-- Parlament stimmenbar -->
+    <div>
+      <p class="section-eyebrow mb-2">Stimmenverhältnis Parlament</p>
+      <div class="community-bar mb-1.5">
+        <div class="bar-ja" style="width: {jaPercent}%" />
+        <div class="bar-nein" style="width: {100 - jaPercent}%" />
+      </div>
+      <div class="flex justify-between text-xs font-mono-data font-semibold">
+        <span class="text-pro">JA {a.parlamentStimmen.ja} ({jaPercent}%)</span>
+        <span class="text-contra">NEIN {a.parlamentStimmen.nein} ({100 - jaPercent}%)</span>
+      </div>
     </div>
-  {/if}
-</div>
+  </div>
+</section>
+
+<!-- USER VOTE / COMMUNITY -->
+<section class="container-app pb-10">
+  <VoteSection slug={a.slug} initialCommunity={data.community} />
+</section>
+
+<!-- CTA -->
+<section class="container-app pb-20">
+  <div class="card p-6 md:p-8 text-center bg-brand-light border-brand/20">
+    <p class="font-display text-xl md:text-2xl text-ink mb-2">Bereit zur Abstimmung?</p>
+    <p class="text-sm text-ink-muted mb-5 max-w-md mx-auto">
+      Alle Informationen und Unterlagen findest du auf der offiziellen Plattform des Bundes.
+    </p>
+    <a href="https://www.ch.ch/de/abstimmungen/" target="_blank" rel="noopener" class="btn-primary">
+      Jetzt informiert abstimmen
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+      </svg>
+    </a>
+  </div>
+</section>

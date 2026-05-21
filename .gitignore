@@ -1,7 +1,11 @@
 node_modules
 .svelte-kit
 .env
+.env.local
+.env.*.local
 build
 dist
 .DS_Store
 *.log
+.netlify
+.vercel

@@ -3,19 +3,23 @@
   export let parteien: Partei[];
 </script>
 
-<div class="grid grid-cols-3 gap-2">
+<div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
   {#each parteien as partei}
-    <div class="flex flex-col items-center gap-1 p-2 rounded-xl bg-gray-50 border border-gray-100">
+    <a
+      href="/parteien/{partei.kuerzel.toLowerCase()}"
+      class="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-surface-alt border border-border-light hover:border-border hover:-translate-y-0.5 transition-all"
+      style="--ring-color: {partei.color};"
+    >
       <div
-        class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-        style="background-color: {partei.color}"
+        class="w-9 h-9 rounded-full flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-offset-2 ring-offset-surface-alt"
+        style="background-color: {partei.color}; --tw-ring-color: {partei.color}30;"
       >
-        {partei.kuerzel.slice(0, 3)}
+        {partei.kuerzel.slice(0, 4)}
       </div>
-      <span class="text-[10px] font-medium text-gray-600 leading-none">{partei.kuerzel}</span>
-      <span class="text-[10px] font-bold {partei.position === 'JA' ? 'text-green-600' : 'text-red-600'}">
+      <span class="text-[10px] font-semibold text-ink leading-none">{partei.kuerzel}</span>
+      <span class="text-[10px] font-bold {partei.position === 'JA' ? 'text-pro' : 'text-contra'}">
         {partei.position}
       </span>
-    </div>
+    </a>
   {/each}
 </div>

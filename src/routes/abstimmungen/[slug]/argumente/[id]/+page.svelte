@@ -12,74 +12,84 @@
 </script>
 
 <svelte:head>
-  <title>{arg.text.slice(0, 40)}... – Argument Detail</title>
+  <title>{arg.text.slice(0, 60)} – Argument | Voting Assistant</title>
+  <meta name="description" content="{arg.detail?.slice(0, 155) ?? arg.text}" />
 </svelte:head>
 
 <AppBar backHref="/abstimmungen/{a.slug}" showBookmark={true} />
 
-<div class="px-4 pt-4 pb-6">
-  <!-- Badge + Title -->
-  <div class="mb-4">
-    <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full mb-3
-      {isPro ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+<section class="container-read pt-6 md:pt-12 pb-16">
+  <a href="/abstimmungen/{a.slug}" class="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark mb-6">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+    Zurück zum Briefing
+  </a>
+
+  <p class="font-mono-data text-xs uppercase tracking-wider text-ink-muted mb-3">
+    {a.shortTitle}
+  </p>
+
+  <div class="mb-5">
+    <span class="{isPro ? 'badge-ja' : 'badge-nein'} text-xs px-3 py-1" style="font-size:11px;">
       {isPro ? '✓ PRO' : '✗ CONTRA'}
     </span>
-    <h1 class="font-serif text-2xl text-gray-900 leading-snug">{arg.text}</h1>
   </div>
 
-  <!-- AI Summary Card -->
-  <div class="card p-4 mb-4 border-l-4 {isPro ? 'border-green-500' : 'border-red-500'}">
-    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">KI-Zusammenfassung</p>
-    <p class="text-sm text-gray-700 leading-relaxed">{arg.detail ?? arg.text}</p>
-    <p class="text-[10px] text-gray-400 mt-3 italic">Generiert von AI · neutral formuliert · basierend auf offiziellen Quellen</p>
+  <h1 class="font-display text-3xl md:text-4xl text-ink leading-tight mb-8">
+    {arg.text}
+  </h1>
+
+  <div class="card p-6 md:p-8 mb-6" style="border-left: 4px solid {isPro ? 'var(--pro)' : 'var(--contra)'};">
+    <p class="section-eyebrow mb-3">KI-Zusammenfassung · Neutral formuliert</p>
+    <p class="text-base text-ink leading-relaxed">{arg.detail ?? arg.text}</p>
+    <p class="text-xs text-ink-subtle mt-4 italic">
+      Generiert auf Basis offizieller Quellen — von Hand auf Genauigkeit geprüft.
+    </p>
   </div>
 
-  <!-- Sources -->
-  <div class="card p-4 mb-4">
-    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Originalquellen (1)</p>
+  <div class="card p-6 mb-6">
+    <p class="section-eyebrow mb-3">Originalquelle</p>
     <a
       href={arg.sourceUrl}
       target="_blank"
       rel="noopener"
-      class="flex items-center gap-3 py-2 group"
+      class="flex items-center gap-3 group"
     >
-      <div class="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <div class="w-10 h-10 rounded-lg bg-surface-alt flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-ink-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
       </div>
-      <div class="flex-1">
-        <p class="font-semibold text-sm text-gray-900 group-hover:text-brand-blue transition-colors">{arg.source}</p>
-        <p class="text-xs text-gray-400">Offizielle Quelle · Web</p>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm text-ink group-hover:text-brand transition-colors">{arg.source}</p>
+        <p class="text-xs text-ink-muted truncate">{arg.sourceUrl}</p>
       </div>
-      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg class="w-4 h-4 text-ink-subtle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </a>
   </div>
 
-  <!-- Opposite argument link -->
   {#if opposite}
     <a
       href="/abstimmungen/{a.slug}/argumente/{opposite.id}"
-      class="card p-4 flex items-center gap-3 mb-5 hover:shadow-md transition-shadow group"
+      class="card card-interactive p-5 mb-8 flex items-start gap-4 group"
     >
-      <span class="text-lg">⟺</span>
-      <div class="flex-1">
-        <p class="text-xs font-bold text-gray-500 mb-0.5">Gegenargument lesen</p>
-        <p class="text-sm text-gray-700 group-hover:text-brand-blue transition-colors">«{opposite.text}»</p>
+      <span class="text-2xl flex-shrink-0" aria-hidden="true">⟺</span>
+      <div class="flex-1 min-w-0">
+        <p class="section-eyebrow mb-1">Andere Perspektive</p>
+        <p class="font-display text-lg text-ink leading-snug group-hover:text-brand transition-colors">
+          «{opposite.text}»
+        </p>
       </div>
-      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 text-ink-subtle flex-shrink-0 mt-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </a>
   {/if}
 
-  <!-- Back to briefing -->
-  <button
-    on:click={() => goto(`/abstimmungen/${a.slug}`)}
-    class="btn-primary"
-  >
+  <button type="button" on:click={() => goto(`/abstimmungen/${a.slug}`)} class="btn-primary">
     Zurück zum Briefing
   </button>
-</div>
+</section>

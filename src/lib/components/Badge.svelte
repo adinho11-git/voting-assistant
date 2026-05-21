@@ -1,12 +1,17 @@
 <script lang="ts">
   export let position: 'JA' | 'NEIN';
-  export let size: 'sm' | 'md' = 'sm';
+  export let size: 'sm' | 'md' | 'lg' = 'sm';
+  export let pulse: boolean = false;
+
+  $: cls = position === 'JA' ? 'badge-ja' : 'badge-nein';
+  $: sizeStyle =
+    size === 'sm'
+      ? 'text-[10px] py-0.5 px-2'
+      : size === 'md'
+        ? 'text-xs py-1 px-3'
+        : 'text-sm py-1.5 px-4';
 </script>
 
-<span class="
-  inline-flex items-center font-bold rounded-full tracking-wider
-  {position === 'JA' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}
-  {size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-3 py-1'}
-">
+<span class="{cls} {sizeStyle} {pulse ? 'badge-pulse' : ''}">
   {position}
 </span>

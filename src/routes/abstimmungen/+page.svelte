@@ -6,14 +6,13 @@
   export let data: PageData;
 
   let searchQuery = '';
-  let activeTab = 'anstehend';
+  let activeTab: 'anstehend' | 'vergangen' | 'kantonal' = 'anstehend';
 
-  function setTab(val: string) { activeTab = val; }
-
-  $: filtered = data.abstimmungen.filter((a) =>
-    a.shortTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.category.toLowerCase().includes(searchQuery.toLowerCase())
+  $: filtered = data.abstimmungen.filter(
+    (a) =>
+      a.shortTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   $: grouped = filtered.reduce<Record<string, typeof filtered>>((acc, a) => {
@@ -26,46 +25,61 @@
 
 <svelte:head>
   <title>Abstimmungen – Voting Assistant</title>
+  <meta name="description" content="Alle anstehenden Schweizer Abstimmungen — chronologisch sortiert, mit Pro/Contra-Übersicht und Parteipositionen." />
 </svelte:head>
 
-<div class="px-4 pt-6 pb-3">
-  <h1 class="font-serif text-2xl text-gray-900 mb-4">Abstimmungen</h1>
+<section class="container-app pt-8 md:pt-12 pb-6">
+  <p class="section-eyebrow mb-2">Übersicht</p>
+  <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Abstimmungen</h1>
+  <p class="text-ink-muted text-sm md:text-base max-w-2xl">
+    Alle eidgenössischen Vorlagen — chronologisch nach Abstimmungstermin sortiert.
+  </p>
+</section>
 
-  <!-- Search -->
-  <div class="relative mb-4">
-    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-    <input
-      type="text"
-      placeholder="Vorlage suchen..."
-      bind:value={searchQuery}
-      class="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
-    />
+<section class="container-app pb-6">
+  <div class="card p-4 md:p-5 flex flex-col md:flex-row gap-3 md:items-center">
+    <div class="relative flex-1">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Vorlage, Kategorie oder Stichwort suchen..."
+        bind:value={searchQuery}
+        class="input-field pl-10"
+        aria-label="Abstimmungen suchen"
+      />
+    </div>
+
+    <div role="tablist" aria-label="Filter" class="flex gap-1 bg-surface-alt p-1 rounded-lg">
+      {#each [['anstehend', 'Anstehend'], ['vergangen', 'Vergangen'], ['kantonal', 'Kantonal']] as [val, label]}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === val}
+          on:click={() => (activeTab = val)}
+          class="px-3 md:px-4 py-1.5 text-sm font-semibold rounded-md transition-colors {activeTab === val
+            ? 'bg-surface text-brand shadow-soft'
+            : 'text-ink-muted hover:text-ink'}"
+        >
+          {label}
+        </button>
+      {/each}
+    </div>
   </div>
+</section>
 
-  <!-- Filter tabs -->
-  <div class="flex gap-0 border-b border-gray-200 mb-4">
-    {#each [['anstehend', 'Anstehend'], ['vergangen', 'Vergangen'], ['kantonal', 'Kantonal']] as [val, label]}
-      <button
-        on:click={() => setTab(val)}
-        class="px-4 py-2.5 text-sm font-medium transition-colors {activeTab === val ? 'text-brand-blue border-b-2 border-brand-blue -mb-px' : 'text-gray-500'}"
-      >
-        {label}
-      </button>
-    {/each}
-  </div>
-</div>
-
-<!-- Grouped list -->
-<div class="px-4 space-y-5 pb-4">
+<section class="container-app pb-16">
   {#if activeTab === 'anstehend'}
     {#each Object.entries(grouped) as [date, items]}
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <span class="font-mono text-xs font-semibold text-brand-blue">{date} · Eidgenössisch</span>
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-4 border-b border-border-light pb-2">
+          <span class="font-mono-data text-xs font-semibold uppercase tracking-wider text-brand">
+            {date} · Eidgenössisch
+          </span>
+          <span class="text-xs text-ink-subtle">{items.length} Vorlage{items.length === 1 ? '' : 'n'}</span>
         </div>
-        <div class="space-y-2.5">
+        <div class="grid md:grid-cols-2 gap-4">
           {#each items as abstimmung}
             <AbstimmungCard {abstimmung} />
           {/each}
@@ -73,16 +87,21 @@
       </div>
     {/each}
     {#if filtered.length === 0}
-      <div class="text-center py-12 text-gray-400">
-        <p class="text-lg mb-1">🔍</p>
-        <p class="text-sm">Keine Vorlagen gefunden</p>
+      <div class="card p-12 text-center text-ink-muted">
+        <p class="text-3xl mb-2">🔍</p>
+        <p class="font-semibold">Keine Vorlagen gefunden</p>
+        <p class="text-xs mt-1">Suchbegriff anpassen oder zurücksetzen.</p>
       </div>
     {/if}
+  {:else if activeTab === 'vergangen'}
+    <div class="card p-12 text-center text-ink-muted">
+      <p class="font-display text-xl text-ink mb-2">Archiv folgt</p>
+      <p class="text-sm">Vergangene Abstimmungen werden ab Sommer 2026 schrittweise erschlossen.</p>
+    </div>
   {:else}
-    <div class="text-center py-12 text-gray-400">
-      <p class="text-2xl mb-2">🗂</p>
-      <p class="text-sm font-medium text-gray-500">Demnächst verfügbar</p>
-      <p class="text-xs text-gray-400 mt-1">Vergangene Abstimmungen folgen in einer nächsten Version.</p>
+    <div class="card p-12 text-center text-ink-muted">
+      <p class="font-display text-xl text-ink mb-2">Kantonale Vorlagen</p>
+      <p class="text-sm">In Vorbereitung. Aktuell konzentriert sich der Prototyp auf eidgenössische Vorlagen.</p>
     </div>
   {/if}
-</div>
+</section>

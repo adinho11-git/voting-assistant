@@ -2,11 +2,19 @@
   import { page } from '$app/stores';
 </script>
 
-<div class="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-  <p class="text-5xl mb-4">🗳</p>
-  <h1 class="font-serif text-2xl text-gray-900 mb-2">Seite nicht gefunden</h1>
-  <p class="text-sm text-gray-500 mb-6">
+<svelte:head>
+  <title>Seite nicht gefunden – Voting Assistant</title>
+</svelte:head>
+
+<div class="container-read py-20 text-center">
+  <p class="font-mono-data text-xs uppercase tracking-wider text-brand mb-3">Fehler {$page.status}</p>
+  <h1 class="font-display text-3xl md:text-4xl text-ink mb-3">
+    {$page.status === 404 ? 'Seite nicht gefunden' : 'Ein Fehler ist aufgetreten'}
+  </h1>
+  <p class="text-ink-muted mb-8 max-w-md mx-auto">
     {$page.error?.message ?? 'Diese Seite existiert leider nicht.'}
   </p>
-  <a href="/" class="btn-primary inline-block w-auto px-6">Zurück zur Startseite</a>
+  <a href="/" class="btn-primary inline-flex">
+    Zurück zur Startseite
+  </a>
 </div>

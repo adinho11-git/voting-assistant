@@ -4,65 +4,76 @@
   import Badge from '$lib/components/Badge.svelte';
 
   export let data: PageData;
+
   $: a = data.abstimmung;
-  $: jaPercent = Math.round(a.parlamentStimmen.ja / (a.parlamentStimmen.ja + a.parlamentStimmen.nein) * 100);
+  $: parlamentTotal = a.parlamentStimmen.ja + a.parlamentStimmen.nein;
+  $: jaPercent = parlamentTotal > 0 ? Math.round((a.parlamentStimmen.ja / parlamentTotal) * 100) : 0;
 </script>
 
 <svelte:head>
-  <title>Parteipositionen – {a.shortTitle}</title>
+  <title>Parteipositionen – {a.shortTitle} | Voting Assistant</title>
 </svelte:head>
 
 <AppBar title="Parteipositionen" backHref="/abstimmungen/{a.slug}" />
 
-<div class="px-4 pt-4 pb-6">
-  <h2 class="font-serif text-xl text-gray-900 mb-0.5">{a.shortTitle}</h2>
-  <p class="text-xs text-gray-500 mb-5">6 Parteien · Bundesrat · Parlament</p>
+<section class="container-read pt-6 md:pt-12 pb-16">
+  <a href="/abstimmungen/{a.slug}" class="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark mb-6">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+    Zurück zum Briefing
+  </a>
 
-  <!-- Parliament bar -->
-  <div class="card p-4 mb-5">
-    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Stimmenverhältnis Parlament</p>
-    <div class="h-4 rounded-full bg-red-100 overflow-hidden mb-2">
-      <div class="h-full bg-green-500 rounded-full transition-all duration-700"
-        style="width: {jaPercent}%">
-      </div>
+  <p class="section-eyebrow mb-2">{a.shortTitle}</p>
+  <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Parteipositionen</h1>
+  <p class="text-ink-muted mb-8">6 Parteien · Bundesrat · Parlament</p>
+
+  <div class="card p-6 mb-8">
+    <p class="section-eyebrow mb-3">Stimmenverhältnis Parlament</p>
+    <div class="community-bar mb-2" style="height: 16px;">
+      <div class="bar-ja" style="width: {jaPercent}%" />
+      <div class="bar-nein" style="width: {100 - jaPercent}%" />
     </div>
-    <div class="flex justify-between text-xs font-mono font-semibold">
-      <span class="text-green-600">JA {a.parlamentStimmen.ja} ({jaPercent}%)</span>
-      <span class="text-red-600">NEIN {a.parlamentStimmen.nein} ({100 - jaPercent}%)</span>
+    <div class="flex justify-between text-sm font-mono-data font-semibold">
+      <span class="text-pro">JA {a.parlamentStimmen.ja} ({jaPercent}%)</span>
+      <span class="text-contra">NEIN {a.parlamentStimmen.nein} ({100 - jaPercent}%)</span>
     </div>
   </div>
 
-  <!-- Party detail cards -->
-  <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Detailübersicht</h3>
-  <div class="space-y-2.5">
+  <h2 class="font-display text-xl text-ink mb-4 border-b border-border-light pb-2">Detailübersicht</h2>
+  <div class="space-y-3">
     {#each a.parteien as partei}
-      <div class="card px-4 py-3.5 flex items-center gap-3">
+      <a
+        href="/parteien/{partei.kuerzel.toLowerCase()}"
+        class="card card-interactive flex items-center gap-4 p-4"
+        style="border-left: 4px solid {partei.color};"
+      >
         <div
-          class="w-11 h-11 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+          class="w-12 h-12 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
           style="background-color: {partei.color}"
+          aria-hidden="true"
         >
-          {partei.kuerzel}
+          {partei.kuerzel.slice(0, 4)}
         </div>
         <div class="flex-1 min-w-0">
-          <p class="font-semibold text-sm text-gray-900">{partei.name}</p>
-          <p class="text-xs text-gray-500 italic leading-snug mt-0.5">{partei.statement}</p>
+          <p class="font-semibold text-base text-ink">{partei.name}</p>
+          <p class="text-sm text-ink-muted italic leading-snug mt-0.5">«{partei.statement}»</p>
         </div>
         <Badge position={partei.position} size="md" />
-      </div>
+      </a>
     {/each}
-  </div>
 
-  <!-- Bundesrat -->
-  <div class="card px-4 py-3.5 flex items-center gap-3 mt-2.5">
-    <div class="w-11 h-11 rounded-full bg-brand-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0">BR</div>
-    <div class="flex-1">
-      <p class="font-semibold text-sm text-gray-900">Bundesrat</p>
-      <p class="text-xs text-gray-500 italic">Offizielle Empfehlung der Landesregierung</p>
+    <div class="card flex items-center gap-4 p-4" style="border-left: 4px solid var(--blue);">
+      <div class="w-12 h-12 rounded-full bg-swiss-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0" aria-hidden="true">BR</div>
+      <div class="flex-1">
+        <p class="font-semibold text-base text-ink">Bundesrat</p>
+        <p class="text-sm text-ink-muted italic">Offizielle Empfehlung der Landesregierung</p>
+      </div>
+      <Badge position={a.bundesratPosition} size="md" />
     </div>
-    <Badge position={a.bundesratPosition} size="md" />
   </div>
 
-  <p class="text-[10px] text-gray-400 text-center mt-5">
-    Quelle: Parlamentsabstimmung · Stand: {new Date().toLocaleDateString('de-CH')} · Aktualisiert täglich
+  <p class="text-xs text-ink-subtle text-center mt-8">
+    Quelle: Parlamentsabstimmung · Aktualisiert täglich
   </p>
-</div>
+</section>
