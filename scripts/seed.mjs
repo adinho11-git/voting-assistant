@@ -14,7 +14,15 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import dns from 'node:dns';
 import { MongoClient } from 'mongodb';
+
+// Fall back to Google DNS if the system resolver refuses SRV lookups (common on some ISPs).
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // ignore — keep default resolver
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
