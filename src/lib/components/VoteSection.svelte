@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { votesStore, setVote, clearVote } from '$lib/stores/votes';
   import { showToast } from '$lib/stores/toast';
+  import { inView } from '$lib/actions/inView';
   import type { Position } from '$lib/types';
 
   export let slug: string;
@@ -10,10 +11,17 @@
   let community = initialCommunity;
   let isSubmitting = false;
   let pulse = false;
+  let revealed = false;
+  let renderedJaPercent = 0;
+  let renderedNeinPercent = 0;
 
   $: userVote = $votesStore[slug];
   $: jaPercent = community.total > 0 ? Math.round((community.ja / community.total) * 100) : 0;
   $: neinPercent = community.total > 0 ? 100 - jaPercent : 0;
+  $: if (revealed) {
+    renderedJaPercent = jaPercent;
+    renderedNeinPercent = neinPercent;
+  }
 
   async function submitVote(position: Position): Promise<void> {
     if (isSubmitting) return;
@@ -62,7 +70,12 @@
   });
 </script>
 
-<div class="card p-6 md:p-8" style="border-left: 4px solid var(--brand);">
+<div
+  class="card p-6 md:p-8 reveal-stage {revealed ? 'is-visible' : ''}"
+  style="border-left: 4px solid var(--brand);"
+  use:inView
+  on:reveal={() => (revealed = true)}
+>
   <div class="flex flex-col md:flex-row md:items-start gap-6">
     <!-- Voting -->
     <div class="flex-1">
@@ -108,8 +121,8 @@
       </div>
 
       <div class="community-bar mb-2">
-        <div class="bar-ja" style="width: {jaPercent}%" />
-        <div class="bar-nein" style="width: {neinPercent}%" />
+        <div class="bar-ja" style="width: {renderedJaPercent}%" />
+        <div class="bar-nein" style="width: {renderedNeinPercent}%" />
       </div>
 
       <div class="flex justify-between text-xs font-mono-data font-semibold">

@@ -10,16 +10,26 @@
 
   $: hideNavOnDetail = $page.url.pathname.includes('/argumente/');
   $: hideNav = hideNavOnDetail || $page.url.pathname.startsWith('/admin/login');
+  $: canonical = `https://friendly-llama-b738d4.netlify.app${$page.url.pathname}`;
 
   onMount(() => {
     loadVotesFromStorage();
   });
 </script>
 
+<svelte:head>
+  <link rel="canonical" href={canonical} />
+  <meta property="og:site_name" content="AI Swiss Voting Assistant" />
+  <meta property="og:locale" content="de_CH" />
+  <meta name="twitter:card" content="summary_large_image" />
+</svelte:head>
+
+<a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+
 <div class="app-shell">
   <TopNav />
 
-  <main class="app-main">
+  <main id="main-content" class="app-main">
     {#key $page.url.pathname}
       <div class="page-wrap" in:fly={{ y: 14, duration: 220, delay: 60 }} out:fade={{ duration: 80 }}>
         <slot />
