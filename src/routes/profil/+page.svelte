@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { votesStore, clearVote, clearAllVotes, setNote, setVote } from '$lib/stores/votes';
   import { showToast } from '$lib/stores/toast';
   import { PARTEIEN } from '$lib/parteiData';
@@ -29,6 +29,9 @@
   $: jaCount = voteEntries.filter(([, e]) => e.position === 'JA').length;
   $: neinCount = voteEntries.filter(([, e]) => e.position === 'NEIN').length;
   $: undecidedCount = voteEntries.filter(([, e]) => e.position === 'UNENTSCHIEDEN').length;
+  $: decidedCount = jaCount + neinCount;
+  $: lowData = total > 0 && total < 3;
+  $: lowDecisionBase = decidedCount > 0 && decidedCount < 3;
   $: bookmarked = data.abstimmungen
     .filter((abstimmung) => favorites[abstimmung.slug])
     .sort((a, b) => {
@@ -41,7 +44,14 @@
   $: history = voteEntries
     .map(([slug, entry]) => {
       const abstimmung = data.abstimmungen.find((a) => a.slug === slug);
-      return abstimmung ? { abstimmung, ...entry } : null;
+      if (!abstimmung) return null;
+      const journal = engagement.journal[slug];
+      return {
+        abstimmung,
+        ...entry,
+        confidence: journal?.confidence,
+        journalNote: journal?.note
+      };
     })
     .filter(<T,>(x: T | null): x is T => x !== null)
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -57,13 +67,71 @@
 
   $: matches = computeMatches(history);
 
+  $: topKompass = $kompassStore?.results?.[0];
+  $: secondKompass = $kompassStore?.results?.[1];
+  $: kompassClose =
+    !!topKompass && !!secondKompass && Math.abs(topKompass.match - secondKompass.match) < 5;
+
+  interface ActivityItem {
+    slug?: string;
+    title: string;
+    detail: string;
+    createdAt: string;
+    type: string;
+    href?: string;
+  }
+
+  $: recentActivities = collectRecentActivities(
+    engagement?.journal ?? {},
+    data.abstimmungen,
+    $kompassStore
+  );
+
+  function collectRecentActivities(
+    journal: Record<string, { timeline?: Array<{ title: string; detail: string; createdAt: string; type: string }> }>,
+    abstimmungen: typeof data.abstimmungen,
+    kompass: typeof $kompassStore
+  ): ActivityItem[] {
+    const items: ActivityItem[] = [];
+
+    for (const [slug, entry] of Object.entries(journal)) {
+      const abstimmung = abstimmungen.find((a) => a.slug === slug);
+      const title = abstimmung?.shortTitle ?? slug;
+      for (const event of entry?.timeline ?? []) {
+        items.push({
+          slug,
+          title: `${event.title} – ${title}`,
+          detail: event.detail,
+          createdAt: event.createdAt,
+          type: event.type,
+          href: abstimmung ? `/abstimmungen/${abstimmung.slug}` : undefined
+        });
+      }
+    }
+
+    if (kompass) {
+      const top = kompass.results?.[0];
+      items.push({
+        title: 'Partei-Kompass abgeschlossen',
+        detail: top ? `Stärkste Nähe: ${top.kuerzel} (${top.match}%)` : 'Quiz gespeichert',
+        createdAt: kompass.savedAt,
+        type: 'kompass',
+        href: '/kompass'
+      });
+    }
+
+    return items
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
+  }
+
   function computeMatches(items: typeof history): PartyMatch[] {
     const list: PartyMatch[] = [];
     for (const partei of PARTEIEN) {
       let matched = 0;
       let possible = 0;
       for (const item of items) {
-        if (item.position === 'UNENTSCHIEDEN') continue; // skip undecided for match
+        if (item.position === 'UNENTSCHIEDEN') continue;
         const partyPos = item.abstimmung.parteien.find((p) => p.kuerzel === partei.kuerzel)?.position;
         if (!partyPos) continue;
         possible++;
@@ -123,6 +191,8 @@
     showToast('Stimme aktualisiert.', 'success');
   }
 
+  const activeIntervals = new Set<ReturnType<typeof setInterval>>();
+
   function animateCountTo(target: number, current: number, set: (v: number) => void): void {
     if (current === target) return;
     const diff = target - current;
@@ -134,10 +204,19 @@
       set(next);
       if (step >= steps) {
         clearInterval(interval);
+        activeIntervals.delete(interval);
         set(target);
       }
     }, 18);
+    activeIntervals.add(interval);
   }
+
+  onDestroy(() => {
+    for (const interval of activeIntervals) {
+      clearInterval(interval);
+    }
+    activeIntervals.clear();
+  });
 
   let prevTotal = 0;
   let prevFavoriteTotal = 0;
@@ -162,18 +241,42 @@
   function positionLabel(p: UserPosition): string {
     return p === 'UNENTSCHIEDEN' ? 'Unsicher' : p;
   }
+
+  function formatDateTime(iso: string): string {
+    try {
+      return new Intl.DateTimeFormat('de-CH', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(iso));
+    } catch {
+      return iso;
+    }
+  }
+
+  function activityIcon(type: string): string {
+    if (type === 'favorite') return '☆';
+    if (type === 'feedback') return '↗';
+    if (type === 'weights') return '%';
+    if (type === 'assistant') return '→';
+    if (type === 'note') return '✎';
+    if (type === 'kompass') return '◎';
+    return '✓';
+  }
 </script>
 
 <svelte:head>
-  <title>Mein Profil – Voting Assistant</title>
-  <meta name="description" content="Persönliches Voting-Journal — alle gespeicherten Positionen, Notizen und deine Partei-Übereinstimmung. Daten bleiben lokal im Browser." />
+  <title>Mein politisches Profil – Voting Assistant</title>
+  <meta name="description" content="Dein persönlicher Reflexionsraum: gespeicherte Positionen, Kompass-Ergebnis und Übereinstimmung mit Parteien. Alles bleibt lokal in deinem Browser." />
 </svelte:head>
 
 <section class="container-app pt-8 md:pt-12 pb-6">
-  <p class="section-eyebrow mb-2">Persönliches Voting-Journal</p>
-  <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Mein Profil</h1>
+  <p class="section-eyebrow mb-2">Persönlicher Reflexionsraum</p>
+  <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Mein politisches Profil</h1>
   <p class="text-ink-muted text-sm md:text-base max-w-2xl">
-    Alle gespeicherten Positionen und Notizen — lokal in deinem Browser, niemals an einen Server gesendet.
+    Hier findest du deine gespeicherten Positionen, das Kompass-Ergebnis und deine Übereinstimmung mit den Parteien — als Grundlage für deine eigene politische Orientierung.
   </p>
 </section>
 
@@ -196,15 +299,15 @@
         </div>
         <div>
           <p class="font-mono-data text-3xl md:text-4xl font-medium text-pro">{jaCountUp}</p>
-          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">JA</p>
+          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">Ja</p>
         </div>
         <div>
           <p class="font-mono-data text-3xl md:text-4xl font-medium text-contra">{neinCountUp}</p>
-          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">NEIN</p>
+          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">Nein</p>
         </div>
         <div>
           <p class="font-mono-data text-3xl md:text-4xl font-medium text-ink-muted">{undecidedCountUp}</p>
-          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">Offen</p>
+          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">Unsicher</p>
         </div>
         <div>
           <p class="font-mono-data text-3xl md:text-4xl font-medium text-brand">{favoriteCountUp}</p>
@@ -212,43 +315,81 @@
         </div>
       </div>
     </div>
+
+    <p class="privacy-hint">
+      <span aria-hidden="true">🔒</span>
+      Deine Positionen bleiben lokal im Browser und dienen nur deiner eigenen Orientierung. Nichts wird an einen Server gesendet.
+    </p>
+
+    {#if lowData}
+      <p class="data-notice">
+        <strong>Noch wenig Datenbasis.</strong>
+        Speichere weitere Abstimmungen, damit du Muster in deinen Entscheidungen zuverlässiger erkennen kannst.
+      </p>
+    {/if}
   </div>
 </section>
 
 {#if total === 0 && !$kompassStore && bookmarked.length === 0}
   <section class="container-app pb-20">
-    <div class="card p-12 text-center">
-      <p class="text-5xl mb-4" aria-hidden="true">🗳</p>
-      <h2 class="font-display text-2xl text-ink mb-2">Noch keine Einträge</h2>
-      <p class="text-ink-muted mb-6 max-w-md mx-auto">
-        Stimme bei einer Vorlage ab oder mach das Kompass-Quiz — danach erscheinen hier deine Positionen, Notizen und die Partei-Übereinstimmung.
+    <div class="card p-10 md:p-12">
+      <p class="text-5xl mb-4 text-center" aria-hidden="true">🗳</p>
+      <h2 class="font-display text-2xl text-ink mb-3 text-center">Dein Journal ist noch leer</h2>
+      <p class="text-ink-muted mb-6 max-w-xl mx-auto text-center">
+        Das Voting-Journal ist dein persönlicher Reflexionsraum. Wenn du erste Positionen speicherst, hilft dir diese Seite, deine politischen Entscheidungen besser zu verstehen.
       </p>
-      <div class="flex flex-wrap gap-3 justify-center">
-        <a href="/abstimmungen" class="btn-primary">Zu den Abstimmungen</a>
-        <a href="/kompass" class="btn-secondary">Kompass-Quiz starten</a>
+
+      <ul class="empty-points">
+        <li>
+          <span class="empty-point-marker" aria-hidden="true">1</span>
+          <span>Speichere deine Position zu Abstimmungen — mit Notiz und Sicherheits-Einschätzung.</span>
+        </li>
+        <li>
+          <span class="empty-point-marker" aria-hidden="true">2</span>
+          <span>Finde im Partei-Kompass eine erste politische Tendenz.</span>
+        </li>
+        <li>
+          <span class="empty-point-marker" aria-hidden="true">3</span>
+          <span>Sieh hier, wo deine Stimmen mit den Parteien übereinstimmen.</span>
+        </li>
+      </ul>
+
+      <div class="flex flex-wrap gap-3 justify-center mt-8">
+        <a href="/abstimmungen" class="btn-primary">Erste Abstimmung verstehen</a>
+        <a href="/kompass" class="btn-secondary">Partei-Kompass starten</a>
       </div>
     </div>
   </section>
 {:else}
   <!-- KOMPASS RESULT -->
-  {#if $kompassStore}
+  {#if $kompassStore && topKompass}
     <section class="container-app pb-6">
       <div class="card p-6 md:p-8">
         <div class="flex items-end justify-between mb-3 border-b border-border-light pb-2 flex-wrap gap-3">
           <div>
-            <p class="section-eyebrow mb-1">Partei-Kompass</p>
-            <h2 class="font-display text-2xl text-ink">Dein Quiz-Ergebnis</h2>
+            <p class="section-eyebrow mb-1">Aus dem Partei-Kompass</p>
+            <h2 class="font-display text-2xl text-ink">Politische Nähe aus dem Kompass</h2>
           </div>
           <a href="/kompass" class="text-sm font-semibold text-brand hover:text-brand-dark">
-            Quiz öffnen →
+            Quiz erneut öffnen →
           </a>
         </div>
-        <p class="text-sm text-ink-muted mb-4">
-          Top-Match: <strong style="color: {$kompassStore.results[0]?.color};">{$kompassStore.results[0]?.kuerzel}</strong>
-          mit <span class="font-mono-data">{$kompassStore.results[0]?.match}%</span>.
-          Gespeichert am {new Date($kompassStore.savedAt).toLocaleString('de-CH')}.
+
+        <p class="text-sm text-ink-muted mb-3">
+          Stärkste Nähe zu
+          <strong style="color: {topKompass.color};">{topKompass.kuerzel}</strong>:
+          <span class="font-mono-data">{topKompass.match}%</span> Nähe-Wert.
+          Das ist eine <em>Tendenz</em>, keine feste Zuordnung.
         </p>
-        <div class="space-y-2">
+
+        {#if kompassClose}
+          <p class="closeness-hint">
+            <span aria-hidden="true">⚖</span>
+            Die ersten Parteien liegen nah beieinander — das Ergebnis ist keine eindeutige Zuordnung.
+          </p>
+        {/if}
+
+        <div class="space-y-2 mt-4">
           {#each $kompassStore.results.slice(0, 3) as r, i}
             <div class="flex items-center gap-3">
               <span class="font-mono-data text-xs font-semibold text-ink-muted w-4 text-right">{i + 1}.</span>
@@ -268,6 +409,10 @@
             </div>
           {/each}
         </div>
+
+        <p class="text-xs text-ink-subtle mt-4">
+          Gespeichert am {new Date($kompassStore.savedAt).toLocaleString('de-CH')}. Werte zeigen Orientierung, kein politisches Urteil.
+        </p>
       </div>
     </section>
   {/if}
@@ -362,15 +507,24 @@
     <!-- PARTY MATCH FROM VOTES -->
     <section class="container-app pb-6">
       <div class="card p-6 md:p-8">
-        <div class="flex items-end justify-between mb-5 border-b border-border-light pb-3 flex-wrap gap-3">
+        <div class="flex items-end justify-between mb-3 border-b border-border-light pb-3 flex-wrap gap-3">
           <div>
-            <p class="section-eyebrow mb-1">Aus deinen JA/NEIN-Positionen</p>
-            <h2 class="font-display text-2xl text-ink">Partei-Übereinstimmung</h2>
+            <p class="section-eyebrow mb-1">Aus deinen Ja/Nein-Positionen</p>
+            <h2 class="font-display text-2xl text-ink">Momentane Übereinstimmung mit Parteipositionen</h2>
           </div>
-          <span class="text-xs font-mono-data text-ink-muted">Basis: {jaCount + neinCount} Positionen</span>
+          <span class="text-xs font-mono-data text-ink-muted">Basis: {decidedCount} {decidedCount === 1 ? 'Position' : 'Positionen'}</span>
         </div>
 
-        <div class="space-y-3">
+        {#if lowDecisionBase}
+          <p class="data-notice data-notice-inline">
+            <strong>Datenbasis noch klein:</strong>
+            Die Prozentwerte sind nur eine erste Momentaufnahme — bei nur {decidedCount}
+            {decidedCount === 1 ? 'gespeicherten Ja/Nein-Position' : 'gespeicherten Ja/Nein-Positionen'}
+            kann ein 100%-Wert noch keine starke politische Aussage sein.
+          </p>
+        {/if}
+
+        <div class="space-y-3 mt-2">
           {#each matches as m}
             {#if m.out_of > 0}
               <a href="/parteien/{m.kuerzel.toLowerCase()}" class="block">
@@ -395,8 +549,42 @@
         </div>
 
         <p class="text-xs text-ink-subtle mt-5">
-          Berechnung: Übereinstimmung deiner Position mit der offiziellen Parteiposition pro Vorlage (UNENTSCHIEDEN zählt nicht).
+          Diese Werte basieren nur auf deinen gespeicherten Ja/Nein-Positionen zu Abstimmungen, nicht auf dem Partei-Kompass. Berechnung: Übereinstimmung deiner Position mit der offiziellen Parteiposition pro Vorlage (Unsicher zählt nicht). Werte ändern sich, sobald du weitere Abstimmungen speicherst.
         </p>
+      </div>
+    </section>
+  {/if}
+
+  <!-- RECENT ACTIVITIES -->
+  {#if recentActivities.length > 0}
+    <section class="container-app pb-6">
+      <div class="card p-6 md:p-8">
+        <div class="flex items-end justify-between mb-4 border-b border-border-light pb-3 flex-wrap gap-3">
+          <div>
+            <p class="section-eyebrow mb-1">Im Blick</p>
+            <h2 class="font-display text-2xl text-ink">Letzte Aktivitäten</h2>
+          </div>
+          <span class="text-xs font-mono-data text-ink-muted">
+            {recentActivities.length} {recentActivities.length === 1 ? 'Eintrag' : 'Einträge'}
+          </span>
+        </div>
+
+        <ul class="activity-list">
+          {#each recentActivities as activity}
+            <li class="activity-item">
+              <span class="activity-icon" aria-hidden="true">{activityIcon(activity.type)}</span>
+              <div class="activity-body">
+                <p class="activity-meta">{formatDateTime(activity.createdAt)}</p>
+                {#if activity.href}
+                  <a href={activity.href} class="activity-title">{activity.title}</a>
+                {:else}
+                  <p class="activity-title">{activity.title}</p>
+                {/if}
+                <p class="activity-detail">{activity.detail}</p>
+              </div>
+            </li>
+          {/each}
+        </ul>
       </div>
     </section>
   {/if}
@@ -404,17 +592,20 @@
   <!-- HISTORY / JOURNAL -->
   {#if history.length > 0}
     <section class="container-app pb-20">
-      <div class="flex items-end justify-between mb-5 border-b border-border-light pb-3 flex-wrap gap-3">
+      <div class="flex items-end justify-between mb-3 border-b border-border-light pb-3 flex-wrap gap-3">
         <div>
           <p class="section-eyebrow mb-1">Deine Einträge</p>
           <h2 class="font-display text-2xl text-ink">Voting-Journal</h2>
+          <p class="text-sm text-ink-muted mt-1 max-w-2xl">
+            Persönliche Reflexionskarten zu jeder gespeicherten Vorlage — Position, Sicherheit, Notiz und Kontext auf einen Blick.
+          </p>
         </div>
         <button type="button" on:click={clearAll} class="text-sm text-ink-muted underline hover:text-contra">
           Alle löschen
         </button>
       </div>
 
-      <div class="space-y-4">
+      <div class="space-y-4 mt-5">
         {#each history as item}
           <article
             class="journal-card"
@@ -425,7 +616,7 @@
             <div class="journal-head">
               <a href="/abstimmungen/{item.abstimmung.slug}" class="journal-title group">
                 <span class="journal-meta">
-                  {formatDate(item.abstimmung.date)} · {item.abstimmung.category}
+                  {formatDate(item.abstimmung.date)} · <span class="journal-topic">{item.abstimmung.category}</span>
                 </span>
                 <span class="journal-name group-hover:text-brand">
                   {item.abstimmung.shortTitle}
@@ -464,29 +655,38 @@
                     </button>
                   {/each}
                 </div>
+                {#if item.confidence !== undefined}
+                  <div class="journal-confidence">
+                    <span class="journal-label">Sicherheit</span>
+                    <div class="journal-confidence-bar" aria-hidden="true">
+                      <div class="journal-confidence-fill" style="width: {item.confidence}%;"></div>
+                    </div>
+                    <span class="font-mono-data text-xs font-semibold text-ink">{item.confidence}%</span>
+                  </div>
+                {/if}
               </div>
 
               <div class="journal-official-grid">
-              <div class="journal-fact">
-                <span class="journal-label">Bundesrat</span>
-                <Badge position={item.abstimmung.bundesratPosition} size="sm" />
-              </div>
-              <div class="journal-fact">
-                <span class="journal-label">Parlament</span>
-                <Badge position={item.abstimmung.parlamentPosition} size="sm" />
-              </div>
-              {#if item.abstimmung.result}
                 <div class="journal-fact">
-                  <span class="journal-label">Endergebnis</span>
-                  <span class="{item.abstimmung.result.accepted ? 'badge-ja' : 'badge-nein'}" style="font-size:9px;">
-                    {item.abstimmung.result.accepted ? 'ANGENOMMEN' : 'ABGELEHNT'}
-                  </span>
+                  <span class="journal-label">Bundesrat</span>
+                  <Badge position={item.abstimmung.bundesratPosition} size="sm" />
                 </div>
-              {/if}
-              <div class="journal-fact">
-                <span class="journal-label">Aktualisiert</span>
-                <span class="font-mono-data text-xs text-ink-muted">{new Date(item.updatedAt).toLocaleDateString('de-CH')}</span>
-              </div>
+                <div class="journal-fact">
+                  <span class="journal-label">Parlament</span>
+                  <Badge position={item.abstimmung.parlamentPosition} size="sm" />
+                </div>
+                {#if item.abstimmung.result}
+                  <div class="journal-fact">
+                    <span class="journal-label">Endergebnis</span>
+                    <span class="{item.abstimmung.result.accepted ? 'badge-ja' : 'badge-nein'}" style="font-size:9px;">
+                      {item.abstimmung.result.accepted ? 'ANGENOMMEN' : 'ABGELEHNT'}
+                    </span>
+                  </div>
+                {/if}
+                <div class="journal-fact">
+                  <span class="journal-label">Aktualisiert</span>
+                  <span class="font-mono-data text-xs text-ink-muted">{formatDateTime(item.updatedAt)}</span>
+                </div>
               </div>
             </div>
 
@@ -503,10 +703,10 @@
                 <button type="button" on:click={() => saveNote(item.abstimmung.slug)} class="btn-primary text-sm">Speichern</button>
                 <button type="button" on:click={cancelNote} class="btn-ghost text-sm">Abbrechen</button>
               </div>
-            {:else if item.note}
+            {:else if item.note || item.journalNote}
               <div class="journal-note">
-                <p class="text-sm text-ink leading-relaxed italic mb-2">«{item.note}»</p>
-                <button type="button" on:click={() => startEditNote(item.abstimmung.slug, item.note)} class="text-xs text-brand hover:underline">
+                <p class="text-sm text-ink leading-relaxed italic mb-2">«{item.note || item.journalNote}»</p>
+                <button type="button" on:click={() => startEditNote(item.abstimmung.slug, item.note || item.journalNote)} class="text-xs text-brand hover:underline">
                   Notiz bearbeiten
                 </button>
               </div>
@@ -515,14 +715,114 @@
                 + Notiz hinzufügen
               </button>
             {/if}
+
+            <div class="journal-actions-row">
+              <a href="/abstimmungen/{item.abstimmung.slug}" class="journal-cta">
+                Briefing erneut öffnen →
+              </a>
+            </div>
           </article>
         {/each}
+      </div>
+
+      <div class="next-step-card">
+        <div>
+          <p class="font-display text-lg text-ink leading-tight">Bereit für die nächste Vorlage?</p>
+          <p class="text-sm text-ink-muted mt-1">Schau dir weitere Abstimmungen an und erweitere deine Datenbasis.</p>
+        </div>
+        <a href="/abstimmungen" class="btn-primary text-sm whitespace-nowrap">Weitere Abstimmungen</a>
       </div>
     </section>
   {/if}
 {/if}
 
 <style>
+  .privacy-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin-top: 1.4rem;
+    border-top: 1px solid var(--border-light);
+    padding-top: 1rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .privacy-hint span[aria-hidden] {
+    font-size: 0.95rem;
+    line-height: 1;
+    margin-top: 0.1rem;
+  }
+
+  .data-notice {
+    margin-top: 1rem;
+    border-left: 3px solid var(--brand);
+    background: var(--brand-soft, color-mix(in srgb, var(--brand) 12%, var(--surface)));
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 0.7rem 0.9rem;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .data-notice strong {
+    color: var(--text);
+    font-weight: 800;
+  }
+
+  .data-notice-inline {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .closeness-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin: 0 0 0.5rem;
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+    border: 1px dashed var(--border);
+    padding: 0.55rem 0.8rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .empty-points {
+    list-style: none;
+    margin: 1.5rem auto 0;
+    padding: 0;
+    max-width: 32rem;
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .empty-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .empty-point-marker {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--radius-full);
+    background: var(--brand-soft, color-mix(in srgb, var(--brand) 14%, var(--surface)));
+    color: var(--brand);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+    margin-top: 0.05rem;
+  }
+
   .journal-card {
     position: relative;
     overflow: hidden;
@@ -567,6 +867,10 @@
     font-size: 0.72rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+
+  .journal-topic {
+    color: var(--brand);
   }
 
   .journal-name {
@@ -673,6 +977,29 @@
     box-shadow: none;
   }
 
+  .journal-confidence {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.55rem;
+    padding-top: 0.55rem;
+    border-top: 1px dashed var(--border-light);
+  }
+
+  .journal-confidence-bar {
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--border-light);
+    overflow: hidden;
+  }
+
+  .journal-confidence-fill {
+    height: 100%;
+    background: var(--brand);
+    border-radius: var(--radius-full);
+    transition: width 240ms ease;
+  }
+
   .journal-official-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -698,6 +1025,104 @@
     font-size: 0.95rem;
     font-style: italic;
     line-height: 1.55;
+  }
+
+  .journal-actions-row {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .journal-cta {
+    color: var(--brand);
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: color 160ms ease;
+  }
+
+  .journal-cta:hover {
+    color: var(--brand-dark, var(--brand));
+    text-decoration: underline;
+  }
+
+  .next-step-card {
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-alt);
+    padding: 1rem 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .activity-item {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .activity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .activity-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-full);
+    background: var(--brand-soft, color-mix(in srgb, var(--brand) 14%, var(--surface)));
+    color: var(--brand);
+    font-weight: 900;
+    font-size: 0.95rem;
+  }
+
+  .activity-body {
+    min-width: 0;
+  }
+
+  .activity-meta {
+    color: var(--text-subtle);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.15rem;
+  }
+
+  .activity-title {
+    display: block;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    transition: color 160ms ease;
+  }
+
+  a.activity-title:hover {
+    color: var(--brand);
+  }
+
+  .activity-detail {
+    margin-top: 0.15rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
   }
 
   .bookmark-card {
@@ -807,8 +1232,18 @@
       grid-template-columns: 1fr;
     }
 
+    .journal-confidence {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+
     .bookmark-context {
       grid-template-columns: 1fr;
+    }
+
+    .next-step-card {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 </style>
