@@ -1,183 +1,144 @@
 <script lang="ts">
-  import type { Abstimmung, UserPosition } from '$lib/types';
-  import { saveAssistantEntry, saveJournalEntry } from '$lib/stores/engagement';
-  import { setVote } from '$lib/stores/votes';
-  import { showToast } from '$lib/stores/toast';
+  import type { Abstimmung, Argument, UserPosition } from '$lib/types';
+  import { engagementStore, type ArgumentSide, type ArgumentWeight } from '$lib/stores/engagement';
 
   export let abstimmung: Abstimmung;
 
-  const steps = ['Kurz verstehen', 'Argumente prüfen', 'Prioritäten setzen', 'Tendenz speichern'];
-  const themes = [
-    'Kosten',
-    'Freiheit',
-    'Sicherheit',
-    'Umwelt',
-    'Soziale Gerechtigkeit',
-    'Wirtschaft',
-    'Service public',
-    'EU-Beziehungen'
+  interface WorkflowStep {
+    label: string;
+    action: string;
+    href: string;
+  }
+
+  interface WeightedReason {
+    side: ArgumentSide;
+    text: string;
+    source: string;
+    weight: ArgumentWeight;
+  }
+
+  const steps: WorkflowStep[] = [
+    { label: 'Verstehen', action: 'neutralen Überblick lesen', href: '#ueberblick' },
+    { label: 'Abwägen', action: 'Pro und Contra prüfen', href: '#argumente' },
+    { label: 'Gewichten', action: 'überzeugende Argumente markieren', href: '#argumente' },
+    { label: 'Einordnen', action: 'Parteien als Orientierung nutzen', href: '#parteien' },
+    { label: 'Entscheiden', action: 'eigene Position setzen', href: '#meine-position' },
+    { label: 'Speichern', action: 'Sicherheit und Notiz sichern', href: '#meine-position' }
   ];
 
-  let step = 0;
-  let selectedThemes: string[] = [];
-  let position: UserPosition | undefined;
-  let saved = false;
+  $: slugWeights = $engagementStore.weights[abstimmung.slug] ?? {};
+  $: proScore = sumWeights(slugWeights, abstimmung.proArguments, 'pro');
+  $: contraScore = sumWeights(slugWeights, abstimmung.contraArguments, 'contra');
+  $: totalScore = proScore + contraScore;
+  $: tendencyPosition = computeTendency(proScore, contraScore);
+  $: tendencyLabel = formatPosition(tendencyPosition);
+  $: topReasons = collectTopReasons(slugWeights, abstimmung);
+  $: tendencyDetail =
+    totalScore === 0
+      ? 'Gewichte weiter unten Argumente, dann erscheint hier deine aktuelle Tendenz.'
+      : `Pro ${proScore} zu Contra ${contraScore}. Die Tendenz entsteht nur aus deinen Gewichtungen.`;
 
-  $: progress = ((step + 1) / steps.length) * 100;
-  $: leadingPro = abstimmung.proArguments.slice(0, 2);
-  $: leadingContra = abstimmung.contraArguments.slice(0, 2);
-  $: reason =
-    selectedThemes.length > 0
-      ? `Du gewichtest vor allem ${selectedThemes.slice(0, 3).join(', ')}.`
-      : 'Du hast noch keine Prioritäten gesetzt.';
-  $: positionLabel = position === 'UNENTSCHIEDEN' ? 'Unsicher' : position;
-  $: suggestedConfidence = position === 'UNENTSCHIEDEN' || !position ? 45 : Math.min(90, 58 + selectedThemes.length * 5);
-
-  function toggleTheme(theme: string): void {
-    if (selectedThemes.includes(theme)) {
-      selectedThemes = selectedThemes.filter((item) => item !== theme);
-    } else {
-      selectedThemes = [...selectedThemes, theme].slice(0, 5);
-    }
-    saved = false;
+  function sumWeights(
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
+    argumentsList: Argument[],
+    side: ArgumentSide
+  ): number {
+    return argumentsList.reduce((sum, argument) => {
+      const current = weights[argument.id];
+      if (!current || current.side !== side) return sum;
+      return sum + current.weight;
+    }, 0);
   }
 
-  function next(): void {
-    step = Math.min(steps.length - 1, step + 1);
+  function weightOf(
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
+    argumentId: string
+  ): ArgumentWeight {
+    return (weights[argumentId]?.weight ?? 0) as ArgumentWeight;
   }
 
-  function previous(): void {
-    step = Math.max(0, step - 1);
+  function computeTendency(pro: number, contra: number): UserPosition {
+    if (pro + contra === 0 || pro === contra) return 'UNENTSCHIEDEN';
+    return pro > contra ? 'JA' : 'NEIN';
   }
 
-  function finish(): void {
-    if (!position) {
-      showToast('Wähle zuerst eine Tendenz oder Unsicher.', 'info');
-      return;
-    }
+  function formatPosition(position: UserPosition): string {
+    if (position === 'UNENTSCHIEDEN') return 'Unsicher';
+    return position;
+  }
 
-    const detail = `${positionLabel}: ${reason}`;
-    saveAssistantEntry(
-      abstimmung.slug,
-      {
-        themes: selectedThemes,
-        position,
-        reason
-      },
-      detail
-    );
-    setVote(abstimmung.slug, position);
-    saveJournalEntry(
-      abstimmung.slug,
-      {
-        position,
-        confidence: suggestedConfidence
-      },
-      {
-        type: 'assistant',
-        title: 'Tendenz aus Assistent übernommen',
-        detail
-      }
-    );
-    saved = true;
-    showToast('Assistent-Ergebnis im Journal gespeichert.', 'success');
+  function collectTopReasons(
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
+    vote: Abstimmung
+  ): WeightedReason[] {
+    const proReasons = vote.proArguments.map((argument) => toReason(argument, 'pro', weights));
+    const contraReasons = vote.contraArguments.map((argument) => toReason(argument, 'contra', weights));
+    return [...proReasons, ...contraReasons]
+      .filter((reason) => reason.weight > 0)
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 2);
+  }
+
+  function toReason(
+    argument: Argument,
+    side: ArgumentSide,
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>
+  ): WeightedReason {
+    return {
+      side,
+      text: argument.text,
+      source: argument.source,
+      weight: weightOf(weights, argument.id)
+    };
   }
 </script>
 
-<div class="assistant-shell">
-  <div class="assistant-head">
-    <div>
-      <p class="section-eyebrow">Abstimmungs-Assistent</p>
-      <h2 class="font-display text-2xl md:text-3xl text-ink">In vier Schritten zur eigenen Tendenz</h2>
+<div class="assistant-shell" aria-labelledby="assistant-title">
+  <div class="assistant-grid">
+    <div class="assistant-main">
+      <p class="section-eyebrow">Geführter Entscheidungs-Assistent</p>
+      <h2 id="assistant-title" class="font-display text-2xl md:text-3xl text-ink">
+        Verstehen → Abwägen → Gewichten → Einordnen → Entscheiden → Speichern
+      </h2>
+      <p class="assistant-summary">{abstimmung.aiSummary}</p>
+
+      <div class="assistant-facts" aria-label="Kurzfakten">
+        <span>{abstimmung.readTime} Min Lesezeit</span>
+        <span>Bundesrat: {abstimmung.bundesratPosition}</span>
+        <span>Parlament: {abstimmung.parlamentPosition}</span>
+      </div>
+
+      <div class="assistant-actions">
+        <a class="btn-primary" href="#argumente">Argumente gewichten</a>
+        <a class="btn-ghost" href="#meine-position">Position speichern</a>
+      </div>
     </div>
-    <div class="assistant-progress" aria-label="Fortschritt">
-      <span>{step + 1}/{steps.length}</span>
-      <div><i style="width: {progress}%"></i></div>
-    </div>
+
+    <aside class="assistant-result" class:is-pro={tendencyPosition === 'JA'} class:is-contra={tendencyPosition === 'NEIN'} aria-live="polite">
+      <span class="result-kicker">Live aus deiner Gewichtung</span>
+      <strong>Deine aktuelle Tendenz: {tendencyLabel}</strong>
+      <p>{tendencyDetail}</p>
+      {#if topReasons.length > 0}
+        <ul>
+          {#each topReasons as reason}
+            <li>
+              <span>{reason.side === 'pro' ? 'Pro' : 'Contra'} · {reason.weight}/3</span>
+              {reason.text}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </aside>
   </div>
 
-  <div class="step-tabs" aria-label="Assistent-Schritte">
-    {#each steps as label, index}
-      <button type="button" class:active={step === index} on:click={() => (step = index)}>
+  <div class="assistant-steps" aria-label="Workflow-Schritte">
+    {#each steps as item, index}
+      <a href={item.href} class="assistant-step">
         <span>{index + 1}</span>
-        {label}
-      </button>
+        <strong>{item.label}</strong>
+        <small>{item.action}</small>
+      </a>
     {/each}
-  </div>
-
-  <div class="assistant-body">
-    {#if step === 0}
-      <div class="assistant-panel intro-panel">
-        <p class="section-eyebrow">Worum geht es?</p>
-        <p class="assistant-summary">{abstimmung.aiSummary}</p>
-        <div class="assistant-fact-row">
-          <span>{abstimmung.readTime} Min Lesezeit</span>
-          <span>Bundesrat: {abstimmung.bundesratPosition}</span>
-          <span>Parlament: {abstimmung.parlamentPosition}</span>
-        </div>
-      </div>
-    {:else if step === 1}
-      <div class="argument-duel">
-        <div class="mini-column pro">
-          <p class="section-eyebrow">Spricht für JA</p>
-          {#each leadingPro as argument}
-            <article>
-              <strong>{argument.text}</strong>
-              <span>{argument.source}</span>
-            </article>
-          {/each}
-        </div>
-        <div class="mini-column contra">
-          <p class="section-eyebrow">Spricht für NEIN</p>
-          {#each leadingContra as argument}
-            <article>
-              <strong>{argument.text}</strong>
-              <span>{argument.source}</span>
-            </article>
-          {/each}
-        </div>
-      </div>
-    {:else if step === 2}
-      <div class="assistant-panel">
-        <p class="section-eyebrow">Was ist dir bei dieser Vorlage wichtig?</p>
-        <div class="theme-grid">
-          {#each themes as theme}
-            <button type="button" class:active={selectedThemes.includes(theme)} on:click={() => toggleTheme(theme)}>
-              {theme}
-            </button>
-          {/each}
-        </div>
-        <p class="assistant-hint">{reason} Maximal fünf Prioritäten, damit die Entscheidung fokussiert bleibt.</p>
-      </div>
-    {:else}
-      <div class="assistant-panel result-panel">
-        <div>
-          <p class="section-eyebrow">Deine aktuelle Tendenz</p>
-          <div class="position-grid">
-            <button type="button" class:active={position === 'JA'} class="ja" on:click={() => ((position = 'JA'), (saved = false))}>JA</button>
-            <button type="button" class:active={position === 'NEIN'} class="nein" on:click={() => ((position = 'NEIN'), (saved = false))}>NEIN</button>
-            <button type="button" class:active={position === 'UNENTSCHIEDEN'} on:click={() => ((position = 'UNENTSCHIEDEN'), (saved = false))}>Unsicher</button>
-          </div>
-        </div>
-        <div class="assistant-result-card">
-          <span class="result-kicker">Orientierung</span>
-          <strong>{position ? `${positionLabel} mit ${suggestedConfidence}% Sicherheit` : 'Noch keine Tendenz gewählt'}</strong>
-          <p>{reason}</p>
-          <button type="button" class="btn-primary" on:click={finish}>
-            {saved ? 'Gespeichert' : 'Ins Journal übernehmen'}
-          </button>
-        </div>
-      </div>
-    {/if}
-  </div>
-
-  <div class="assistant-actions">
-    <button type="button" class="btn-ghost" on:click={previous} disabled={step === 0}>Zurück</button>
-    {#if step < steps.length - 1}
-      <button type="button" class="btn-primary" on:click={next}>Weiter</button>
-    {:else}
-      <button type="button" class="btn-secondary" on:click={() => (step = 1)}>Argumente nochmals ansehen</button>
-    {/if}
   </div>
 </div>
 
@@ -186,291 +147,180 @@
     position: relative;
     overflow: hidden;
     padding: clamp(22px, 3vw, 34px);
-    border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border-light));
+    border: 1px solid color-mix(in srgb, var(--brand) 24%, var(--border-light));
     border-radius: var(--radius-lg);
     background:
-      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--brand-soft) 75%, transparent), transparent 36%),
+      linear-gradient(135deg, color-mix(in srgb, var(--brand-soft) 72%, transparent), transparent 42%),
       var(--surface);
     box-shadow: var(--shadow-md);
   }
 
-  .assistant-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 18px;
-  }
-
-  .assistant-progress {
-    min-width: 170px;
-    font-family: 'IBM Plex Mono', monospace;
-    color: var(--text-muted);
-    font-size: 12px;
-    text-align: right;
-  }
-
-  .assistant-progress div {
-    height: 7px;
-    margin-top: 8px;
-    overflow: hidden;
-    border-radius: 999px;
-    background: var(--surface-alt);
-  }
-
-  .assistant-progress i {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, var(--brand), color-mix(in srgb, var(--brand) 60%, var(--pro)));
-    transition: width 420ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .step-tabs {
+  .assistant-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 18px;
-  }
-
-  .step-tabs button,
-  .theme-grid button,
-  .position-grid button {
-    border: 1px solid var(--border-light);
-    background: var(--surface);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
-  }
-
-  .step-tabs button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 42px;
-    border-radius: var(--radius);
-    font-weight: 700;
-    font-size: 13px;
-  }
-
-  .step-tabs span {
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    background: var(--surface-alt);
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-  }
-
-  .step-tabs button.active,
-  .theme-grid button.active,
-  .position-grid button.active {
-    border-color: color-mix(in srgb, var(--brand) 46%, var(--border-light));
-    background: var(--brand-soft);
-    color: var(--brand);
-  }
-
-  .assistant-body {
-    min-height: 270px;
-  }
-
-  .assistant-panel {
-    height: 100%;
-    min-height: 270px;
-    padding: clamp(18px, 2.4vw, 26px);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--surface) 86%, var(--surface-alt));
-    animation: panel-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .assistant-summary {
-    max-width: 980px;
-    color: var(--text);
-    font-size: clamp(17px, 1.55vw, 22px);
-    line-height: 1.58;
-  }
-
-  .assistant-fact-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-    font-family: 'IBM Plex Mono', monospace;
-    color: var(--text-muted);
-    font-size: 12px;
-  }
-
-  .assistant-fact-row span {
-    padding: 7px 10px;
-    border-radius: 999px;
-    background: var(--surface);
-    border: 1px solid var(--border-light);
-  }
-
-  .argument-duel {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    animation: panel-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .mini-column {
-    min-height: 270px;
-    padding: clamp(18px, 2.4vw, 24px);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  .mini-column.pro {
-    border-top: 4px solid var(--pro);
-  }
-
-  .mini-column.contra {
-    border-top: 4px solid var(--contra);
-  }
-
-  .mini-column article {
-    padding: 16px 0;
-    border-top: 1px solid var(--border-light);
-  }
-
-  .mini-column strong {
-    display: block;
-    color: var(--text);
-    line-height: 1.35;
-  }
-
-  .mini-column span {
-    display: block;
-    margin-top: 7px;
-    color: var(--text-muted);
-    font-size: 12px;
-  }
-
-  .theme-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 18px;
-  }
-
-  .theme-grid button {
-    min-height: 42px;
-    padding: 0 14px;
-    border-radius: 999px;
-    font-weight: 700;
-  }
-
-  .assistant-hint {
-    margin-top: 18px;
-    color: var(--text-muted);
-    line-height: 1.55;
-  }
-
-  .result-panel {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.45fr);
+    gap: clamp(18px, 3vw, 30px);
     align-items: stretch;
   }
 
-  .position-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    margin-top: 18px;
-  }
-
-  .position-grid button {
-    min-height: 76px;
-    border-radius: var(--radius);
-    font-size: 18px;
-    font-weight: 800;
-  }
-
-  .position-grid .ja.active {
-    color: var(--pro);
-    border-color: color-mix(in srgb, var(--pro) 44%, var(--border-light));
-    background: var(--pro-soft);
-  }
-
-  .position-grid .nein.active {
-    color: var(--contra);
-    border-color: color-mix(in srgb, var(--contra) 44%, var(--border-light));
-    background: var(--contra-soft);
-  }
-
-  .assistant-result-card {
+  .assistant-main {
     display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .assistant-summary {
+    max-width: 880px;
+    color: var(--text);
+    font-size: clamp(16px, 1.35vw, 20px);
+    line-height: 1.58;
+  }
+
+  .assistant-facts,
+  .assistant-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .assistant-facts span {
+    padding: 7px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .assistant-actions {
+    margin-top: 4px;
+  }
+
+  .assistant-result {
+    display: flex;
+    min-height: 100%;
     flex-direction: column;
     justify-content: center;
     gap: 12px;
     padding: 20px;
     border-radius: var(--radius);
     color: white;
-    background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 62%, #111));
+    background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 58%, #111));
   }
 
-  .assistant-result-card strong {
+  .assistant-result.is-pro {
+    background: linear-gradient(135deg, var(--pro), color-mix(in srgb, var(--pro) 58%, #111));
+  }
+
+  .assistant-result.is-contra {
+    background: linear-gradient(135deg, var(--contra), color-mix(in srgb, var(--contra) 58%, #111));
+  }
+
+  .assistant-result strong {
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 24px;
-    line-height: 1.1;
+    font-size: clamp(23px, 2.2vw, 31px);
+    line-height: 1.12;
   }
 
-  .assistant-result-card p {
-    color: rgba(255, 255, 255, 0.78);
+  .assistant-result p,
+  .assistant-result li {
+    color: rgba(255, 255, 255, 0.82);
     line-height: 1.45;
   }
 
+  .assistant-result ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .assistant-result li {
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    font-size: 13px;
+  }
+
+  .assistant-result li span,
   .result-kicker {
+    display: block;
+    margin-bottom: 3px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: rgba(255, 255, 255, 0.72);
   }
 
-  .assistant-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 18px;
+  .assistant-steps {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 22px;
   }
 
-  @keyframes panel-in {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
+  .assistant-step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 9px;
+    min-height: 94px;
+    padding: 14px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 88%, var(--surface-alt));
+    text-decoration: none;
+    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+  }
+
+  .assistant-step:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--brand) 35%, var(--border-light));
+    background: var(--brand-soft);
+  }
+
+  .assistant-step span {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-full);
+    background: var(--brand);
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .assistant-step strong {
+    align-self: center;
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .assistant-step small {
+    grid-column: 2;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  @media (max-width: 1080px) {
+    .assistant-grid,
+    .assistant-steps {
+      grid-template-columns: 1fr;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    .assistant-step {
+      min-height: 0;
     }
   }
 
-  @media (max-width: 860px) {
-    .assistant-head,
-    .result-panel {
-      grid-template-columns: 1fr;
-      display: grid;
-    }
-
-    .assistant-progress {
-      text-align: left;
-      min-width: 0;
-    }
-
-    .step-tabs,
-    .argument-duel,
-    .position-grid {
-      grid-template-columns: 1fr;
+  @media (max-width: 560px) {
+    .assistant-actions a {
+      width: 100%;
     }
   }
 </style>

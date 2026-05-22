@@ -15,6 +15,21 @@
 
   export let data: PageData;
 
+  interface SourceItem {
+    label: string;
+    url: string;
+    context: string;
+    date?: string;
+  }
+
+  const sectionLinks = [
+    { label: 'Überblick', href: '#ueberblick' },
+    { label: 'Argumente', href: '#argumente' },
+    { label: 'Parteien', href: '#parteien' },
+    { label: 'Meine Position', href: '#meine-position' },
+    { label: 'Quellen', href: '#quellen' }
+  ];
+
   $: a = data.abstimmung;
   $: dateStr = formatDate(a.date);
   $: parlamentTotal = a.parlamentStimmen.ja + a.parlamentStimmen.nein;
@@ -27,6 +42,35 @@
   $: resultJaVotesLabel = a.result?.jaVotes ? new Intl.NumberFormat('de-CH').format(a.result.jaVotes) : null;
   $: resultNeinVotesLabel = a.result?.neinVotes ? new Intl.NumberFormat('de-CH').format(a.result.neinVotes) : null;
   $: bookmarked = !!$engagementStore.favorites[a.slug];
+  $: sourceItems = collectSources(a);
+
+  function collectSources(vote: PageData['abstimmung']): SourceItem[] {
+    const seen = new Set<string>();
+    const items: SourceItem[] = [];
+
+    function add(label: string | undefined, url: string | undefined, context: string, date?: string): void {
+      if (!label || !url) return;
+      const key = `${label}-${url}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      items.push({ label, url, context, date });
+    }
+
+    add(vote.summarySource, vote.summarySourceUrl, 'Neutraler Überblick', vote.summaryLastChecked);
+    if (vote.result) add(vote.result.source, vote.result.sourceUrl, 'Offizielles Resultat');
+
+    for (const argument of vote.proArguments) {
+      add(argument.source, argument.sourceUrl, 'Pro-Argument', argument.sourceDate);
+    }
+    for (const argument of vote.contraArguments) {
+      add(argument.source, argument.sourceUrl, 'Contra-Argument', argument.sourceDate);
+    }
+    for (const party of vote.parteien) {
+      add(party.parolenQuelle, party.parolenQuelleUrl, `Parole ${party.kuerzel}`);
+    }
+
+    return items;
+  }
 
   function toggleDetailFavorite(): void {
     const next = toggleFavorite(a.slug, a.shortTitle);
@@ -36,14 +80,13 @@
 
 <svelte:head>
   <title>{a.shortTitle} – Briefing | Voting Assistant</title>
-  <meta name="description" content="{a.aiSummary.slice(0, 155)}" />
-  <meta property="og:title" content="{a.title}" />
-  <meta property="og:description" content="{a.aiSummary.slice(0, 200)}" />
+  <meta name="description" content={a.aiSummary.slice(0, 155)} />
+  <meta property="og:title" content={a.title} />
+  <meta property="og:description" content={a.aiSummary.slice(0, 200)} />
 </svelte:head>
 
 <AppBar title="Briefing {dateStr}" backHref="/abstimmungen" showBookmark={true} bookmarked={bookmarked} on:bookmark={toggleDetailFavorite} />
 
-<!-- HEADER -->
 <section class="container-app pt-6 md:pt-10 pb-4">
   <a href="/abstimmungen" class="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:text-brand-dark mb-6">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -88,7 +131,6 @@
   </div>
 </section>
 
-<!-- RESULT BANNER for past votes -->
 {#if isPast && a.result}
   <section class="container-app pb-6">
     <div class="card p-6 md:p-8" style="border-left: 4px solid {a.result.accepted ? 'var(--pro)' : 'var(--contra)'};">
@@ -148,116 +190,42 @@
   </section>
 {/if}
 
-<!-- AI SUMMARY -->
-<section class="container-app pb-8">
-  <div class="card p-6 md:p-8 hero-accent">
-    <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-      <p class="section-eyebrow">KI-Zusammenfassung · neutral formuliert</p>
-      <p class="text-xs text-ink-subtle font-mono-data">
-        Quelle: <a href={a.summarySourceUrl} target="_blank" rel="noopener" class="source-link">{a.summarySource}</a>
-        · Stand {a.summaryLastChecked}
-      </p>
-    </div>
-    <p class="text-base md:text-lg text-ink leading-relaxed">{a.aiSummary}</p>
-    {#if a.parlamentNote}
-      <p class="text-xs text-ink-subtle mt-3 italic">{a.parlamentNote}</p>
-    {/if}
-  </div>
+<section class="container-app pb-6">
+  <nav class="workflow-nav" aria-label="Abschnitte des Entscheidungs-Assistenten">
+    {#each sectionLinks as item, index}
+      <a href={item.href}>
+        <span>{index + 1}</span>
+        {item.label}
+      </a>
+    {/each}
+  </nav>
 </section>
 
-<!-- ASSISTENT -->
-<section class="container-app pb-8">
+<section id="ueberblick" class="container-app pb-8 workflow-anchor">
   <VotingAssistant abstimmung={a} />
+  {#if a.parlamentNote}
+    <p class="briefing-note">{a.parlamentNote}</p>
+  {/if}
 </section>
 
-<!-- ORIENTIERUNG -->
-<section class="container-app pb-10">
-  <div class="grid md:grid-cols-3 gap-5">
-    <div class="card p-5 md:p-6" style="border-top: 4px solid var(--brand);">
-      <p class="section-eyebrow mb-2">Worum geht es?</p>
-      <h2 class="font-display text-lg text-ink mb-2">Entscheid in einem Satz</h2>
-      <p class="text-sm text-ink-muted leading-relaxed">
-        Die Vorlage fragt, ob die Schweiz den vorgeschlagenen politischen Kurs bei
-        <strong>{a.category}</strong> übernehmen soll.
-      </p>
+<section id="argumente" class="container-app pb-10 workflow-anchor">
+  <div class="section-heading">
+    <div>
+      <p class="section-eyebrow">2 Abwägen · 3 Gewichten</p>
+      <h2 class="font-display text-2xl md:text-3xl text-ink">Argumente mit Wirkung auf deine Tendenz</h2>
     </div>
-    <div class="card p-5 md:p-6" style="border-top: 4px solid var(--pro);">
-      <p class="section-eyebrow mb-2" style="color: var(--pro);">Bei einem JA</p>
-      <h2 class="font-display text-lg text-ink mb-2">Stärkstes Pro-Argument</h2>
-      <p class="text-sm text-ink-muted leading-relaxed">{a.proArguments[0]?.text}</p>
-    </div>
-    <div class="card p-5 md:p-6" style="border-top: 4px solid var(--contra);">
-      <p class="section-eyebrow mb-2" style="color: var(--contra);">Bei einem NEIN</p>
-      <h2 class="font-display text-lg text-ink mb-2">Stärkstes Contra-Argument</h2>
-      <p class="text-sm text-ink-muted leading-relaxed">{a.contraArguments[0]?.text}</p>
-    </div>
+    <p>
+      Die Gewichtung ist keine Prognose und kein Parteien-Matching, sondern nur deine eigene Priorisierung der Argumente.
+    </p>
   </div>
-</section>
-
-<!-- PRO / CONTRA SPLIT -->
-<section class="container-app pb-12">
-  <div class="argument-board">
-    <!-- PRO -->
-    <div class="argument-column argument-column-pro">
-      <div class="flex items-center gap-2 mb-5 border-b border-pro/30 pb-3">
-        <span class="w-7 h-7 rounded-full bg-pro flex items-center justify-center text-white text-sm font-bold" aria-hidden="true">✓</span>
-        <h2 class="font-display text-xl uppercase tracking-wider font-bold" style="color: var(--pro);">PRO</h2>
-        <span class="text-xs font-mono-data text-ink-muted ml-auto">{a.proArguments.length} ARGUMENTE</span>
-      </div>
-      <div class="space-y-3">
-        {#each a.proArguments as arg}
-          <a href="/abstimmungen/{a.slug}/argumente/{arg.id}" class="argument-card pro group">
-            <p class="text-sm text-ink leading-snug group-hover:text-pro transition-colors mb-2">
-              {arg.text}
-            </p>
-            <p class="text-xs source-link inline-flex items-center gap-1">
-              {arg.source}{#if arg.sourceDate} · {arg.sourceDate}{/if}
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </p>
-          </a>
-        {/each}
-      </div>
-    </div>
-
-    <!-- CONTRA -->
-    <div class="argument-column argument-column-contra">
-      <div class="flex items-center gap-2 mb-5 border-b border-contra/30 pb-3">
-        <span class="w-7 h-7 rounded-full bg-contra flex items-center justify-center text-white text-sm font-bold" aria-hidden="true">✗</span>
-        <h2 class="font-display text-xl uppercase tracking-wider font-bold" style="color: var(--contra);">CONTRA</h2>
-        <span class="text-xs font-mono-data text-ink-muted ml-auto">{a.contraArguments.length} ARGUMENTE</span>
-      </div>
-      <div class="space-y-3">
-        {#each a.contraArguments as arg}
-          <a href="/abstimmungen/{a.slug}/argumente/{arg.id}" class="argument-card contra group">
-            <p class="text-sm text-ink leading-snug group-hover:text-contra transition-colors mb-2">
-              {arg.text}
-            </p>
-            <p class="text-xs source-link inline-flex items-center gap-1">
-              {arg.source}{#if arg.sourceDate} · {arg.sourceDate}{/if}
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </p>
-          </a>
-        {/each}
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ARGUMENTE GEWICHTEN -->
-<section class="container-app pb-12">
   <ArgumentWeighting abstimmung={a} />
 </section>
 
-<!-- PARTEIPOSITIONEN -->
-<section class="container-app pb-10">
+<section id="parteien" class="container-app pb-10 workflow-anchor">
   <div class="card p-6 md:p-8">
-    <div class="flex items-end justify-between mb-5 border-b border-border-light pb-3 flex-wrap gap-3">
+    <div class="section-heading compact">
       <div>
-        <p class="section-eyebrow mb-1">Politische Landkarte</p>
+        <p class="section-eyebrow">4 Einordnen</p>
         <h2 class="font-display text-2xl text-ink">Parteipositionen</h2>
       </div>
       <a href="/abstimmungen/{a.slug}/parteien" class="text-sm font-semibold text-brand hover:text-brand-dark">
@@ -265,15 +233,19 @@
       </a>
     </div>
 
-    <div class="space-y-2 mb-6">
+    <p class="party-note">
+      Parteiparolen zeigen politische Orientierungslinien. Sie sind keine persönliche Empfehlung und ersetzen deine eigene Gewichtung nicht.
+    </p>
+
+    <div class="party-list">
       {#each a.parteien as partei}
         <a
           href="/parteien/{partei.kuerzel.toLowerCase()}"
-          class="card card-interactive flex items-center gap-4 p-4"
-          style="border-left: 4px solid {partei.color};"
+          class="party-row"
+          style="border-left-color: {partei.color};"
         >
           <div
-            class="w-11 h-11 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+            class="party-avatar"
             style="background-color: {partei.color}"
             aria-hidden="true"
           >
@@ -288,7 +260,6 @@
       {/each}
     </div>
 
-    <!-- Parlament stimmenbar -->
     <div>
       <p class="section-eyebrow mb-2">Stimmenverhältnis Parlament</p>
       <div class="community-bar mb-1.5">
@@ -303,22 +274,47 @@
   </div>
 </section>
 
-<!-- USER VOTE / COMMUNITY / COMPARE -->
-<section class="container-app pb-10">
+<section id="meine-position" class="container-app pb-10 workflow-anchor">
+  <div class="section-heading">
+    <div>
+      <p class="section-eyebrow">5 Entscheiden · 6 Speichern</p>
+      <h2 class="font-display text-2xl md:text-3xl text-ink">Meine Position und Voting-Journal</h2>
+    </div>
+    <p>
+      Lege deine aktuelle Haltung fest, speichere die Sicherheit dazu und halte kurz fest, warum du so entscheidest.
+    </p>
+  </div>
   <VoteSection slug={a.slug} abstimmung={a} initialCommunity={data.community} />
+  <div class="journal-followup">
+    <VotingJournal abstimmung={a} />
+  </div>
 </section>
 
-<!-- JOURNAL -->
-<section class="container-app pb-10">
-  <VotingJournal abstimmung={a} />
+<section id="quellen" class="container-app pb-10 workflow-anchor">
+  <div class="card p-6 md:p-8">
+    <div class="section-heading compact">
+      <div>
+        <p class="section-eyebrow">Quellen</p>
+        <h2 class="font-display text-2xl text-ink">Nachprüfen statt nur vertrauen</h2>
+      </div>
+      <a href="/quellen" class="text-sm font-semibold text-brand hover:text-brand-dark">Quellenübersicht →</a>
+    </div>
+
+    <div class="source-grid">
+      {#each sourceItems as source}
+        <a href={source.url} target="_blank" rel="noopener" class="source-item">
+          <span>{source.context}{#if source.date} · {source.date}{/if}</span>
+          <strong>{source.label}</strong>
+        </a>
+      {/each}
+    </div>
+  </div>
 </section>
 
-<!-- FEEDBACK -->
 <section class="container-app pb-10">
   <FeedbackForm abstimmung={a} />
 </section>
 
-<!-- CTA -->
 <section class="container-app pb-20">
   <div class="card p-6 md:p-8 text-center" style="background: var(--brand-light); border-color: rgba(200,16,46,0.2);">
     <p class="font-display text-xl md:text-2xl text-ink mb-2">
@@ -346,3 +342,212 @@
     {/if}
   </div>
 </section>
+
+<style>
+  .workflow-anchor {
+    scroll-margin-top: 96px;
+  }
+
+  .workflow-nav {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .workflow-nav a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .workflow-nav a:hover {
+    color: var(--brand);
+    border-color: color-mix(in srgb, var(--brand) 32%, var(--border-light));
+    background: var(--brand-soft);
+  }
+
+  .workflow-nav span {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--surface-alt);
+    color: var(--brand);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .section-heading.compact {
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .section-heading > p {
+    max-width: 430px;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .briefing-note {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.45;
+  }
+
+  .party-note {
+    margin: 16px 0;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border-light));
+    border-radius: var(--radius);
+    background: var(--brand-soft);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .party-list {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .party-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--brand);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface-alt) 22%, var(--surface));
+    text-decoration: none;
+    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+  }
+
+  .party-row:hover {
+    transform: translateY(-1px);
+    border-color: var(--border);
+    background: var(--surface);
+  }
+
+  .party-avatar {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .journal-followup {
+    margin-top: 18px;
+  }
+
+  .source-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .source-item {
+    display: grid;
+    gap: 5px;
+    padding: 14px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface-alt) 30%, var(--surface));
+    text-decoration: none;
+    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  }
+
+  .source-item:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--brand) 35%, var(--border-light));
+    background: var(--surface);
+  }
+
+  .source-item span {
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .source-item strong {
+    color: var(--brand);
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  @media (max-width: 820px) {
+    .workflow-anchor {
+      scroll-margin-top: 124px;
+    }
+
+    .workflow-nav {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .workflow-nav a {
+      min-width: 0;
+    }
+
+    .section-heading,
+    .section-heading.compact {
+      display: grid;
+      align-items: start;
+    }
+
+    .source-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .workflow-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .party-row {
+      align-items: flex-start;
+    }
+  }
+</style>

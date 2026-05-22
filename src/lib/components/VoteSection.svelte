@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { votesStore, setVote, clearVote, setNote } from '$lib/stores/votes';
-  import { saveJournalEntry } from '$lib/stores/engagement';
+  import { votesStore, setVote, clearVote } from '$lib/stores/votes';
+  import { engagementStore, saveJournalEntry } from '$lib/stores/engagement';
   import { showToast } from '$lib/stores/toast';
   import { inView } from '$lib/actions/inView';
   import type { UserPosition, Abstimmung } from '$lib/types';
@@ -16,11 +16,17 @@
   let revealed = false;
   let renderedJaPercent = 0;
   let renderedNeinPercent = 0;
+  let positionDraft: UserPosition | undefined;
+  let confidenceDraft = 65;
   let noteDraft = '';
-  let editingNote = false;
+  let editingDecision = false;
 
   $: userEntry = $votesStore[slug];
+  $: journalEntry = $engagementStore.journal[slug];
   $: userVote = userEntry?.position;
+  $: savedConfidence = journalEntry?.confidence;
+  $: savedNote = userEntry?.note ?? journalEntry?.note ?? '';
+  $: showDecisionForm = editingDecision || !userVote;
   $: jaPercent = community.total > 0 ? Math.round((community.ja / community.total) * 100) : 0;
   $: neinPercent = community.total > 0 ? 100 - jaPercent : 0;
   $: if (revealed) {
@@ -28,39 +34,65 @@
     renderedNeinPercent = neinPercent;
   }
 
-  async function submitVote(position: UserPosition): Promise<void> {
+  function choosePosition(position: UserPosition): void {
+    positionDraft = position;
+    if (position === 'UNENTSCHIEDEN' && confidenceDraft > 60) {
+      confidenceDraft = 45;
+    }
+    if ((position === 'JA' || position === 'NEIN') && confidenceDraft < 50) {
+      confidenceDraft = 65;
+    }
+  }
+
+  async function saveDecision(): Promise<void> {
     if (isSubmitting) return;
+    if (!positionDraft) {
+      showToast('Wähle zuerst Ja, Nein oder Unsicher.', 'info');
+      return;
+    }
+
     isSubmitting = true;
+    let serverSynced = true;
     try {
-      if (position !== 'UNENTSCHIEDEN') {
+      if (positionDraft !== 'UNENTSCHIEDEN') {
         const res = await fetch(`/api/abstimmungen/${slug}/vote`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ position })
+          body: JSON.stringify({ position: positionDraft })
         });
         if (res.ok) {
           const data = (await res.json()) as { ja: number; nein: number; total: number };
           community = data;
+        } else {
+          serverSynced = false;
         }
       }
-      setVote(slug, position);
-      saveJournalEntry(
-        slug,
-        { position },
-        {
-          type: 'position',
-          title: 'Position gespeichert',
-          detail: `Schnellwahl: ${position}`
-        }
-      );
-      pulse = true;
-      setTimeout(() => (pulse = false), 400);
-      showToast(`Deine Position: ${position}`, 'success');
     } catch (err) {
       console.error(err);
-      setVote(slug, position);
-      showToast('Lokal gespeichert. Server gerade nicht erreichbar.', 'info');
+      serverSynced = false;
     } finally {
+      const cleanNote = noteDraft.trim();
+      setVote(slug, positionDraft, cleanNote);
+      saveJournalEntry(
+        slug,
+        {
+          position: positionDraft,
+          confidence: confidenceDraft,
+          note: cleanNote
+        },
+        {
+          type: 'position',
+          title: 'Position im Journal gespeichert',
+          detail: `${formatPosition(positionDraft)} · ${confidenceDraft}% Sicherheit${cleanNote ? ` · ${cleanNote.slice(0, 90)}` : ''}`
+        }
+      );
+      editingDecision = false;
+      pulse = true;
+      setTimeout(() => (pulse = false), 400);
+      showToast(
+        serverSynced ? 'Position, Sicherheit und Notiz gespeichert.' : 'Lokal gespeichert. Server gerade nicht erreichbar.',
+        serverSynced ? 'success' : 'info'
+      );
       isSubmitting = false;
     }
   }
@@ -70,46 +102,42 @@
       const res = await fetch(`/api/abstimmungen/${slug}/vote`);
       if (res.ok) community = (await res.json()) as typeof community;
     } catch {
-      // ignore
+      // Community data is optional for the local prototype.
     }
   }
 
   function change(): void {
     clearVote(slug);
+    positionDraft = undefined;
+    confidenceDraft = 65;
     noteDraft = '';
-    editingNote = false;
+    editingDecision = false;
     showToast('Position zurückgesetzt.', 'info');
   }
 
-  function startEditNote(): void {
-    noteDraft = userEntry?.note ?? '';
-    editingNote = true;
+  function startDecisionEdit(): void {
+    positionDraft = userVote;
+    confidenceDraft = savedConfidence ?? (userVote === 'UNENTSCHIEDEN' ? 45 : 65);
+    noteDraft = savedNote;
+    editingDecision = true;
   }
 
-  function saveNote(): void {
-    if (!userEntry) return;
-    setNote(slug, noteDraft.trim());
-    saveJournalEntry(
-      slug,
-      { note: noteDraft.trim() },
-      {
-        type: 'note',
-        title: 'Notiz aktualisiert',
-        detail: noteDraft.trim() ? noteDraft.trim().slice(0, 90) : 'Notiz geleert'
-      }
-    );
-    editingNote = false;
-    showToast('Notiz gespeichert.', 'success');
-  }
-
-  function cancelNote(): void {
-    editingNote = false;
-    noteDraft = '';
+  function cancelDecisionEdit(): void {
+    editingDecision = false;
+    positionDraft = userVote;
+    confidenceDraft = savedConfidence ?? 65;
+    noteDraft = savedNote;
   }
 
   onMount(() => {
     refreshCommunity();
   });
+
+  function formatPosition(position: UserPosition | undefined): string {
+    if (!position) return 'Noch offen';
+    if (position === 'UNENTSCHIEDEN') return 'Unsicher';
+    return position;
+  }
 
   function positionClass(p: UserPosition): string {
     if (p === 'JA') return 'badge-ja';
@@ -126,70 +154,115 @@
   on:reveal|once={() => (revealed = true)}
 >
   <div class="grid lg:grid-cols-2 gap-6 lg:gap-8">
-    <!-- Voting -->
     <div>
-      <p class="section-eyebrow mb-3">Deine Position</p>
-      {#if userVote}
-        <h3 class="font-display text-xl text-ink mb-3">
-          Du würdest mit <span class="{userVote === 'JA' ? 'text-pro' : userVote === 'NEIN' ? 'text-contra' : 'text-ink-muted'}">{userVote === 'UNENTSCHIEDEN' ? 'UNENTSCHIEDEN' : userVote}</span> stimmen.
-        </h3>
-        <div class="flex items-center gap-3 flex-wrap mb-4">
-          <span class="{positionClass(userVote)} text-sm px-4 py-1.5 {pulse ? 'badge-pulse' : ''}" style="font-size:13px;">
-            {userVote === 'UNENTSCHIEDEN' ? 'UNENTSCHIEDEN' : userVote}
-          </span>
-          <button type="button" on:click={change} class="text-sm text-ink-muted underline hover:text-ink">
-            Position zurücksetzen
+      <p class="section-eyebrow mb-3">Entscheiden und speichern</p>
+
+      {#if showDecisionForm}
+        <h3 class="font-display text-xl text-ink mb-2">Was ist deine aktuelle Position?</h3>
+        <p class="text-sm text-ink-muted mb-4">
+          Speichere Position, Sicherheit und Notiz gemeinsam in deinem Voting-Journal. Du kannst alles später wieder ändern.
+        </p>
+
+        <div class="decision-options" role="group" aria-label="Position wählen">
+          <button
+            type="button"
+            class="decision-option ja"
+            class:active={positionDraft === 'JA'}
+            on:click={() => choosePosition('JA')}
+            disabled={isSubmitting}
+          >
+            JA
+          </button>
+          <button
+            type="button"
+            class="decision-option nein"
+            class:active={positionDraft === 'NEIN'}
+            on:click={() => choosePosition('NEIN')}
+            disabled={isSubmitting}
+          >
+            NEIN
+          </button>
+          <button
+            type="button"
+            class="decision-option neutral"
+            class:active={positionDraft === 'UNENTSCHIEDEN'}
+            on:click={() => choosePosition('UNENTSCHIEDEN')}
+            disabled={isSubmitting}
+          >
+            Unsicher
           </button>
         </div>
 
-        <!-- Note section -->
-        <div class="border-t border-border-light pt-4">
-          <p class="section-eyebrow mb-2">Deine Notiz</p>
-          {#if editingNote}
-            <textarea
-              bind:value={noteDraft}
-              rows="3"
-              maxlength="500"
-              class="input-field text-sm mb-2"
-              placeholder="Was bewegt dich an dieser Vorlage? (lokal gespeichert, max. 500 Zeichen)"
-            />
-            <div class="flex gap-2">
-              <button type="button" on:click={saveNote} class="btn-primary text-sm">Speichern</button>
-              <button type="button" on:click={cancelNote} class="btn-ghost text-sm">Abbrechen</button>
-            </div>
-          {:else if userEntry?.note}
-            <p class="text-sm text-ink leading-relaxed italic mb-2">«{userEntry.note}»</p>
-            <button type="button" on:click={startEditNote} class="text-xs text-brand hover:underline">
-              Notiz bearbeiten
-            </button>
-          {:else}
-            <button type="button" on:click={startEditNote} class="text-sm text-brand hover:underline">
-              + Notiz hinzufügen
+        <label class="decision-label" for="confidence-slider">Sicherheit</label>
+        <div class="confidence-row">
+          <input
+            id="confidence-slider"
+            class="slider-vote"
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            bind:value={confidenceDraft}
+            disabled={isSubmitting}
+          />
+          <strong>{confidenceDraft}%</strong>
+        </div>
+
+        <label class="decision-label" for="decision-note">Notiz</label>
+        <textarea
+          id="decision-note"
+          bind:value={noteDraft}
+          rows="3"
+          maxlength="500"
+          class="input-field text-sm"
+          placeholder="Was überzeugt dich oder macht dich noch unsicher? (lokal gespeichert, max. 500 Zeichen)"
+          disabled={isSubmitting}
+        />
+
+        <div class="decision-actions">
+          <button type="button" on:click={saveDecision} disabled={isSubmitting} class="btn-primary">
+            {isSubmitting ? 'Speichert...' : 'Position im Journal speichern'}
+          </button>
+          {#if userVote}
+            <button type="button" on:click={cancelDecisionEdit} disabled={isSubmitting} class="btn-ghost">
+              Abbrechen
             </button>
           {/if}
         </div>
-      {:else}
-        <h3 class="font-display text-xl text-ink mb-2">Wie würdest du abstimmen?</h3>
-        <p class="text-sm text-ink-muted mb-4">
-          Anonym, ohne Login. Speichert sich in deinem Browser, fliesst anonym in die Community-Statistik ein.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <button type="button" on:click={() => submitVote('JA')} disabled={isSubmitting} class="btn-vote-ja flex-1">
-            ✓ JA
-          </button>
-          <button type="button" on:click={() => submitVote('NEIN')} disabled={isSubmitting} class="btn-vote-nein flex-1">
-            ✗ NEIN
-          </button>
-          <button type="button" on:click={() => submitVote('UNENTSCHIEDEN')} disabled={isSubmitting} class="btn-ghost flex-1">
-            ? Unentschieden
-          </button>
+      {:else if userVote}
+        <h3 class="font-display text-xl text-ink mb-3">
+          Du würdest aktuell mit
+          <span class="{userVote === 'JA' ? 'text-pro' : userVote === 'NEIN' ? 'text-contra' : 'text-ink-muted'}">
+            {formatPosition(userVote)}
+          </span>
+          stimmen.
+        </h3>
+        <div class="saved-decision {pulse ? 'badge-pulse' : ''}">
+          <span class="{positionClass(userVote)} text-sm px-4 py-1.5" style="font-size:13px;">
+            {formatPosition(userVote)}
+          </span>
+          <span class="saved-meta">
+            {#if savedConfidence !== undefined}{savedConfidence}% Sicherheit{:else}Sicherheit noch offen{/if}
+          </span>
+          <span class="saved-journal">Im Voting-Journal gespeichert</span>
+        </div>
+
+        {#if savedNote}
+          <div class="saved-note">
+            <p class="section-eyebrow mb-2">Deine Notiz</p>
+            <p>«{savedNote}»</p>
+          </div>
+        {/if}
+
+        <div class="decision-actions">
+          <button type="button" on:click={startDecisionEdit} class="btn-primary">Position bearbeiten</button>
+          <button type="button" on:click={change} class="btn-ghost">Position zurücksetzen</button>
         </div>
       {/if}
     </div>
 
-    <!-- Compare -->
     <div class="lg:border-l lg:border-border-light lg:pl-8">
-      <p class="section-eyebrow mb-3">Vergleich mit offiziellen Positionen</p>
+      <p class="section-eyebrow mb-3">Einordnung deiner Position</p>
 
       <div class="space-y-2 mb-5">
         <div class="flex items-center justify-between gap-3 py-1.5 border-b border-border-light">
@@ -234,3 +307,128 @@
     </div>
   </div>
 </div>
+
+<style>
+  .decision-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .decision-option {
+    min-height: 72px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 900;
+    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+  }
+
+  .decision-option:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--brand) 38%, var(--border-light));
+  }
+
+  .decision-option.active.ja {
+    color: var(--pro);
+    border-color: color-mix(in srgb, var(--pro) 44%, var(--border-light));
+    background: var(--pro-soft);
+  }
+
+  .decision-option.active.nein {
+    color: var(--contra);
+    border-color: color-mix(in srgb, var(--contra) 44%, var(--border-light));
+    background: var(--contra-soft);
+  }
+
+  .decision-option.active.neutral {
+    color: var(--brand);
+    border-color: color-mix(in srgb, var(--brand) 44%, var(--border-light));
+    background: var(--brand-soft);
+  }
+
+  .decision-label {
+    display: block;
+    margin: 14px 0 7px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .confidence-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 64px;
+    gap: 14px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface-alt) 44%, var(--surface));
+  }
+
+  .confidence-row strong {
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: right;
+  }
+
+  .decision-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .saved-decision {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--brand-soft) 46%, var(--surface));
+  }
+
+  .saved-meta,
+  .saved-journal {
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .saved-journal {
+    color: var(--brand);
+  }
+
+  .saved-note {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .saved-note p:last-child {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+    font-style: italic;
+  }
+
+  @media (max-width: 560px) {
+    .decision-options {
+      grid-template-columns: 1fr;
+    }
+
+    .decision-actions .btn-primary,
+    .decision-actions .btn-ghost {
+      width: 100%;
+    }
+  }
+</style>

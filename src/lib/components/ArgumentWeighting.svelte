@@ -20,25 +20,46 @@
     { value: 3, label: 'Sehr wichtig', short: '3' }
   ];
 
-  // Reactive: slugWeights is the per-slug weights record from the engagement store.
-  // All derived values MUST take slugWeights as an explicit dependency so Svelte 4
-  // re-evaluates them when the store updates.
-  $: slugWeights = $engagementStore.weights[abstimmung.slug] ?? {};
+  interface Column {
+    side: ArgumentSide;
+    label: string;
+    icon: string;
+    items: Argument[];
+  }
 
+  interface WeightedReason {
+    side: ArgumentSide;
+    text: string;
+    source: string;
+    weight: ArgumentWeight;
+  }
+
+  $: slugWeights = $engagementStore.weights[abstimmung.slug] ?? {};
   $: proScore = sumWeights(slugWeights, abstimmung.proArguments, 'pro');
   $: contraScore = sumWeights(slugWeights, abstimmung.contraArguments, 'contra');
   $: totalScore = proScore + contraScore;
   $: strongestScore = Math.max(proScore, contraScore);
   $: tendencyPercent = totalScore > 0 ? Math.round((strongestScore / totalScore) * 100) : 50;
   $: tendencyPosition = computeTendency(proScore, contraScore);
+  $: tendencyLabel = formatPosition(tendencyPosition);
   $: visibleArguments = [...abstimmung.proArguments, ...abstimmung.contraArguments];
   $: weightedCount = visibleArguments.filter((argument) => weightOf(slugWeights, argument.id) > 0).length;
+  $: openArgumentCount = visibleArguments.length - weightedCount;
+  $: topReasons = collectTopReasons(slugWeights, abstimmung);
   $: statusText =
     totalScore === 0
-      ? 'Wähle pro Argument eine Wichtigkeit — die Tendenz aktualisiert sich live.'
+      ? 'Gewichte mindestens ein Argument, dann berechnet sich deine Tendenz.'
       : tendencyPosition === 'UNENTSCHIEDEN'
-        ? 'Ausgeglichen: Pro und Contra sind für dich gleich stark.'
-        : `Deine gewichtete Tendenz: ${tendencyPercent}% ${tendencyPosition}.`;
+        ? 'Deine aktuelle Tendenz: Unsicher.'
+        : `Deine aktuelle Tendenz: ${tendencyLabel}.`;
+  $: scoreDetail =
+    totalScore === 0
+      ? 'Noch neutral: Pro und Contra sind für dich nicht gewichtet.'
+      : `Pro ${proScore} zu Contra ${contraScore}. ${tendencyPercent}% der gewichteten Punkte liegen auf der stärkeren Seite.`;
+  $: columns = [
+    { side: 'pro', label: 'Pro', icon: '✓', items: abstimmung.proArguments },
+    { side: 'contra', label: 'Contra', icon: '×', items: abstimmung.contraArguments }
+  ] as Column[];
 
   function sumWeights(
     weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
@@ -68,6 +89,45 @@
     return pro > contra ? 'JA' : 'NEIN';
   }
 
+  function formatPosition(position: UserPosition): string {
+    if (position === 'UNENTSCHIEDEN') return 'Unsicher';
+    return position;
+  }
+
+  function sideLabel(side: ArgumentSide): string {
+    return side === 'pro' ? 'Pro' : 'Contra';
+  }
+
+  function collectTopReasons(
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
+    vote: Abstimmung
+  ): WeightedReason[] {
+    const proReasons = vote.proArguments.map((argument) => toReason(argument, 'pro', weights));
+    const contraReasons = vote.contraArguments.map((argument) => toReason(argument, 'contra', weights));
+    return [...proReasons, ...contraReasons]
+      .filter((reason) => reason.weight > 0)
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 2);
+  }
+
+  function toReason(
+    argument: Argument,
+    side: ArgumentSide,
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>
+  ): WeightedReason {
+    return {
+      side,
+      text: argument.text,
+      source: argument.source,
+      weight: weightOf(weights, argument.id)
+    };
+  }
+
+  function reasonSummary(): string {
+    if (topReasons.length === 0) return 'Noch keine gewichteten Gründe.';
+    return topReasons.map((reason) => `${sideLabel(reason.side)} (${reason.weight}/3): ${reason.text}`).join(' | ');
+  }
+
   function setWeight(argumentId: string, side: ArgumentSide, weight: ArgumentWeight): void {
     setArgumentWeight(abstimmung.slug, argumentId, side, weight);
   }
@@ -85,18 +145,6 @@
     }
   }
 
-  interface Column {
-    side: ArgumentSide;
-    label: string;
-    icon: string;
-    items: Argument[];
-  }
-
-  $: columns = [
-    { side: 'pro', label: 'Pro', icon: '✓', items: abstimmung.proArguments },
-    { side: 'contra', label: 'Contra', icon: '×', items: abstimmung.contraArguments }
-  ] as Column[];
-
   function saveTendency(): void {
     if (totalScore === 0) {
       showToast('Gewichte zuerst mindestens ein Argument.', 'info');
@@ -104,6 +152,7 @@
     }
 
     const confidence = tendencyPosition === 'UNENTSCHIEDEN' ? 45 : Math.min(96, Math.max(52, tendencyPercent));
+    const detail = `${statusText} ${scoreDetail} Gründe: ${reasonSummary()}`;
     setVote(abstimmung.slug, tendencyPosition);
     saveJournalEntry(
       abstimmung.slug,
@@ -113,33 +162,85 @@
       },
       {
         type: 'weights',
-        title: 'Argumente gewichtet',
-        detail: `${statusText} Bewertete Argumente: ${weightedCount}`
+        title: 'Gewichtete Tendenz gespeichert',
+        detail
       }
     );
-    recordWeightSummary(abstimmung.slug, 'Gewichtete Tendenz berechnet', statusText);
+    recordWeightSummary(abstimmung.slug, 'Argumentgewichtung aktualisiert', detail);
     showToast('Gewichtete Tendenz im Journal gespeichert.', 'success');
   }
 </script>
 
 <div class="weighting-shell">
   <div class="weighting-header">
-    <div>
-      <p class="section-eyebrow">Argumente gewichten</p>
+    <div class="weighting-intro">
+      <p class="section-eyebrow">Abwägen und gewichten</p>
       <h2 class="font-display text-2xl md:text-3xl text-ink">Welche Argumente tragen deine Entscheidung?</h2>
-      <p>
-        Wähle pro Argument auf der 4-Stufen-Skala (Nicht wichtig → Sehr wichtig), wie stark es deine Entscheidung beeinflusst. Die gewichtete Tendenz unten rechts aktualisiert sich live.
+      <p class="weighting-copy">
+        Pro und Contra stehen direkt neben der 4-Stufen-Gewichtung. Wähle pro Argument, wie stark es dich überzeugt; die Zusammenfassung aktualisiert sich live.
       </p>
+
+      <div class="weighting-guide-card" aria-label="So funktioniert die Gewichtung">
+        <div>
+          <p class="guide-title">So funktioniert die Gewichtung</p>
+          <ol class="guide-steps">
+            <li><span>1</span>Pro und Contra lesen</li>
+            <li><span>2</span>Argumente nach Überzeugung bewerten</li>
+            <li><span>3</span>Live-Tendenz beobachten</li>
+            <li><span>4</span>Tendenz speichern</li>
+          </ol>
+        </div>
+
+        <dl class="progress-summary" aria-label="Fortschritt der Gewichtung">
+          <div>
+            <dt>Bewertet</dt>
+            <dd>{weightedCount}/{visibleArguments.length}</dd>
+          </div>
+          <div>
+            <dt>Pro-Punkte</dt>
+            <dd>{proScore}</dd>
+          </div>
+          <div>
+            <dt>Contra-Punkte</dt>
+            <dd>{contraScore}</dd>
+          </div>
+          <div>
+            <dt>Offen</dt>
+            <dd>{openArgumentCount}</dd>
+          </div>
+        </dl>
+      </div>
     </div>
 
-    <div class="weighting-score" class:is-neutral={tendencyPosition === 'UNENTSCHIEDEN'} aria-live="polite">
-      <span>{weightedCount} bewertet</span>
-      <strong>{statusText}</strong>
+    <div
+      class="weighting-score"
+      class:is-neutral={tendencyPosition === 'UNENTSCHIEDEN'}
+      class:is-pro={tendencyPosition === 'JA'}
+      class:is-contra={tendencyPosition === 'NEIN'}
+      aria-live="polite"
+    >
+      <span>{weightedCount} von {visibleArguments.length} Argumenten bewertet</span>
+      <strong>Deine aktuelle Tendenz: {tendencyLabel}</strong>
+      <p>{scoreDetail}</p>
+
+      {#if topReasons.length > 0}
+        <div class="reason-list" aria-label="Stärkste gewichtete Gründe">
+          {#each topReasons as reason}
+            <article>
+              <span>{sideLabel(reason.side)} · Gewicht {reason.weight}/3</span>
+              <p>{reason.text}</p>
+            </article>
+          {/each}
+        </div>
+      {:else}
+        <p class="empty-reasons">Noch keine Gründe ausgewählt.</p>
+      {/if}
+
       <div class="score-bar" aria-hidden="true">
         <i class="pro" style="width: {totalScore > 0 ? (proScore / totalScore) * 100 : 50}%"></i>
         <i class="contra" style="width: {totalScore > 0 ? (contraScore / totalScore) * 100 : 50}%"></i>
       </div>
-      <button type="button" class="btn-primary" on:click={saveTendency}>Tendenz übernehmen</button>
+      <button type="button" class="btn-primary" on:click={saveTendency}>Gewichtete Tendenz speichern</button>
     </div>
   </div>
 
@@ -199,7 +300,7 @@
                 on:click={() => adjustWeight(argument.id, column.side, -1)}
                 disabled={weight === 0}
                 aria-label="Wichtigkeit verringern"
-              >−</button>
+              >-</button>
               <strong>{wLabel}</strong>
               <button
                 type="button"
@@ -227,17 +328,106 @@
 
   .weighting-header {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.46fr);
     gap: 22px;
-    align-items: stretch;
+    align-items: start;
     margin-bottom: 22px;
   }
 
-  .weighting-header p:not(.section-eyebrow) {
+  .weighting-intro {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .weighting-copy {
     max-width: 720px;
     color: var(--text-muted);
     line-height: 1.55;
-    margin-top: 8px;
+  }
+
+  .weighting-guide-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.55fr);
+    gap: 16px;
+    margin-top: 6px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface-alt) 38%, var(--surface));
+  }
+
+  .guide-title {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .guide-steps {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .guide-steps li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .guide-steps span {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    color: var(--brand);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 900;
+    border: 1px solid var(--border-light);
+  }
+
+  .progress-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+  }
+
+  .progress-summary div {
+    min-height: 66px;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .progress-summary dt {
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .progress-summary dd {
+    margin: 6px 0 0;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1;
   }
 
   .weighting-score {
@@ -248,24 +438,54 @@
     padding: 18px;
     border-radius: var(--radius);
     color: white;
-    background: linear-gradient(135deg, var(--pro), var(--contra));
+    background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 54%, #1a1a1a));
   }
 
-  .weighting-score.is-neutral {
-    background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 54%, #1a1a1a));
+  .weighting-score.is-pro {
+    background: linear-gradient(135deg, var(--pro), color-mix(in srgb, var(--pro) 54%, #1a1a1a));
+  }
+
+  .weighting-score.is-contra {
+    background: linear-gradient(135deg, var(--contra), color-mix(in srgb, var(--contra) 54%, #1a1a1a));
   }
 
   .weighting-score span {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     text-transform: uppercase;
-    opacity: 0.78;
+    opacity: 0.8;
   }
 
   .weighting-score strong {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: clamp(22px, 2.2vw, 30px);
     line-height: 1.12;
+  }
+
+  .weighting-score p {
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.45;
+  }
+
+  .reason-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .reason-list article {
+    padding: 10px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .reason-list article p {
+    margin-top: 3px;
+    font-size: 13px;
+  }
+
+  .empty-reasons {
+    padding: 10px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    font-size: 13px;
   }
 
   .score-bar {
@@ -356,7 +576,6 @@
     border-color: color-mix(in srgb, var(--brand) 34%, var(--border-light));
   }
 
-  /* Card = display container, no longer clickable */
   .weight-card {
     position: relative;
     display: grid;
@@ -464,12 +683,12 @@
     cursor: pointer;
     transition: background 160ms ease, color 160ms ease;
   }
+
   .source-pill:hover {
     background: color-mix(in srgb, var(--brand) 14%, var(--surface));
     color: var(--brand-dark, var(--brand));
   }
 
-  /* Primary interaction: weight pills */
   .weight-controls {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -501,10 +720,6 @@
     border-color: color-mix(in srgb, var(--brand) 42%, var(--border-light));
     color: var(--brand);
     background: var(--brand-soft, var(--brand-light));
-  }
-
-  .weight-pill:active {
-    transform: translateY(0);
   }
 
   .weight-pill:focus-visible {
@@ -554,7 +769,6 @@
     font-weight: 800;
   }
 
-  /* Stepper for fine-tuning */
   .weight-stepper {
     display: grid;
     grid-template-columns: 44px minmax(0, 1fr) 44px;
@@ -586,11 +800,6 @@
     background: var(--brand-soft, var(--brand-light));
   }
 
-  .step-btn:focus-visible {
-    outline: 3px solid var(--brand);
-    outline-offset: 2px;
-  }
-
   .step-btn:disabled {
     cursor: not-allowed;
     opacity: 0.42;
@@ -608,18 +817,25 @@
     .weighting-grid {
       grid-template-columns: 1fr;
     }
+
+    .weighting-guide-card {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 560px) {
     .column-actions {
       grid-template-columns: 1fr;
     }
+
     .weight-controls {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
     .weight-card-head {
       grid-template-columns: 1fr;
     }
+
     .impact-orb {
       width: 100%;
       min-height: 56px;
@@ -629,6 +845,7 @@
       padding: 6px 12px;
       text-align: left;
     }
+
     .impact-orb small {
       margin-top: 0;
     }
