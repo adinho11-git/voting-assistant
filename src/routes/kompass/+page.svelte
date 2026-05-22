@@ -66,7 +66,7 @@
     currentStep = 1;
   }
 
-  const labels = ['Stimme voll zu', 'Eher zu', 'Neutral', 'Eher dagegen', 'Stimme gar nicht zu'];
+  const labels = ['Stimme gar nicht zu', 'Eher dagegen', 'Neutral', 'Eher zu', 'Stimme voll zu'];
 </script>
 
 <svelte:head>
@@ -91,7 +91,7 @@
           <strong class="font-semibold">So funktioniert's:</strong>
         </p>
         <ul class="text-sm text-ink leading-relaxed space-y-1.5 list-disc ml-5">
-          <li>Pro Frage wählst du auf einer 5-Stufen-Skala (1 = stimme voll zu, 5 = stimme gar nicht zu)</li>
+          <li>Pro Frage wählst du auf einer 5-Stufen-Skala (1 = stimme gar nicht zu, 5 = stimme voll zu)</li>
           <li>Du kannst Fragen überspringen — sie zählen dann nicht für deinen Match</li>
           <li>Am Ende siehst du ein Ranking + die Themenbereiche, in denen du mit jeder Partei am stärksten übereinstimmst</li>
           <li>Du kannst deine Antworten anpassen oder als persönliche Positionen speichern</li>
@@ -133,9 +133,9 @@
 
         <div class="card p-6 md:p-8 mb-6">
           <div class="grid grid-cols-3 text-xs font-mono-data text-ink-muted uppercase tracking-wider mb-4">
-            <span class="text-left">Stimme voll zu</span>
+            <span class="text-left">Stimme gar nicht zu</span>
             <span class="text-center">Neutral</span>
-            <span class="text-right">Stimme gar nicht zu</span>
+            <span class="text-right">Stimme voll zu</span>
           </div>
 
           <!-- Click-based 5-button scale -->
@@ -260,7 +260,7 @@
       <details class="card p-5 mb-6" bind:open={expandedExplanation}>
         <summary class="font-semibold text-sm text-brand cursor-pointer">Wie wird die Übereinstimmung berechnet?</summary>
         <p class="text-sm text-ink leading-relaxed mt-3">
-          Sowohl deine Antworten als auch die Parteipositionen sind auf einer 1–5-Skala kodiert (1 = volle Zustimmung zur Aussage, 5 = volle Ablehnung). Pro Frage wird die absolute Differenz berechnet — 0 ergibt 100% Match, 4 ergibt 0% Match. Übersprungene Fragen werden nicht gewichtet. Der Endwert ist der Durchschnitt über alle beantworteten Fragen. Die Themen-Breakdown zeigt denselben Durchschnitt pro Themenbereich.
+          Deine Antworten sind auf einer 1–5-Skala kodiert (1 = volle Ablehnung der Aussage, 5 = volle Zustimmung). Für den Vergleich werden sie mit den Parteipositionen auf dieselbe Richtung gebracht. Pro Frage wird die absolute Differenz berechnet — 0 ergibt 100% Match, 4 ergibt 0% Match. Übersprungene Fragen werden nicht gewichtet. Der Endwert ist der Durchschnitt über alle beantworteten Fragen. Die Themen-Breakdown zeigt denselben Durchschnitt pro Themenbereich.
         </p>
         <p class="text-xs text-ink-muted mt-3">
           Die Parteipositionen basieren auf publizierten Wahlempfehlungen, Parteiprogrammen und Abstimmungsverhalten im Nationalrat. Sie wurden für diesen Prototyp manuell kalibriert.

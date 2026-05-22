@@ -35,7 +35,7 @@
         <strong style="color: var(--brand);">keine offizielle Abstimmungshilfe.</strong>
         Reale Vorlagen, Argumente und Ergebnisse stammen von admin.ch /
         bk.admin.ch (Stand 21. Mai 2026); kantonale Inhalte sind als Demo markiert.
-        <a href="/quellen" class="source-link" style="font-size: 12px;">Methodik &amp; Quellen</a>
+        <a href="/quellen" class="source-link" style="font-size: 12px;">Quellen &amp; Medienberichte</a>
       </span>
       <button
         type="button"

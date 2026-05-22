@@ -4,32 +4,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: '#C8102E',
-        'brand-dark': '#8B0A1E',
-        'brand-light': '#FFF0F2',
+        brand: 'var(--brand)',
+        'brand-dark': 'var(--brand-hover)',
+        'brand-light': 'var(--brand-soft)',
         swiss: {
-          red: '#C8102E',
-          'red-dark': '#8B0A1E',
-          blue: '#003087'
+          red: 'var(--brand)',
+          'red-dark': 'var(--brand-hover)',
+          blue: 'var(--blue)'
         },
         pro: {
-          DEFAULT: '#065F46',
-          light: '#ECFDF5'
+          DEFAULT: 'var(--pro)',
+          light: 'var(--pro-soft)'
         },
         contra: {
-          DEFAULT: '#991B1B',
-          light: '#FEF2F2'
+          DEFAULT: 'var(--contra)',
+          light: 'var(--contra-soft)'
         },
-        paper: '#F7F6F2',
-        surface: '#FFFFFF',
-        'surface-alt': '#EFEDE7',
+        paper: 'var(--bg)',
+        surface: 'var(--surface)',
+        'surface-alt': 'var(--surface-alt)',
         ink: {
-          DEFAULT: '#1A1A1A',
-          muted: '#6B6B6B',
-          subtle: '#9A9A9A'
+          DEFAULT: 'var(--text)',
+          muted: 'var(--text-muted)',
+          subtle: 'var(--text-subtle)'
         },
-        border: '#D4D0C8',
-        'border-light': '#E8E5DE'
+        border: 'var(--border)',
+        'border-light': 'var(--border-light)'
       },
       fontFamily: {
         display: ['"Playfair Display"', 'Georgia', 'serif'],
@@ -37,9 +37,9 @@ export default {
         mono: ['"IBM Plex Mono"', '"JetBrains Mono"', 'monospace']
       },
       boxShadow: {
-        soft: '0 1px 3px rgba(0,0,0,0.06)',
-        card: '0 4px 16px rgba(0,0,0,0.08)',
-        lifted: '0 20px 48px rgba(0,0,0,0.12)'
+        soft: 'var(--shadow-sm)',
+        card: 'var(--shadow-md)',
+        lifted: 'var(--shadow-lg)'
       },
       borderRadius: {
         DEFAULT: '8px',

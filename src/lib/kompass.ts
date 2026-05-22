@@ -1,7 +1,8 @@
 /**
  * Partei-Kompass — 18 realistische Schweizer Szenario-Fragen,
- * 10 Themen, 5-Punkt-Skala. Antwort-Mapping berücksichtigt,
- * ob &quot;Zustimmung zur Aussage&quot; eher JA- oder NEIN-Lager entspricht.
+ * 10 Themen, 5-Punkt-Skala. User-Antworten werden in der UI als
+ * 1 = volle Ablehnung, 5 = volle Zustimmung angezeigt und vor dem Matching
+ * auf die interne Parteiskala gespiegelt.
  */
 import type { Abstimmung, ParteiKuerzel, Position } from './types';
 
@@ -23,7 +24,7 @@ export interface KompassFrage {
   topicLabel: string;
   scenario: string;
   question: string;
-  /** Welche Position entspricht «Zustimmung zur Aussage» (Antwort 1 = stimme voll zu) */
+  /** Welche Position entspricht «Zustimmung zur Aussage» */
   zustimmungEntspricht: Position;
   /** Statements der einzelnen Parteien (1..5) — 1 = voll dafür, 5 = voll dagegen */
   parteiPositionen: Partial<Record<ParteiKuerzel, number>>;
@@ -250,7 +251,9 @@ const PARTY_META: { kuerzel: ParteiKuerzel; name: string; color: string }[] = [
 
 /**
  * Calculate match between user answers and party positions.
- * Both are on a 1..5 scale where 1 = "stimme voll zu", 5 = "stimme gar nicht zu".
+ * User-facing answers: 1 = "stimme gar nicht zu", 5 = "stimme voll zu".
+ * Party positions remain on the calibrated internal scale:
+ * 1 = "stimme voll zu", 5 = "stimme gar nicht zu".
  * The match per question = 100 - |user - party| * 25 (perfect match 100%, max diff 100%).
  */
 export function calculateMatches(answers: Record<string, number>): MatchResult[] {
@@ -267,7 +270,8 @@ export function calculateMatches(answers: Record<string, number>): MatchResult[]
       const partyAnswer = frage.parteiPositionen[party.kuerzel];
       if (partyAnswer === undefined) continue;
 
-      const diff = Math.abs(userAnswer - partyAnswer);
+      const userAnswerForMatching = 6 - userAnswer;
+      const diff = Math.abs(userAnswerForMatching - partyAnswer);
       const matchPercent = Math.max(0, 100 - diff * 25); // 0 diff → 100, 4 diff → 0
       totalScore += matchPercent;
       totalAnswered += 1;

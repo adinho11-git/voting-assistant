@@ -9,6 +9,31 @@
 
   $: p = data.partei;
   $: mitgliederFmt = new Intl.NumberFormat('de-CH').format(p.mitglieder);
+
+  function stanceForTopic(topic: string): string {
+    const lower = topic.toLowerCase();
+    if (lower.includes('klima') || lower.includes('energie') || lower.includes('biodiversit') || lower.includes('umwelt')) {
+      return `${p.name} verbindet dieses Thema mit ihrer Grundausrichtung: ${p.ausrichtung}. Konkret geht es um die Frage, wie stark der Staat lenken soll, welche Rolle Marktanreize spielen und wie Kosten zwischen Haushalten, Unternehmen und öffentlicher Hand verteilt werden.`;
+    }
+    if (lower.includes('migration') || lower.includes('eu') || lower.includes('bilateral') || lower.includes('aussen')) {
+      return `${p.name} bewertet dieses Thema vor allem entlang von Souveränität, wirtschaftlicher Offenheit und Planbarkeit. Entscheidend ist, ob internationale Kooperation als Chance oder als Risiko für die Schweiz verstanden wird.`;
+    }
+    if (lower.includes('wirtschaft') || lower.includes('steuer') || lower.includes('kmu') || lower.includes('bürokratie')) {
+      return `${p.name} setzt hier Schwerpunkte bei Standortpolitik, Finanzierung und Verantwortung zwischen Staat und Privaten. Die Partei argumentiert typischerweise mit langfristiger Tragbarkeit und Auswirkungen auf Arbeit, Unternehmen und Kaufkraft.`;
+    }
+    if (lower.includes('gesund') || lower.includes('ahv') || lower.includes('sozial') || lower.includes('familie') || lower.includes('gleichstellung') || lower.includes('mindestlohn') || lower.includes('wohnbau')) {
+      return `${p.name} betrachtet dieses Thema durch die Brille sozialer Sicherheit und Alltagstauglichkeit. Zentral ist, wer entlastet wird, wer die Kosten trägt und ob eine Vorlage den gesellschaftlichen Zusammenhalt stärkt.`;
+    }
+    return `${p.name} ordnet dieses Thema in ihr Gesamtprofil ein: ${p.kurzprofil} Für konkrete Abstimmungen prüft die Partei jeweils Zweck, Kosten, Nebenwirkungen und Vereinbarkeit mit ihren Grundwerten.`;
+  }
+
+  function counterForTopic(topic: string): string {
+    const left = p.spektrumLR < 40;
+    const right = p.spektrumLR > 60;
+    if (left) return `Bürgerliche Parteien kritisieren hier oft höhere Staatsausgaben, mehr Regulierung oder unklare Finanzierung.`;
+    if (right) return `Linke und grüne Parteien kritisieren hier oft soziale Härten, fehlende ökologische Wirkung oder zu starke Marktlogik.`;
+    return `Parteien links und rechts der Mitte kritisieren meist, dass die Position entweder zu kompromissorientiert oder zu wenig konsequent sei.`;
+  }
 </script>
 
 <svelte:head>
@@ -66,6 +91,49 @@
         {#each p.kernthemen as thema}
           <span class="tag" style="background: {p.farbeLight}; color: {p.farbe}; border-color: {p.farbe}40;">{thema}</span>
         {/each}
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-8">
+        <div class="card p-5" style="border-top: 4px solid {p.farbe};">
+          <p class="section-eyebrow mb-2">Politische Rolle</p>
+          <p class="text-sm text-ink-muted leading-relaxed">
+            Mit einer Position von <strong style="color: {p.farbe};">{p.spektrumLR}/100</strong> auf der Links-Rechts-Achse
+            steht die Partei im Bereich <strong>{p.ausrichtung}</strong>. In Abstimmungen ist sie besonders relevant,
+            wenn Vorlagen Wertefragen mit Kosten-, Freiheits- oder Standortfragen verbinden.
+          </p>
+        </div>
+        <div class="card p-5" style="border-top: 4px solid {p.farbe};">
+          <p class="section-eyebrow mb-2">Wählerprofil</p>
+          <p class="text-sm text-ink-muted leading-relaxed">
+            Die Partei spricht Personen an, die ihre Prioritäten bei {p.kernthemen.slice(0, 3).join(', ')}
+            setzen. Der Kompass vergleicht deine Antworten mit diesen programmatischen Schwerpunkten und mit
+            konkreten Parolen zu Abstimmungen.
+          </p>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <p class="section-eyebrow mb-3">Kernthemen im Detail</p>
+        <div class="space-y-3">
+          {#each p.kernthemen as thema}
+            <details class="card p-4 group">
+              <summary class="list-none cursor-pointer flex items-center justify-between gap-3">
+                <span class="font-semibold text-ink">{thema}</span>
+                <span class="text-xs font-mono-data" style="color: {p.farbe};">öffnen</span>
+              </summary>
+              <div class="mt-4 grid md:grid-cols-2 gap-4 border-t border-border-light pt-4">
+                <div>
+                  <p class="text-xs font-mono-data uppercase tracking-wider mb-2" style="color: {p.farbe};">Haltung der Partei</p>
+                  <p class="text-sm text-ink-muted leading-relaxed">{stanceForTopic(thema)}</p>
+                </div>
+                <div>
+                  <p class="text-xs font-mono-data uppercase tracking-wider mb-2 text-contra">Typisches Gegenargument</p>
+                  <p class="text-sm text-ink-muted leading-relaxed">{counterForTopic(thema)}</p>
+                </div>
+              </div>
+            </details>
+          {/each}
+        </div>
       </div>
     </div>
 

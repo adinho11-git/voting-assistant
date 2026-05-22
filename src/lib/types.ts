@@ -32,6 +32,12 @@ export interface AbstimmungResult {
   turnoutPercent: number;
   /** Annahme oder Ablehnung */
   accepted: boolean;
+  /** Eingegangene Stimmzettel in der Schweiz */
+  votersTotal?: number;
+  /** Ja-Stimmen absolut */
+  jaVotes?: number;
+  /** Nein-Stimmen absolut */
+  neinVotes?: number;
   /** Bei Volksinitiativen und Verfassungsänderungen: Ständemehr */
   staendeJa?: number;
   staendeNein?: number;

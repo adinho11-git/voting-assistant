@@ -49,7 +49,7 @@
 
 <!-- FILTER (separate row with breathing space) -->
 <section class="container-app pb-8">
-  <div class="card p-4">
+  <div class="filter-panel">
     <p class="font-mono-data text-xs uppercase tracking-wider text-ink-muted mb-3">Politisches Spektrum filtern</p>
     <div role="tablist" aria-label="Politisches Spektrum" class="flex gap-1 bg-surface-alt p-1 rounded-lg w-fit">
       {#each filterTabs as tab}
@@ -71,9 +71,13 @@
 
 <!-- PARTY CARDS -->
 <section class="container-app pb-16">
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-    {#each filteredParteien as partei (partei.kuerzel)}
-      <article class="card overflow-hidden flex flex-col" style="border-top: 6px solid {partei.farbe};">
+  {#key filter}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {#each filteredParteien as partei, i (partei.kuerzel)}
+        <article
+          class="card overflow-hidden flex flex-col party-card-appear"
+          style="border-top: 6px solid {partei.farbe}; --party-delay: {Math.min(i, 4) * 70}ms;"
+        >
         <div class="p-6 flex-1 flex flex-col">
           <div class="flex items-start gap-3 mb-3">
             <div
@@ -118,9 +122,10 @@
             Mehr erfahren
           </a>
         </div>
-      </article>
-    {/each}
-  </div>
+        </article>
+      {/each}
+    </div>
+  {/key}
 </section>
 
 <!-- COMPARE TWO PARTIES -->

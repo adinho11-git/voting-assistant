@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { votesStore, setVote, clearVote, setNote } from '$lib/stores/votes';
+  import { saveJournalEntry } from '$lib/stores/engagement';
   import { showToast } from '$lib/stores/toast';
   import { inView } from '$lib/actions/inView';
   import type { UserPosition, Abstimmung } from '$lib/types';
@@ -43,6 +44,15 @@
         }
       }
       setVote(slug, position);
+      saveJournalEntry(
+        slug,
+        { position },
+        {
+          type: 'position',
+          title: 'Position gespeichert',
+          detail: `Schnellwahl: ${position}`
+        }
+      );
       pulse = true;
       setTimeout(() => (pulse = false), 400);
       showToast(`Deine Position: ${position}`, 'success');
@@ -79,6 +89,15 @@
   function saveNote(): void {
     if (!userEntry) return;
     setNote(slug, noteDraft.trim());
+    saveJournalEntry(
+      slug,
+      { note: noteDraft.trim() },
+      {
+        type: 'note',
+        title: 'Notiz aktualisiert',
+        detail: noteDraft.trim() ? noteDraft.trim().slice(0, 90) : 'Notiz geleert'
+      }
+    );
     editingNote = false;
     showToast('Notiz gespeichert.', 'success');
   }

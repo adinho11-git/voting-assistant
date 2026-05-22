@@ -97,7 +97,7 @@
 </section>
 
 <!-- SEARCH (separate row, no overlap) -->
-<section class="container-app pb-6">
+<section class="container-app pb-8">
   <div class="card p-4 md:p-5">
     <label for="vote-search" class="sr-only">Abstimmungen durchsuchen</label>
     <div class="relative">
@@ -126,12 +126,12 @@
   {#if activeTab === 'anstehend'}
     {#if filteredAnstehende.length > 0}
       {#each Object.entries(groupedAnstehende) as [date, items]}
-        <div class="mb-10">
-          <div class="flex items-center gap-3 mb-5 border-b border-border-light pb-2 flex-wrap">
+        <div class="mb-12">
+          <div class="vote-group-header">
             <span class="font-mono-data text-xs font-semibold uppercase tracking-wider text-brand">
               {date} · Eidgenössische Abstimmungen
             </span>
-            <span class="text-xs text-ink-subtle">{items.length} Vorlage{items.length === 1 ? '' : 'n'}</span>
+            <span class="text-xs text-ink-subtle block mt-1">{items.length} Vorlage{items.length === 1 ? '' : 'n'} am selben Abstimmungstermin</span>
           </div>
           <div class="grid md:grid-cols-2 gap-5">
             {#each items as abstimmung}
@@ -150,14 +150,14 @@
   {:else if activeTab === 'vergangen'}
     {#if filteredVergangene.length > 0}
       {#each Object.entries(groupedVergangene) as [date, items]}
-        <div class="mb-10">
-          <div class="flex items-center gap-3 mb-5 border-b border-border-light pb-2 flex-wrap">
+        <div class="mb-12">
+          <div class="vote-group-header">
             <span class="font-mono-data text-xs font-semibold uppercase tracking-wider text-ink-muted">
               {date} · Eidgenössische Abstimmungen
             </span>
-            <span class="text-xs text-ink-subtle">Endergebnis</span>
+            <span class="text-xs text-ink-subtle block mt-1">Offizielles Endergebnis mit Quellen und Vergleichsmöglichkeit</span>
           </div>
-          <div class="grid md:grid-cols-2 gap-5">
+          <div class="grid gap-5 {items.length > 1 ? 'xl:grid-cols-2' : ''}">
             {#each items as a}
               {@const userPos = userPositionFor(a.slug)}
               <a href="/abstimmungen/{a.slug}" class="card card-interactive p-5 block" style="border-left: 4px solid {a.result?.accepted ? 'var(--pro)' : 'var(--contra)'};">
@@ -252,6 +252,7 @@
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }

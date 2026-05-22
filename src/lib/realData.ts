@@ -348,10 +348,13 @@ export const realAbstimmungen: Abstimmung[] = [
     ],
     result: {
       jaPercent: 50.4,
-      turnoutPercent: 49.2,
+      turnoutPercent: 49.58,
       accepted: true,
+      votersTotal: 2796897,
+      jaVotes: 1384586,
+      neinVotes: 1363362,
       source: 'Bundeskanzlei — Abstimmungsdashboard',
-      sourceUrl: 'https://abstimmungen.admin.ch/'
+      sourceUrl: 'https://www.bk.admin.ch/ch/d/pore/va/20250928/can679.html'
     }
   },
 

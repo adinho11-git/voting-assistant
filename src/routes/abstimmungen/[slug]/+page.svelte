@@ -3,7 +3,14 @@
   import AppBar from '$lib/components/AppBar.svelte';
   import Badge from '$lib/components/Badge.svelte';
   import VoteSection from '$lib/components/VoteSection.svelte';
+  import VotingAssistant from '$lib/components/VotingAssistant.svelte';
+  import ArgumentWeighting from '$lib/components/ArgumentWeighting.svelte';
+  import VotingJournal from '$lib/components/VotingJournal.svelte';
+  import FeedbackForm from '$lib/components/FeedbackForm.svelte';
+  import FavoriteButton from '$lib/components/FavoriteButton.svelte';
   import DataQualityBadge from '$lib/components/DataQualityBadge.svelte';
+  import { engagementStore, toggleFavorite } from '$lib/stores/engagement';
+  import { showToast } from '$lib/stores/toast';
   import { formatDate } from '$lib/mockData';
 
   export let data: PageData;
@@ -13,6 +20,18 @@
   $: parlamentTotal = a.parlamentStimmen.ja + a.parlamentStimmen.nein;
   $: jaPercent = parlamentTotal > 0 ? Math.round((a.parlamentStimmen.ja / parlamentTotal) * 100) : 0;
   $: isPast = a.status === 'vergangen';
+  $: resultNeinPercent = a.result ? 100 - a.result.jaPercent : 0;
+  $: resultVotesTotal =
+    a.result?.votersTotal ?? (a.result?.jaVotes && a.result?.neinVotes ? a.result.jaVotes + a.result.neinVotes : null);
+  $: resultVotesLabel = resultVotesTotal ? new Intl.NumberFormat('de-CH').format(resultVotesTotal) : null;
+  $: resultJaVotesLabel = a.result?.jaVotes ? new Intl.NumberFormat('de-CH').format(a.result.jaVotes) : null;
+  $: resultNeinVotesLabel = a.result?.neinVotes ? new Intl.NumberFormat('de-CH').format(a.result.neinVotes) : null;
+  $: bookmarked = !!$engagementStore.favorites[a.slug];
+
+  function toggleDetailFavorite(): void {
+    const next = toggleFavorite(a.slug, a.shortTitle);
+    showToast(next ? 'In deiner Merkliste gespeichert.' : 'Aus deiner Merkliste entfernt.', 'success');
+  }
 </script>
 
 <svelte:head>
@@ -22,7 +41,7 @@
   <meta property="og:description" content="{a.aiSummary.slice(0, 200)}" />
 </svelte:head>
 
-<AppBar title="Briefing {dateStr}" backHref="/abstimmungen" showBookmark={true} />
+<AppBar title="Briefing {dateStr}" backHref="/abstimmungen" showBookmark={true} bookmarked={bookmarked} on:bookmark={toggleDetailFavorite} />
 
 <!-- HEADER -->
 <section class="container-app pt-6 md:pt-10 pb-4">
@@ -44,16 +63,28 @@
     {/if}
   </div>
 
-  <h1 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] text-ink mb-5 max-w-4xl">
-    {a.title}
-  </h1>
+  <div class="flex items-start justify-between gap-5 mb-5">
+    <h1 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] text-ink max-w-4xl">
+      {a.title}
+    </h1>
+    <div class="hidden md:block flex-shrink-0 pt-2">
+      <FavoriteButton slug={a.slug} title={a.shortTitle} />
+    </div>
+  </div>
 
-  <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono-data text-ink-muted uppercase tracking-wider">
-    <span>{a.readTime} MIN LESEZEIT</span>
-    <span aria-hidden="true">·</span>
-    <span class="inline-flex items-center gap-1">BUNDESRAT <Badge position={a.bundesratPosition} size="sm" /></span>
-    <span aria-hidden="true">·</span>
-    <span class="inline-flex items-center gap-1">PARLAMENT <Badge position={a.parlamentPosition} size="sm" /> ({a.parlamentStimmen.ja}:{a.parlamentStimmen.nein})</span>
+  <div class="meta-strip">
+    <div class="meta-pill">
+      <span class="meta-label">Lesezeit</span>
+      <span class="meta-value">{a.readTime} Min</span>
+    </div>
+    <div class="meta-pill">
+      <span class="meta-label">Bundesrat</span>
+      <Badge position={a.bundesratPosition} size="sm" />
+    </div>
+    <div class="meta-pill">
+      <span class="meta-label">Parlament</span>
+      <span class="inline-flex items-center gap-2"><Badge position={a.parlamentPosition} size="sm" /> {a.parlamentStimmen.ja}:{a.parlamentStimmen.nein}</span>
+    </div>
   </div>
 </section>
 
@@ -67,23 +98,48 @@
           {a.result.accepted ? 'ANGENOMMEN' : 'ABGELEHNT'}
         </span>
       </div>
-      <div class="grid sm:grid-cols-3 gap-5 mb-4">
-        <div>
-          <p class="font-mono-data text-3xl font-medium text-ink">{a.result.jaPercent.toFixed(1)}%</p>
-          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">JA-Anteil</p>
+      <div class="result-metrics">
+        <div class="result-metric result-metric-ja">
+          <div class="result-metric-label">
+            <span class="result-icon result-icon-ja" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>JA-Anteil</span>
+          </div>
+          <p class="result-metric-value text-pro">{a.result.jaPercent.toFixed(1)}%</p>
+          {#if resultJaVotesLabel}
+            <p class="result-metric-note">{resultJaVotesLabel} Ja-Stimmen</p>
+          {/if}
         </div>
-        <div>
-          <p class="font-mono-data text-3xl font-medium text-ink">{(100 - a.result.jaPercent).toFixed(1)}%</p>
-          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">NEIN-Anteil</p>
+
+        <div class="result-metric result-metric-nein">
+          <div class="result-metric-label">
+            <span class="result-icon result-icon-nein" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span>NEIN-Anteil</span>
+          </div>
+          <p class="result-metric-value text-contra">{resultNeinPercent.toFixed(1)}%</p>
+          {#if resultNeinVotesLabel}
+            <p class="result-metric-note">{resultNeinVotesLabel} Nein-Stimmen</p>
+          {/if}
         </div>
-        <div>
-          <p class="font-mono-data text-3xl font-medium text-ink">{a.result.turnoutPercent.toFixed(1)}%</p>
-          <p class="text-xs text-ink-muted uppercase tracking-wider font-mono-data">Stimmbeteiligung</p>
+
+        <div class="result-metric">
+          <div class="result-metric-label">
+            <span>Abstimmende Schweiz</span>
+          </div>
+          <p class="result-metric-value">{resultVotesLabel ?? 'Nicht ausgewiesen'}</p>
+          <p class="result-metric-note">{a.result.turnoutPercent.toFixed(2)}% Stimmbeteiligung</p>
         </div>
       </div>
       <div class="community-bar mb-2">
         <div class="bar-ja" style="width: {a.result.jaPercent}%" />
-        <div class="bar-nein" style="width: {100 - a.result.jaPercent}%" />
+        <div class="bar-nein" style="width: {resultNeinPercent}%" />
       </div>
       <p class="text-xs text-ink-subtle mt-3">
         Quelle: <a href={a.result.sourceUrl} target="_blank" rel="noopener" class="source-link">{a.result.source}</a>
@@ -109,12 +165,41 @@
   </div>
 </section>
 
-<!-- PRO / CONTRA SPLIT -->
+<!-- ASSISTENT -->
+<section class="container-app pb-8">
+  <VotingAssistant abstimmung={a} />
+</section>
+
+<!-- ORIENTIERUNG -->
 <section class="container-app pb-10">
-  <div class="grid md:grid-cols-2 gap-5">
+  <div class="grid md:grid-cols-3 gap-5">
+    <div class="card p-5 md:p-6" style="border-top: 4px solid var(--brand);">
+      <p class="section-eyebrow mb-2">Worum geht es?</p>
+      <h2 class="font-display text-lg text-ink mb-2">Entscheid in einem Satz</h2>
+      <p class="text-sm text-ink-muted leading-relaxed">
+        Die Vorlage fragt, ob die Schweiz den vorgeschlagenen politischen Kurs bei
+        <strong>{a.category}</strong> übernehmen soll.
+      </p>
+    </div>
+    <div class="card p-5 md:p-6" style="border-top: 4px solid var(--pro);">
+      <p class="section-eyebrow mb-2" style="color: var(--pro);">Bei einem JA</p>
+      <h2 class="font-display text-lg text-ink mb-2">Stärkstes Pro-Argument</h2>
+      <p class="text-sm text-ink-muted leading-relaxed">{a.proArguments[0]?.text}</p>
+    </div>
+    <div class="card p-5 md:p-6" style="border-top: 4px solid var(--contra);">
+      <p class="section-eyebrow mb-2" style="color: var(--contra);">Bei einem NEIN</p>
+      <h2 class="font-display text-lg text-ink mb-2">Stärkstes Contra-Argument</h2>
+      <p class="text-sm text-ink-muted leading-relaxed">{a.contraArguments[0]?.text}</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRO / CONTRA SPLIT -->
+<section class="container-app pb-12">
+  <div class="argument-board">
     <!-- PRO -->
-    <div>
-      <div class="flex items-center gap-2 mb-4 border-b border-pro/30 pb-2">
+    <div class="argument-column argument-column-pro">
+      <div class="flex items-center gap-2 mb-5 border-b border-pro/30 pb-3">
         <span class="w-7 h-7 rounded-full bg-pro flex items-center justify-center text-white text-sm font-bold" aria-hidden="true">✓</span>
         <h2 class="font-display text-xl uppercase tracking-wider font-bold" style="color: var(--pro);">PRO</h2>
         <span class="text-xs font-mono-data text-ink-muted ml-auto">{a.proArguments.length} ARGUMENTE</span>
@@ -137,8 +222,8 @@
     </div>
 
     <!-- CONTRA -->
-    <div>
-      <div class="flex items-center gap-2 mb-4 border-b border-contra/30 pb-2">
+    <div class="argument-column argument-column-contra">
+      <div class="flex items-center gap-2 mb-5 border-b border-contra/30 pb-3">
         <span class="w-7 h-7 rounded-full bg-contra flex items-center justify-center text-white text-sm font-bold" aria-hidden="true">✗</span>
         <h2 class="font-display text-xl uppercase tracking-wider font-bold" style="color: var(--contra);">CONTRA</h2>
         <span class="text-xs font-mono-data text-ink-muted ml-auto">{a.contraArguments.length} ARGUMENTE</span>
@@ -160,6 +245,11 @@
       </div>
     </div>
   </div>
+</section>
+
+<!-- ARGUMENTE GEWICHTEN -->
+<section class="container-app pb-12">
+  <ArgumentWeighting abstimmung={a} />
 </section>
 
 <!-- PARTEIPOSITIONEN -->
@@ -216,6 +306,16 @@
 <!-- USER VOTE / COMMUNITY / COMPARE -->
 <section class="container-app pb-10">
   <VoteSection slug={a.slug} abstimmung={a} initialCommunity={data.community} />
+</section>
+
+<!-- JOURNAL -->
+<section class="container-app pb-10">
+  <VotingJournal abstimmung={a} />
+</section>
+
+<!-- FEEDBACK -->
+<section class="container-app pb-10">
+  <FeedbackForm abstimmung={a} />
 </section>
 
 <!-- CTA -->

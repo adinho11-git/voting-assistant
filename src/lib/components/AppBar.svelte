@@ -1,10 +1,13 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { createEventDispatcher } from 'svelte';
 
   export let title: string = '';
   export let backHref: string = '';
   export let showBookmark: boolean = false;
   export let bookmarked: boolean = false;
+
+  const dispatch = createEventDispatcher<{ bookmark: void }>();
 
   function goBack(): void {
     if (backHref) {
@@ -34,7 +37,13 @@
     {/if}
 
     {#if showBookmark}
-      <button type="button" class="p-1.5 rounded-lg active:bg-surface-alt" aria-label="Merkliste">
+      <button
+        type="button"
+        class="p-1.5 rounded-lg active:bg-surface-alt"
+        aria-label={bookmarked ? 'Aus Merkliste entfernen' : 'Zur Merkliste hinzufügen'}
+        aria-pressed={bookmarked}
+        on:click={() => dispatch('bookmark')}
+      >
         <svg class="w-5 h-5 {bookmarked ? 'text-brand fill-brand' : 'text-ink-subtle'}"
           fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round"

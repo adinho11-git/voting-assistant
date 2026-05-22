@@ -17,8 +17,7 @@
 			// FOUC-free theme application
 			try {
 				var stored = localStorage.getItem('theme_v1');
-				var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				var theme = stored === 'dark' || stored === 'light' ? stored : prefersDark ? 'dark' : 'light';
+				var theme = stored === 'dark' || stored === 'light' ? stored : 'light';
 				document.documentElement.setAttribute('data-theme', theme);
 			} catch (e) {
 				document.documentElement.setAttribute('data-theme', 'light');

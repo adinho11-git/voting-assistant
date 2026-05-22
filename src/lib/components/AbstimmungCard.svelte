@@ -40,11 +40,11 @@
     <h2 class="font-display text-2xl md:text-3xl leading-tight text-ink mb-3">
       {abstimmung.title}
     </h2>
-    <p class="text-ink-muted text-sm md:text-base mb-5 leading-relaxed line-clamp-4 flex-1">
+    <p class="featured-summary text-ink-muted text-sm md:text-base mb-6 leading-relaxed">
       {abstimmung.aiSummary}
     </p>
-    <div class="flex items-center justify-between flex-wrap gap-3">
-      <div class="flex items-center gap-3 text-xs font-mono-data text-ink-muted">
+    <div class="featured-footer flex items-center justify-between flex-wrap gap-3 min-w-0">
+      <div class="flex items-center gap-3 text-xs font-mono-data text-ink-muted flex-wrap min-w-0">
         <span>{abstimmung.readTime} MIN LESEZEIT</span>
         <span aria-hidden="true">·</span>
         <span class="inline-flex items-center gap-1">BR <Badge position={abstimmung.bundesratPosition} size="sm" /></span>
@@ -57,7 +57,7 @@
           </span>
         {/if}
       </div>
-      <span class="btn-primary text-sm">
+      <span class="btn-primary text-sm w-full sm:w-auto">
         Briefing öffnen
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -122,13 +122,29 @@
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .line-clamp-4 {
+  .featured-summary {
     display: -webkit-box;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;
+    max-height: 6.6em;
     overflow: hidden;
+  }
+
+  .featured-footer {
+    margin-top: auto;
+    padding-top: 10px;
+  }
+
+  @media (min-width: 1024px) {
+    .featured-summary {
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      max-height: 4.95em;
+    }
   }
 </style>

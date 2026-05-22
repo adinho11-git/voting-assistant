@@ -2,9 +2,13 @@
   import type { PageData } from './$types';
   import AbstimmungCard from '$lib/components/AbstimmungCard.svelte';
   import Badge from '$lib/components/Badge.svelte';
+  import SwissPartyMap from '$lib/components/SwissPartyMap.svelte';
+  import { inView } from '$lib/actions/inView';
   import { formatDate } from '$lib/mockData';
 
   export let data: PageData;
+
+  let mapRevealed = false;
 </script>
 
 <svelte:head>
@@ -16,8 +20,12 @@
 </svelte:head>
 
 <!-- HERO -->
-<section class="container-app pt-8 md:pt-14 pb-8 md:pb-12">
-  <div class="hero-accent mb-8 max-w-3xl">
+<section class="container-app home-hero pt-8 md:pt-14 pb-8 md:pb-12">
+  <div class="hero-swiss-backdrop" aria-hidden="true">
+    <SwissPartyMap variant="hero" id="hero" />
+  </div>
+
+  <div class="hero-accent mb-8 max-w-3xl home-hero-copy">
     <p class="section-eyebrow mb-3">Eidgenössische Volksabstimmung · 14. Juni 2026</p>
     <h1 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.05] text-ink mb-4">
       Abstimmungen<br />neutral verstehen.
@@ -35,14 +43,14 @@
       </div>
     {/if}
 
-    <div class="flex flex-wrap gap-3">
-      <a href="/abstimmungen" class="btn-primary">
+    <div class="flex flex-col sm:flex-row flex-wrap gap-3 max-w-full">
+      <a href="/abstimmungen" class="btn-primary w-full sm:w-auto">
         Alle Abstimmungen
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
       </a>
-      <a href="/kompass" class="btn-secondary">Partei-Kompass starten</a>
+      <a href="/kompass" class="btn-secondary w-full sm:w-auto">Partei-Kompass starten</a>
     </div>
   </div>
 
@@ -70,7 +78,7 @@
     <div class="grid md:grid-cols-4 gap-5">
       {#each [
         { n: '1', t: 'Briefing lesen', d: 'KI-Zusammenfassung der Vorlage in drei Minuten. Alle Argumente mit Originalquelle hinterlegt.' },
-        { n: '2', t: 'Pro &amp; Contra abwägen', d: 'Argumente mit Quellen-Datum und Verlinkung. Direkter Vergleich der Gegenseite.' },
+        { n: '2', t: 'Pro & Contra abwägen', d: 'Argumente mit Quellen-Datum und Verlinkung. Direkter Vergleich der Gegenseite.' },
         { n: '3', t: 'Position speichern', d: 'JA, NEIN oder UNENTSCHIEDEN, mit persönlicher Notiz — alles lokal in deinem Browser.' },
         { n: '4', t: 'Vergleichen', d: 'Wie liegen Bundesrat, Parlament, Parteien, Community? Bei vergangenen Vorlagen: Endresultat.' }
       ] as step}
@@ -109,6 +117,33 @@
           Stimme ab, schreib eine Notiz, vergleiche dich mit der Community, finde im Kompass-Quiz heraus, welche Partei dir am nächsten steht.
         </p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- SWISS PARTY LANDSCAPE -->
+<section
+  id="politische-landkarte"
+  class="container-app swiss-landscape-section reveal-stage {mapRevealed ? 'is-visible' : ''} pb-12 md:pb-16"
+  use:inView={{ threshold: 0.22 }}
+  on:reveal|once={() => (mapRevealed = true)}
+>
+  <div class="swiss-landscape-card">
+    <div class="swiss-landscape-copy">
+      <p class="section-eyebrow mb-3">Politische Landkarte</p>
+      <h2 class="font-display text-3xl md:text-4xl text-ink mb-3">Parteistärken nach Kanton.</h2>
+      <p class="text-sm md:text-base text-ink-muted leading-relaxed">
+        Fahre über einen Kanton oder tippe ihn an: Die Karte zeigt, welche Partei dort besonders stark ist
+        und wie sich die wichtigsten Parteianteile verteilen.
+      </p>
+      <p class="text-xs text-ink-subtle mt-4">
+        Datenkontext: Nationalratswahlen 2023, im Prototyp verdichtet visualisiert. Quelle:
+        <a href="https://www.atlas.bfs.admin.ch/maps/12/map/mapIdOnly/27436_de.html" target="_blank" rel="noopener" class="source-link">BFS Politischer Atlas</a>
+      </p>
+    </div>
+
+    <div class="swiss-landscape-map">
+      <SwissPartyMap variant="feature" id="landscape" revealed={mapRevealed} />
     </div>
   </div>
 </section>
