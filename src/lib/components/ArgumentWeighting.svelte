@@ -78,6 +78,31 @@
     }
   }
 
+  function handleCardKeydown(event: KeyboardEvent, argumentId: string, side: ArgumentSide): void {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault();
+      cycleWeight(argumentId, side);
+    } else if (event.key === 'ArrowRight' || event.key === '+') {
+      event.preventDefault();
+      adjustWeight(argumentId, side, 1);
+    } else if (event.key === 'ArrowLeft' || event.key === '-') {
+      event.preventDefault();
+      adjustWeight(argumentId, side, -1);
+    }
+  }
+
+  interface Column {
+    side: ArgumentSide;
+    label: string;
+    icon: string;
+    items: Argument[];
+  }
+
+  $: columns = [
+    { side: 'pro', label: 'Pro', icon: '✓', items: abstimmung.proArguments },
+    { side: 'contra', label: 'Contra', icon: '×', items: abstimmung.contraArguments }
+  ] as Column[];
+
   function saveTendency(): void {
     if (totalScore === 0) {
       showToast('Gewichte zuerst mindestens ein Argument.', 'info');
@@ -123,113 +148,93 @@
   </div>
 
   <div class="weighting-grid">
-    <section class="weighting-column pro">
-      <div class="column-title">
-        <span>✓</span>
-        <h3>Pro</h3>
-      </div>
-      <div class="column-actions">
-        <button type="button" on:click={() => setSideWeight('pro', 2)}>Pro wichtig setzen</button>
-        <button type="button" on:click={() => setSideWeight('pro', 0)}>Pro zurücksetzen</button>
-      </div>
+    {#each columns as column}
+      <section class="weighting-column {column.side}">
+        <div class="column-title">
+          <span>{column.icon}</span>
+          <h3>{column.label}</h3>
+        </div>
+        <div class="column-actions">
+          <button type="button" on:click={() => setSideWeight(column.side, 2)}>{column.label} wichtig setzen</button>
+          <button type="button" on:click={() => setSideWeight(column.side, 0)}>{column.label} zurücksetzen</button>
+        </div>
 
-      {#each abstimmung.proArguments as argument}
-        <article class="weight-card" class:is-weighted={getWeight(argument.id) > 0} style="--impact: {getWeight(argument.id)};">
-          <button
-            type="button"
-            class="weight-card-main"
-            on:click={() => cycleWeight(argument.id, 'pro')}
-            aria-label={`Wichtigkeit ändern: ${argument.text}`}
+        {#each column.items as argument (argument.id)}
+          {@const weight = getWeight(argument.id)}
+          <div
+            class="weight-card"
+            class:is-weighted={weight > 0}
+            style="--impact: {weight};"
+            role="button"
+            tabindex="0"
+            aria-label="Gewichtung für '{argument.text}' ändern. Aktuell: {weightLabel(argument.id)}. Klick erhöht die Wichtigkeit."
+            aria-pressed={weight > 0}
+            on:click={() => cycleWeight(argument.id, column.side)}
+            on:keydown={(e) => handleCardKeydown(e, argument.id, column.side)}
           >
-            <div>
-              <p>{argument.text}</p>
-              <span class="tap-hint">Karte antippen: Wichtigkeit erhöhen</span>
+            <div class="weight-card-head">
+              <div class="weight-card-text">
+                <p>{argument.text}</p>
+                <span class="tap-hint">Karte antippen: Wichtigkeit erhöhen · Pfeil ← / → fein justieren</span>
+              </div>
+              <div class="impact-orb" aria-hidden="true">
+                <span>{weight}</span>
+                <small>{weightLabel(argument.id)}</small>
+              </div>
             </div>
-            <div class="impact-orb" aria-hidden="true">
-              <span>{getWeight(argument.id)}</span>
-              <small>{weightLabel(argument.id)}</small>
-            </div>
-          </button>
 
-          <a href="/abstimmungen/{abstimmung.slug}/argumente/{argument.id}">{argument.source} prüfen</a>
+            <a
+              class="source-pill"
+              href="/abstimmungen/{abstimmung.slug}/argumente/{argument.id}"
+              on:click|stopPropagation
+              on:keydown|stopPropagation
+            >
+              {argument.source} prüfen →
+            </a>
 
-          <div class="weight-stepper" aria-label="Feineinstellung Pro-Argument">
-            <button type="button" on:click={() => adjustWeight(argument.id, 'pro', -1)} disabled={getWeight(argument.id) === 0}>−</button>
-            <strong>{weightLabel(argument.id)}</strong>
-            <button type="button" on:click={() => adjustWeight(argument.id, 'pro', 1)} disabled={getWeight(argument.id) === 3}>+</button>
-          </div>
-
-          <div class="weight-controls" role="group" aria-label="Gewichtung Pro-Argument">
-            {#each weightOptions as option}
+            <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-no-static-element-interactions -->
+            <div class="weight-stepper" role="group" on:click|stopPropagation on:keydown|stopPropagation aria-label="Feineinstellung">
               <button
                 type="button"
-                class:active={getWeight(argument.id) === option.value}
-                class:zero={option.value === 0}
-                on:click={() => setWeight(argument.id, 'pro', option.value)}
-                title={option.label}
-              >
-                <span>{option.short}</span>
-                {option.label}
-              </button>
-            {/each}
-          </div>
-        </article>
-      {/each}
-    </section>
-
-    <section class="weighting-column contra">
-      <div class="column-title">
-        <span>×</span>
-        <h3>Contra</h3>
-      </div>
-      <div class="column-actions">
-        <button type="button" on:click={() => setSideWeight('contra', 2)}>Contra wichtig setzen</button>
-        <button type="button" on:click={() => setSideWeight('contra', 0)}>Contra zurücksetzen</button>
-      </div>
-
-      {#each abstimmung.contraArguments as argument}
-        <article class="weight-card" class:is-weighted={getWeight(argument.id) > 0} style="--impact: {getWeight(argument.id)};">
-          <button
-            type="button"
-            class="weight-card-main"
-            on:click={() => cycleWeight(argument.id, 'contra')}
-            aria-label={`Wichtigkeit ändern: ${argument.text}`}
-          >
-            <div>
-              <p>{argument.text}</p>
-              <span class="tap-hint">Karte antippen: Wichtigkeit erhöhen</span>
-            </div>
-            <div class="impact-orb" aria-hidden="true">
-              <span>{getWeight(argument.id)}</span>
-              <small>{weightLabel(argument.id)}</small>
-            </div>
-          </button>
-
-          <a href="/abstimmungen/{abstimmung.slug}/argumente/{argument.id}">{argument.source} prüfen</a>
-
-          <div class="weight-stepper" aria-label="Feineinstellung Contra-Argument">
-            <button type="button" on:click={() => adjustWeight(argument.id, 'contra', -1)} disabled={getWeight(argument.id) === 0}>−</button>
-            <strong>{weightLabel(argument.id)}</strong>
-            <button type="button" on:click={() => adjustWeight(argument.id, 'contra', 1)} disabled={getWeight(argument.id) === 3}>+</button>
-          </div>
-
-          <div class="weight-controls" role="group" aria-label="Gewichtung Contra-Argument">
-            {#each weightOptions as option}
+                on:click={() => adjustWeight(argument.id, column.side, -1)}
+                disabled={weight === 0}
+                aria-label="Wichtigkeit verringern"
+              >−</button>
+              <strong>{weightLabel(argument.id)}</strong>
               <button
                 type="button"
-                class:active={getWeight(argument.id) === option.value}
-                class:zero={option.value === 0}
-                on:click={() => setWeight(argument.id, 'contra', option.value)}
-                title={option.label}
-              >
-                <span>{option.short}</span>
-                {option.label}
-              </button>
-            {/each}
+                on:click={() => adjustWeight(argument.id, column.side, 1)}
+                disabled={weight === 3}
+                aria-label="Wichtigkeit erhöhen"
+              >+</button>
+            </div>
+
+            <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-no-static-element-interactions -->
+            <div
+              class="weight-controls"
+              role="group"
+              aria-label="Gewichtung wählen"
+              on:click|stopPropagation
+              on:keydown|stopPropagation
+            >
+              {#each weightOptions as option}
+                <button
+                  type="button"
+                  class:active={weight === option.value}
+                  class:zero={option.value === 0}
+                  on:click={() => setWeight(argument.id, column.side, option.value)}
+                  aria-label="{option.label} setzen"
+                  aria-pressed={weight === option.value}
+                >
+                  <span>{option.short}</span>
+                  {option.label}
+                </button>
+              {/each}
+            </div>
           </div>
-        </article>
-      {/each}
-    </section>
+        {/each}
+      </section>
+    {/each}
   </div>
 </div>
 
@@ -299,13 +304,8 @@
     transition: width 500ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .score-bar .pro {
-    background: #34d399;
-  }
-
-  .score-bar .contra {
-    background: #ff7a7a;
-  }
+  .score-bar .pro { background: #34d399; }
+  .score-bar .contra { background: #ff7a7a; }
 
   .weighting-grid {
     display: grid;
@@ -323,13 +323,8 @@
     background: color-mix(in srgb, var(--surface-alt) 34%, var(--surface));
   }
 
-  .weighting-column.pro {
-    border-top: 4px solid var(--pro);
-  }
-
-  .weighting-column.contra {
-    border-top: 4px solid var(--contra);
-  }
+  .weighting-column.pro { border-top: 4px solid var(--pro); }
+  .weighting-column.contra { border-top: 4px solid var(--contra); }
 
   .column-title {
     display: flex;
@@ -350,9 +345,7 @@
     background: var(--pro);
   }
 
-  .contra .column-title span {
-    background: var(--contra);
-  }
+  .contra .column-title span { background: var(--contra); }
 
   .column-title h3 {
     font-family: 'Playfair Display', Georgia, serif;
@@ -381,10 +374,11 @@
   .column-actions button:hover {
     transform: translateY(-1px);
     color: var(--brand);
-    background: var(--brand-soft);
+    background: var(--brand-soft, var(--brand-light));
     border-color: color-mix(in srgb, var(--brand) 34%, var(--border-light));
   }
 
+  /* The whole card is now a single interactive surface */
   .weight-card {
     position: relative;
     display: grid;
@@ -394,6 +388,8 @@
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+    cursor: pointer;
+    outline: none;
     transition:
       transform 190ms ease,
       border-color 190ms ease,
@@ -409,6 +405,7 @@
     border-radius: var(--radius) 0 0 var(--radius);
     background: color-mix(in srgb, var(--brand) calc(var(--impact, 0) * 24%), transparent);
     transition: width 220ms ease, background 220ms ease;
+    pointer-events: none;
   }
 
   .weight-card:hover,
@@ -420,27 +417,34 @@
 
   .weight-card.is-weighted {
     background:
-      linear-gradient(90deg, color-mix(in srgb, var(--brand-soft) calc(var(--impact, 0) * 18%), transparent), transparent 58%),
+      linear-gradient(90deg, color-mix(in srgb, var(--brand-soft, var(--brand-light)) calc(var(--impact, 0) * 18%), transparent), transparent 58%),
       var(--surface);
   }
 
-  .weight-card-main {
-    position: relative;
-    z-index: 1;
+  .weight-card:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 3px;
+  }
+
+  .weight-card:active {
+    transform: translateY(0);
+    transition-duration: 80ms;
+  }
+
+  /* Head row: text + orb. Click anywhere on this region also cycles via card click. */
+  .weight-card-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 14px;
     align-items: center;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    text-align: left;
-    cursor: pointer;
+    pointer-events: none; /* card-level handler fires instead */
   }
 
-  .weight-card p {
+  .weight-card-text {
+    min-width: 0;
+  }
+
+  .weight-card-text p {
     color: var(--text);
     line-height: 1.42;
   }
@@ -472,7 +476,7 @@
   .weight-card.is-weighted .impact-orb {
     transform: scale(1.03);
     border-color: color-mix(in srgb, var(--brand) 32%, var(--border-light));
-    background: var(--brand-soft);
+    background: var(--brand-soft, var(--brand-light));
   }
 
   .impact-orb span {
@@ -495,21 +499,26 @@
     line-height: 1.15;
   }
 
-  .weight-card a {
+  .source-pill {
     position: relative;
-    z-index: 1;
     display: inline-flex;
+    align-items: center;
     width: fit-content;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brand-soft, var(--brand-light)) 70%, transparent);
     color: var(--brand);
     font-weight: 700;
-    font-size: 13px;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .source-pill:hover {
+    background: color-mix(in srgb, var(--brand) 14%, var(--surface));
   }
 
   .weight-stepper {
     position: relative;
-    z-index: 1;
     display: grid;
     grid-template-columns: 42px minmax(0, 1fr) 42px;
     align-items: center;
@@ -517,6 +526,7 @@
     padding: 8px;
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--surface-alt) 52%, var(--surface));
+    cursor: default;
   }
 
   .weight-stepper button {
@@ -537,7 +547,7 @@
     transform: translateY(-1px);
     color: var(--brand);
     border-color: color-mix(in srgb, var(--brand) 42%, var(--border-light));
-    background: var(--brand-soft);
+    background: var(--brand-soft, var(--brand-light));
   }
 
   .weight-stepper button:disabled {
@@ -553,10 +563,10 @@
 
   .weight-controls {
     position: relative;
-    z-index: 1;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 7px;
+    cursor: default;
   }
 
   .weight-controls button {
@@ -580,7 +590,7 @@
     transform: translateY(-1px);
     color: var(--brand);
     border-color: color-mix(in srgb, var(--brand) 42%, var(--border-light));
-    background: var(--brand-soft);
+    background: var(--brand-soft, var(--brand-light));
   }
 
   .weight-controls button.active.zero {
@@ -613,7 +623,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .weight-card-main {
+    .weight-card-head {
       grid-template-columns: 1fr;
     }
 
@@ -623,6 +633,17 @@
       grid-template-columns: auto 1fr;
       justify-items: start;
       gap: 10px;
+      display: grid;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .weight-card,
+    .weight-card::before,
+    .impact-orb,
+    .weight-stepper button,
+    .weight-controls button {
+      transition: none;
     }
   }
 </style>
