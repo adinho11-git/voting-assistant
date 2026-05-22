@@ -20,54 +20,61 @@
     { value: 3, label: 'Sehr wichtig', short: '3' }
   ];
 
+  // Reactive: slugWeights is the per-slug weights record from the engagement store.
+  // All derived values MUST take slugWeights as an explicit dependency so Svelte 4
+  // re-evaluates them when the store updates.
   $: slugWeights = $engagementStore.weights[abstimmung.slug] ?? {};
-  $: proScore = sumWeights(abstimmung.proArguments, 'pro');
-  $: contraScore = sumWeights(abstimmung.contraArguments, 'contra');
+
+  $: proScore = sumWeights(slugWeights, abstimmung.proArguments, 'pro');
+  $: contraScore = sumWeights(slugWeights, abstimmung.contraArguments, 'contra');
   $: totalScore = proScore + contraScore;
   $: strongestScore = Math.max(proScore, contraScore);
   $: tendencyPercent = totalScore > 0 ? Math.round((strongestScore / totalScore) * 100) : 50;
-  $: tendencyPosition = getTendency();
+  $: tendencyPosition = computeTendency(proScore, contraScore);
   $: visibleArguments = [...abstimmung.proArguments, ...abstimmung.contraArguments];
-  $: weightedCount = visibleArguments.filter((argument) => getWeight(argument.id) > 0).length;
+  $: weightedCount = visibleArguments.filter((argument) => weightOf(slugWeights, argument.id) > 0).length;
   $: statusText =
     totalScore === 0
-      ? 'Tippe eine Argument-Karte an und gewichte, was dich wirklich bewegt.'
+      ? 'Wähle pro Argument eine Wichtigkeit — die Tendenz aktualisiert sich live.'
       : tendencyPosition === 'UNENTSCHIEDEN'
         ? 'Ausgeglichen: Pro und Contra sind für dich gleich stark.'
         : `Deine gewichtete Tendenz: ${tendencyPercent}% ${tendencyPosition}.`;
 
-  function sumWeights(argumentsList: Argument[], side: ArgumentSide): number {
+  function sumWeights(
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
+    argumentsList: Argument[],
+    side: ArgumentSide
+  ): number {
     return argumentsList.reduce((sum, argument) => {
-      const current = slugWeights[argument.id];
+      const current = weights[argument.id];
       if (!current || current.side !== side) return sum;
       return sum + current.weight;
     }, 0);
   }
 
-  function getWeight(argumentId: string): ArgumentWeight {
-    return slugWeights[argumentId]?.weight ?? 0;
+  function weightOf(
+    weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
+    argumentId: string
+  ): ArgumentWeight {
+    return (weights[argumentId]?.weight ?? 0) as ArgumentWeight;
   }
 
-  function getTendency(): UserPosition {
-    if (totalScore === 0 || proScore === contraScore) return 'UNENTSCHIEDEN';
-    return proScore > contraScore ? 'JA' : 'NEIN';
+  function labelOf(weight: ArgumentWeight): string {
+    return weightOptions.find((option) => option.value === weight)?.label ?? 'Nicht wichtig';
+  }
+
+  function computeTendency(pro: number, contra: number): UserPosition {
+    if (pro + contra === 0 || pro === contra) return 'UNENTSCHIEDEN';
+    return pro > contra ? 'JA' : 'NEIN';
   }
 
   function setWeight(argumentId: string, side: ArgumentSide, weight: ArgumentWeight): void {
     setArgumentWeight(abstimmung.slug, argumentId, side, weight);
   }
 
-  function weightLabel(argumentId: string): string {
-    return weightOptions.find((option) => option.value === getWeight(argumentId))?.label ?? 'Nicht wichtig';
-  }
-
-  function cycleWeight(argumentId: string, side: ArgumentSide): void {
-    const next = ((getWeight(argumentId) + 1) % 4) as ArgumentWeight;
-    setWeight(argumentId, side, next);
-  }
-
   function adjustWeight(argumentId: string, side: ArgumentSide, delta: number): void {
-    const next = Math.min(3, Math.max(0, getWeight(argumentId) + delta)) as ArgumentWeight;
+    const current = weightOf(slugWeights, argumentId);
+    const next = Math.min(3, Math.max(0, current + delta)) as ArgumentWeight;
     setWeight(argumentId, side, next);
   }
 
@@ -75,19 +82,6 @@
     const argumentsList = side === 'pro' ? abstimmung.proArguments : abstimmung.contraArguments;
     for (const argument of argumentsList) {
       setWeight(argument.id, side, weight);
-    }
-  }
-
-  function handleCardKeydown(event: KeyboardEvent, argumentId: string, side: ArgumentSide): void {
-    if (event.key === ' ' || event.key === 'Enter') {
-      event.preventDefault();
-      cycleWeight(argumentId, side);
-    } else if (event.key === 'ArrowRight' || event.key === '+') {
-      event.preventDefault();
-      adjustWeight(argumentId, side, 1);
-    } else if (event.key === 'ArrowLeft' || event.key === '-') {
-      event.preventDefault();
-      adjustWeight(argumentId, side, -1);
     }
   }
 
@@ -133,7 +127,9 @@
     <div>
       <p class="section-eyebrow">Argumente gewichten</p>
       <h2 class="font-display text-2xl md:text-3xl text-ink">Welche Argumente tragen deine Entscheidung?</h2>
-      <p>Tippe eine Karte an, erhöhe oder senke die Wichtigkeit und sieh sofort, wie sich deine Tendenz verändert.</p>
+      <p>
+        Wähle pro Argument auf der 4-Stufen-Skala (Nicht wichtig → Sehr wichtig), wie stark es deine Entscheidung beeinflusst. Die gewichtete Tendenz unten rechts aktualisiert sich live.
+      </p>
     </div>
 
     <div class="weighting-score" class:is-neutral={tendencyPosition === 'UNENTSCHIEDEN'} aria-live="polite">
@@ -160,78 +156,60 @@
         </div>
 
         {#each column.items as argument (argument.id)}
-          {@const weight = getWeight(argument.id)}
-          <div
-            class="weight-card"
-            class:is-weighted={weight > 0}
-            style="--impact: {weight};"
-            role="button"
-            tabindex="0"
-            aria-label="Gewichtung für '{argument.text}' ändern. Aktuell: {weightLabel(argument.id)}. Klick erhöht die Wichtigkeit."
-            aria-pressed={weight > 0}
-            on:click={() => cycleWeight(argument.id, column.side)}
-            on:keydown={(e) => handleCardKeydown(e, argument.id, column.side)}
-          >
-            <div class="weight-card-head">
+          {@const weight = weightOf(slugWeights, argument.id)}
+          {@const wLabel = labelOf(weight)}
+          <article class="weight-card" class:is-weighted={weight > 0} style="--impact: {weight};">
+            <header class="weight-card-head">
               <div class="weight-card-text">
                 <p>{argument.text}</p>
-                <span class="tap-hint">Karte antippen: Wichtigkeit erhöhen · Pfeil ← / → fein justieren</span>
+                <a
+                  class="source-pill"
+                  href="/abstimmungen/{abstimmung.slug}/argumente/{argument.id}"
+                >
+                  {argument.source} prüfen →
+                </a>
               </div>
               <div class="impact-orb" aria-hidden="true">
                 <span>{weight}</span>
-                <small>{weightLabel(argument.id)}</small>
+                <small>{wLabel}</small>
               </div>
-            </div>
+            </header>
 
-            <a
-              class="source-pill"
-              href="/abstimmungen/{abstimmung.slug}/argumente/{argument.id}"
-              on:click|stopPropagation
-              on:keydown|stopPropagation
-            >
-              {argument.source} prüfen →
-            </a>
-
-            <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-no-static-element-interactions -->
-            <div class="weight-stepper" role="group" on:click|stopPropagation on:keydown|stopPropagation aria-label="Feineinstellung">
-              <button
-                type="button"
-                on:click={() => adjustWeight(argument.id, column.side, -1)}
-                disabled={weight === 0}
-                aria-label="Wichtigkeit verringern"
-              >−</button>
-              <strong>{weightLabel(argument.id)}</strong>
-              <button
-                type="button"
-                on:click={() => adjustWeight(argument.id, column.side, 1)}
-                disabled={weight === 3}
-                aria-label="Wichtigkeit erhöhen"
-              >+</button>
-            </div>
-
-            <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-no-static-element-interactions -->
-            <div
-              class="weight-controls"
-              role="group"
-              aria-label="Gewichtung wählen"
-              on:click|stopPropagation
-              on:keydown|stopPropagation
-            >
+            <div class="weight-controls" role="group" aria-label="Wichtigkeit wählen für {argument.text.slice(0, 60)}">
               {#each weightOptions as option}
                 <button
                   type="button"
+                  class="weight-pill"
                   class:active={weight === option.value}
                   class:zero={option.value === 0}
                   on:click={() => setWeight(argument.id, column.side, option.value)}
                   aria-label="{option.label} setzen"
                   aria-pressed={weight === option.value}
                 >
-                  <span>{option.short}</span>
-                  {option.label}
+                  <span class="pill-num">{option.short}</span>
+                  <span class="pill-label">{option.label}</span>
                 </button>
               {/each}
             </div>
-          </div>
+
+            <div class="weight-stepper" role="group" aria-label="Feintuning">
+              <button
+                type="button"
+                class="step-btn"
+                on:click={() => adjustWeight(argument.id, column.side, -1)}
+                disabled={weight === 0}
+                aria-label="Wichtigkeit verringern"
+              >−</button>
+              <strong>{wLabel}</strong>
+              <button
+                type="button"
+                class="step-btn"
+                on:click={() => adjustWeight(argument.id, column.side, 1)}
+                disabled={weight === 3}
+                aria-label="Wichtigkeit erhöhen"
+              >+</button>
+            </div>
+          </article>
         {/each}
       </section>
     {/each}
@@ -345,7 +323,7 @@
     background: var(--pro);
   }
 
-  .contra .column-title span { background: var(--contra); }
+  .weighting-column.contra .column-title span { background: var(--contra); }
 
   .column-title h3 {
     font-family: 'Playfair Display', Georgia, serif;
@@ -378,23 +356,20 @@
     border-color: color-mix(in srgb, var(--brand) 34%, var(--border-light));
   }
 
-  /* The whole card is now a single interactive surface */
+  /* Card = display container, no longer clickable */
   .weight-card {
     position: relative;
     display: grid;
-    gap: 12px;
+    gap: 14px;
     padding: 16px;
     border: 1px solid var(--border-light);
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
-    cursor: pointer;
-    outline: none;
     transition:
-      transform 190ms ease,
-      border-color 190ms ease,
-      box-shadow 190ms ease,
-      background 190ms ease;
+      border-color 220ms ease,
+      box-shadow 220ms ease,
+      background 220ms ease;
   }
 
   .weight-card::before {
@@ -408,73 +383,48 @@
     pointer-events: none;
   }
 
-  .weight-card:hover,
   .weight-card.is-weighted {
-    transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--brand) 24%, var(--border-light));
-    box-shadow: var(--shadow-md);
-  }
-
-  .weight-card.is-weighted {
+    box-shadow: var(--shadow-sm);
     background:
       linear-gradient(90deg, color-mix(in srgb, var(--brand-soft, var(--brand-light)) calc(var(--impact, 0) * 18%), transparent), transparent 58%),
       var(--surface);
   }
 
-  .weight-card:focus-visible {
-    outline: 3px solid var(--brand);
-    outline-offset: 3px;
-  }
-
-  .weight-card:active {
-    transform: translateY(0);
-    transition-duration: 80ms;
-  }
-
-  /* Head row: text + orb. Click anywhere on this region also cycles via card click. */
   .weight-card-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 14px;
-    align-items: center;
-    pointer-events: none; /* card-level handler fires instead */
+    align-items: start;
   }
 
   .weight-card-text {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .weight-card-text p {
     color: var(--text);
     line-height: 1.42;
-  }
-
-  .tap-hint {
-    display: inline-flex;
-    margin-top: 9px;
-    color: var(--text-subtle);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    margin: 0;
   }
 
   .impact-orb {
     display: grid;
     place-items: center;
-    width: 82px;
-    min-height: 74px;
-    padding: 8px;
+    width: 76px;
+    min-height: 68px;
+    padding: 6px;
     border: 1px solid var(--border-light);
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--surface-alt) 72%, var(--surface));
     text-align: center;
-    transition: transform 190ms ease, background 190ms ease, border-color 190ms ease;
+    transition: background 220ms ease, border-color 220ms ease;
   }
 
-  .weight-card:hover .impact-orb,
   .weight-card.is-weighted .impact-orb {
-    transform: scale(1.03);
     border-color: color-mix(in srgb, var(--brand) 32%, var(--border-light));
     background: var(--brand-soft, var(--brand-light));
   }
@@ -482,8 +432,8 @@
   .impact-orb span {
     display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 999px;
     background: var(--surface);
     color: var(--brand);
@@ -497,13 +447,13 @@
     font-size: 10px;
     font-weight: 900;
     line-height: 1.15;
+    margin-top: 2px;
   }
 
   .source-pill {
-    position: relative;
+    align-self: flex-start;
     display: inline-flex;
     align-items: center;
-    width: fit-content;
     padding: 4px 10px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--brand-soft, var(--brand-light)) 70%, transparent);
@@ -512,24 +462,110 @@
     font-size: 12px;
     text-decoration: none;
     cursor: pointer;
+    transition: background 160ms ease, color 160ms ease;
   }
   .source-pill:hover {
     background: color-mix(in srgb, var(--brand) 14%, var(--surface));
+    color: var(--brand-dark, var(--brand));
   }
 
-  .weight-stepper {
-    position: relative;
+  /* Primary interaction: weight pills */
+  .weight-controls {
     display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .weight-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 68px;
+    padding: 8px 6px;
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.15;
+    text-align: center;
+    transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+  }
+
+  .weight-pill:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--brand) 42%, var(--border-light));
+    color: var(--brand);
+    background: var(--brand-soft, var(--brand-light));
+  }
+
+  .weight-pill:active {
+    transform: translateY(0);
+  }
+
+  .weight-pill:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  .weight-pill.active {
+    background: var(--brand);
+    color: white;
+    border-color: var(--brand);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--brand) 35%, transparent);
+  }
+
+  .weight-pill.active .pill-num {
+    background: rgba(255, 255, 255, 0.22);
+    color: white;
+  }
+
+  .weight-pill.zero.active {
+    background: var(--surface-alt);
+    color: var(--text);
+    border-color: var(--border);
+    box-shadow: none;
+  }
+
+  .weight-pill.zero.active .pill-num {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .pill-num {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    transition: background 140ms ease, color 140ms ease;
+  }
+
+  .pill-label {
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  /* Stepper for fine-tuning */
+  .weight-stepper {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
     gap: 8px;
-    padding: 8px;
+    padding: 6px;
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--surface-alt) 52%, var(--surface));
-    cursor: default;
   }
 
-  .weight-stepper button {
+  .step-btn {
     display: grid;
     place-items: center;
     min-height: 38px;
@@ -540,17 +576,22 @@
     cursor: pointer;
     font-size: 20px;
     font-weight: 900;
-    transition: transform 160ms ease, border-color 160ms ease, color 160ms ease, background 160ms ease;
+    transition: transform 140ms ease, border-color 140ms ease, color 140ms ease, background 140ms ease;
   }
 
-  .weight-stepper button:not(:disabled):hover {
+  .step-btn:not(:disabled):hover {
     transform: translateY(-1px);
     color: var(--brand);
     border-color: color-mix(in srgb, var(--brand) 42%, var(--border-light));
     background: var(--brand-soft, var(--brand-light));
   }
 
-  .weight-stepper button:disabled {
+  .step-btn:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  .step-btn:disabled {
     cursor: not-allowed;
     opacity: 0.42;
   }
@@ -559,55 +600,7 @@
     color: var(--text);
     text-align: center;
     font-size: 13px;
-  }
-
-  .weight-controls {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 7px;
-    cursor: default;
-  }
-
-  .weight-controls button {
-    display: grid;
-    place-items: center;
-    gap: 4px;
-    min-height: 58px;
-    padding: 8px 6px;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 800;
-    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
-  }
-
-  .weight-controls button:hover,
-  .weight-controls button.active {
-    transform: translateY(-1px);
-    color: var(--brand);
-    border-color: color-mix(in srgb, var(--brand) 42%, var(--border-light));
-    background: var(--brand-soft, var(--brand-light));
-  }
-
-  .weight-controls button.active.zero {
-    color: var(--text-muted);
-    border-color: var(--border-light);
-    background: color-mix(in srgb, var(--surface-alt) 54%, var(--surface));
-  }
-
-  .weight-controls span {
-    display: grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    background: var(--surface-alt);
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
   }
 
   @media (max-width: 980px) {
@@ -618,22 +611,26 @@
   }
 
   @media (max-width: 560px) {
-    .column-actions,
+    .column-actions {
+      grid-template-columns: 1fr;
+    }
     .weight-controls {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
     .weight-card-head {
       grid-template-columns: 1fr;
     }
-
     .impact-orb {
       width: 100%;
-      min-height: 58px;
-      grid-template-columns: auto 1fr;
+      min-height: 56px;
+      grid-template-columns: auto 1fr auto;
       justify-items: start;
       gap: 10px;
-      display: grid;
+      padding: 6px 12px;
+      text-align: left;
+    }
+    .impact-orb small {
+      margin-top: 0;
     }
   }
 
@@ -641,8 +638,9 @@
     .weight-card,
     .weight-card::before,
     .impact-orb,
-    .weight-stepper button,
-    .weight-controls button {
+    .weight-pill,
+    .step-btn,
+    .score-bar i {
       transition: none;
     }
   }
