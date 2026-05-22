@@ -919,6 +919,18 @@ span {
   justify-content: center;
 }
 
+/* Bonus/exploration variant: same look, reduced visual weight so it doesn't
+   compete with the main vote-decision workflow above. */
+.landscape-bonus .swiss-landscape-card {
+  padding: clamp(20px, 3vw, 32px);
+  opacity: 0.95;
+  box-shadow: var(--shadow-sm);
+}
+
+.landscape-bonus .swiss-landscape-map {
+  min-height: 320px;
+}
+
 @media (max-width: 980px) {
   .hero-swiss-backdrop {
     top: 170px;

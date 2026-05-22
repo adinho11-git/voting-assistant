@@ -58,7 +58,7 @@
         {/if}
       </div>
       <span class="btn-primary text-sm w-full sm:w-auto">
-        Briefing öffnen
+        Briefing starten
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>

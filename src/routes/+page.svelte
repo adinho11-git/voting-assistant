@@ -12,10 +12,10 @@
 </script>
 
 <svelte:head>
-  <title>Voting Assistant – Schweizer Abstimmungen neutral verstehen</title>
-  <meta name="description" content="Interaktiver politischer Orientierungsassistent für Schweizer Abstimmungen und Parteien — Briefings, Pro/Contra, Partei-Kompass, persönliches Voting-Journal." />
+  <title>Voting Assistant – Schweizer Abstimmungen verstehen, abwägen, entscheiden</title>
+  <meta name="description" content="Geführter Entscheidungsassistent für Schweizer Abstimmungen: Briefing lesen, Pro & Contra abwägen, Argumente gewichten, Parteipositionen einordnen, eigene Position im Journal speichern." />
   <meta property="og:title" content="AI Swiss Voting Assistant" />
-  <meta property="og:description" content="Schweizer Abstimmungen neutral verstehen — KI-gestützt, quellenbasiert, interaktiv." />
+  <meta property="og:description" content="Abstimmungen verstehen. Argumente gewichten. Eigene Position finden." />
   <meta property="og:type" content="website" />
 </svelte:head>
 
@@ -28,10 +28,10 @@
   <div class="hero-accent mb-8 max-w-3xl home-hero-copy">
     <p class="section-eyebrow mb-3">Eidgenössische Volksabstimmung · 14. Juni 2026</p>
     <h1 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.05] text-ink mb-4">
-      Abstimmungen<br />neutral verstehen.
+      Abstimmungen verstehen.<br />Argumente gewichten.<br />Eigene Position finden.
     </h1>
     <p class="text-base md:text-lg text-ink-muted leading-relaxed mb-5">
-      Interaktiver politischer Orientierungsassistent für Schweizer Abstimmungen und Parteien — KI-gestützte Briefings, Pro/Contra mit Originalquellen, Partei-Kompass und persönliches Voting-Journal.
+      Dein geführter Entscheidungsassistent für Schweizer Abstimmungen: Briefing lesen, Pro &amp; Contra abwägen, Parteipositionen einordnen und deine Position im Journal speichern.
     </p>
 
     {#if data.daysUntil > 0}
@@ -45,7 +45,7 @@
 
     <div class="flex flex-col sm:flex-row flex-wrap gap-3 max-w-full">
       <a href="/abstimmungen" class="btn-primary w-full sm:w-auto">
-        Alle Abstimmungen
+        Abstimmung verstehen
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
@@ -56,6 +56,13 @@
 
   <!-- 2-card hero with both upcoming votes -->
   {#if data.upcoming.length > 0}
+    <div class="mb-4 flex items-end justify-between flex-wrap gap-2">
+      <div>
+        <p class="section-eyebrow mb-1">Direkt einsteigen</p>
+        <h2 class="font-display text-xl md:text-2xl text-ink">Starte mit einer aktuellen Abstimmung</h2>
+      </div>
+      <a href="/abstimmungen" class="text-sm font-semibold text-brand hover:text-brand-dark">Alle Abstimmungen →</a>
+    </div>
     <div class="grid md:grid-cols-2 gap-5">
       {#each data.upcoming as a}
         <AbstimmungCard abstimmung={a} featured={true} />
@@ -68,23 +75,23 @@
 <section class="container-app pb-12 md:pb-16">
   <div class="border-t border-border-light pt-12">
     <div class="max-w-3xl mb-10">
-      <p class="section-eyebrow mb-2">Persönlicher Voting-Workflow</p>
-      <h2 class="font-display text-3xl md:text-4xl text-ink mb-3">In drei Minuten zur informierten Stimme.</h2>
+      <p class="section-eyebrow mb-2">So führt dich der Assistent</p>
+      <h2 class="font-display text-3xl md:text-4xl text-ink mb-3">Verstehen → Abwägen → Gewichten → Speichern.</h2>
       <p class="text-ink-muted">
-        Der Voting Assistant ist kein Ersatz für das Abstimmungsbüchlein, sondern dein Einstieg: schnell, neutral, interaktiv.
+        Jede Abstimmungs-Detailseite folgt diesem Workflow — vom neutralen Briefing bis zur eigenen, dokumentierten Position.
       </p>
     </div>
 
     <div class="grid md:grid-cols-4 gap-5">
       {#each [
-        { n: '1', t: 'Briefing lesen', d: 'KI-Zusammenfassung der Vorlage in drei Minuten. Alle Argumente mit Originalquelle hinterlegt.' },
-        { n: '2', t: 'Pro & Contra abwägen', d: 'Argumente mit Quellen-Datum und Verlinkung. Direkter Vergleich der Gegenseite.' },
-        { n: '3', t: 'Position speichern', d: 'JA, NEIN oder UNENTSCHIEDEN, mit persönlicher Notiz — alles lokal in deinem Browser.' },
-        { n: '4', t: 'Vergleichen', d: 'Wie liegen Bundesrat, Parlament, Parteien, Community? Bei vergangenen Vorlagen: Endresultat.' }
+        { n: '1', t: 'Verstehen', d: 'Lies das KI-Briefing der Vorlage in drei Minuten — neutral aufbereitet, jede Aussage mit Originalquelle hinterlegt.' },
+        { n: '2', t: 'Abwägen', d: 'Pro &amp; Contra mit Quellen-Datum direkt nebeneinander. Sieh, was Bundesrat, Parlament und Parteien empfehlen.' },
+        { n: '3', t: 'Gewichten &amp; Einordnen', d: 'Markiere, welche Argumente für dich wirklich zählen — und schau, welche Parteien deiner Linie am nächsten kommen.' },
+        { n: '4', t: 'Entscheiden &amp; Speichern', d: 'Halte JA, NEIN oder UNENTSCHIEDEN mit Notiz im Voting-Journal fest — alles lokal in deinem Browser.' }
       ] as step}
         <div class="card p-5 md:p-6">
           <p class="font-mono-data text-2xl font-medium text-brand mb-3">{step.n}</p>
-          <h3 class="font-display text-lg text-ink mb-2">{step.t}</h3>
+          <h3 class="font-display text-lg text-ink mb-2">{@html step.t}</h3>
           <p class="text-sm text-ink-muted leading-relaxed">{@html step.d}</p>
         </div>
       {/each}
@@ -117,33 +124,6 @@
           Stimme ab, schreib eine Notiz, vergleiche dich mit der Community, finde im Kompass-Quiz heraus, welche Partei dir am nächsten steht.
         </p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- SWISS PARTY LANDSCAPE -->
-<section
-  id="politische-landkarte"
-  class="container-app swiss-landscape-section reveal-stage {mapRevealed ? 'is-visible' : ''} pb-12 md:pb-16"
-  use:inView={{ threshold: 0.22 }}
-  on:reveal|once={() => (mapRevealed = true)}
->
-  <div class="swiss-landscape-card">
-    <div class="swiss-landscape-copy">
-      <p class="section-eyebrow mb-3">Politische Landkarte</p>
-      <h2 class="font-display text-3xl md:text-4xl text-ink mb-3">Parteistärken nach Kanton.</h2>
-      <p class="text-sm md:text-base text-ink-muted leading-relaxed">
-        Fahre über einen Kanton oder tippe ihn an: Die Karte zeigt, welche Partei dort besonders stark ist
-        und wie sich die wichtigsten Parteianteile verteilen.
-      </p>
-      <p class="text-xs text-ink-subtle mt-4">
-        Datenkontext: Nationalratswahlen 2023, im Prototyp verdichtet visualisiert. Quelle:
-        <a href="https://www.atlas.bfs.admin.ch/maps/12/map/mapIdOnly/27436_de.html" target="_blank" rel="noopener" class="source-link">BFS Politischer Atlas</a>
-      </p>
-    </div>
-
-    <div class="swiss-landscape-map">
-      <SwissPartyMap variant="feature" id="landscape" revealed={mapRevealed} />
     </div>
   </div>
 </section>
@@ -184,6 +164,33 @@
     </div>
   </section>
 {/if}
+
+<!-- SWISS PARTY LANDSCAPE — Bonus/Exploration -->
+<section
+  id="politische-landkarte"
+  class="container-app swiss-landscape-section landscape-bonus reveal-stage {mapRevealed ? 'is-visible' : ''} pb-12 md:pb-16"
+  use:inView={{ threshold: 0.22 }}
+  on:reveal|once={() => (mapRevealed = true)}
+>
+  <div class="swiss-landscape-card">
+    <div class="swiss-landscape-copy">
+      <p class="section-eyebrow mb-3">Bonus · Exploration</p>
+      <h2 class="font-display text-2xl md:text-3xl text-ink mb-3">Politische Landkarte: Parteistärken nach Kanton.</h2>
+      <p class="text-sm md:text-base text-ink-muted leading-relaxed">
+        Fahre über einen Kanton oder tippe ihn an: Die Karte zeigt, welche Partei dort besonders stark ist
+        und wie sich die wichtigsten Parteianteile verteilen. Ergänzt den Abstimmungs-Workflow um regionalen Kontext.
+      </p>
+      <p class="text-xs text-ink-subtle mt-4">
+        Datenkontext: Nationalratswahlen 2023, im Prototyp verdichtet visualisiert. Quelle:
+        <a href="https://www.atlas.bfs.admin.ch/maps/12/map/mapIdOnly/27436_de.html" target="_blank" rel="noopener" class="source-link">BFS Politischer Atlas</a>
+      </p>
+    </div>
+
+    <div class="swiss-landscape-map">
+      <SwissPartyMap variant="feature" id="landscape" revealed={mapRevealed} />
+    </div>
+  </div>
+</section>
 
 <!-- FAQ + TRANSPARENCY -->
 <section class="container-app pb-20">
