@@ -20,6 +20,15 @@
   $: answeredCount = Object.keys(answers).length;
   $: skippedCount = Math.max(0, currentStep - 1 - answeredCount);
 
+  // Ableitungen für die Ergebnis-Erklärung (keine neue Berechnung)
+  $: top = results[0];
+  $: second = results[1];
+  $: breakdown = top?.topicBreakdown ?? [];
+  $: topStrengths = breakdown.slice(0, Math.min(3, breakdown.length));
+  $: topDifferences = breakdown.length >= 6 ? [...breakdown].slice(-3).reverse() : [];
+  $: isClose = top && second ? top.match - second.match <= 5 : false;
+  $: hasSkipped = skippedCount > 0;
+
   function setAnswer(value: number): void {
     if (!currentFrage) return;
     answers = { ...answers, [currentFrage.id]: value };
@@ -198,22 +207,50 @@
   {:else}
     <!-- RESULTAT -->
     <div in:fade={{ duration: 300 }}>
-      <p class="section-eyebrow mb-2">Dein Ergebnis · {answeredCount} von {totalQuestions} Fragen beantwortet{skippedCount > 0 ? ' (' + skippedCount + ' übersprungen)' : ''}</p>
+      <p class="section-eyebrow mb-2">Deine Orientierung · {answeredCount} von {totalQuestions} Fragen beantwortet{skippedCount > 0 ? ' (' + skippedCount + ' übersprungen)' : ''}</p>
       <h1 class="font-display text-3xl md:text-4xl text-ink leading-tight mb-3">
-        Du stimmst am ähnlichsten wie die <span style="color: {results[0]?.color};">{results[0]?.kuerzel}</span> ab.
+        Deine stärkste politische Nähe: <span style="color: {top?.color};">{top?.kuerzel}</span>
       </h1>
-      <p class="text-ink-muted mb-2">
-        Übereinstimmung: <span class="font-mono-data text-2xl font-medium text-ink">{results[0]?.match}%</span>
+      <p class="text-sm text-ink-muted mb-3 max-w-2xl">
+        Orientierung basierend auf deinen beantworteten Fragen – keine Wahlempfehlung.
       </p>
-      {#if results[0]?.topicHighlight}
-        <p class="text-sm text-ink-muted mb-8">
-          Besonders nahe bei <strong>{results[0].topicHighlight.label}</strong>.
-        </p>
-      {/if}
+      <p class="text-ink-muted mb-6">
+        Nähe-Wert: <span class="font-mono-data text-2xl font-medium text-ink">{top?.match}%</span>
+      </p>
+
+      <!-- Warum dieses Ergebnis? -->
+      <div class="card p-6 md:p-7 mb-6" style="background: var(--brand-light); border-color: rgba(200,16,46,0.2);">
+        <p class="section-eyebrow mb-3">Warum dieses Ergebnis?</p>
+        {#if topStrengths.length > 0}
+          <p class="text-sm text-ink leading-relaxed mb-2">
+            <strong class="font-semibold">Stärkste Themen-Nähe</strong> zur {top?.kuerzel}:
+            {#each topStrengths as t, i}<span>{t.topicLabel} <span class="font-mono-data text-ink-muted">({t.match}%)</span>{i < topStrengths.length - 1 ? ', ' : ''}</span>{/each}.
+          </p>
+        {/if}
+        {#if topDifferences.length > 0}
+          <p class="text-sm text-ink leading-relaxed mb-2">
+            <strong class="font-semibold">Grösste inhaltliche Distanz</strong>:
+            {#each topDifferences as t, i}<span>{t.topicLabel} <span class="font-mono-data text-ink-muted">({t.match}%)</span>{i < topDifferences.length - 1 ? ', ' : ''}</span>{/each}.
+          </p>
+        {/if}
+        {#if hasSkipped}
+          <p class="text-sm text-ink-muted leading-relaxed mb-2">
+            Übersprungene Fragen wurden nicht gewertet ({skippedCount} von {totalQuestions}).
+          </p>
+        {/if}
+        {#if isClose && second}
+          <p class="text-sm text-ink-muted leading-relaxed">
+            Hinweis: Die ersten Parteien liegen nah beieinander ({top?.kuerzel} {top?.match}% · {second.kuerzel} {second.match}%) – das Ergebnis zeigt eine Tendenz, keine eindeutige Zuordnung.
+          </p>
+        {/if}
+      </div>
 
       <!-- Ranking -->
       <div class="card p-6 md:p-8 mb-6">
-        <p class="section-eyebrow mb-4">Übereinstimmungs-Ranking</p>
+        <p class="section-eyebrow mb-2">Nähe-Ranking</p>
+        <p class="text-xs text-ink-muted leading-relaxed mb-4">
+          Prozentwerte sind Vergleichswerte aus deinen Antworten – kein absolutes Urteil über eine Partei.
+        </p>
         <div class="space-y-3">
           {#each results as r, i}
             <div class="flex items-center gap-3" in:fly={{ y: 10, duration: 300, delay: i * 80 }}>
@@ -239,12 +276,12 @@
 
       <!-- Topic breakdown -->
       <div class="card p-6 md:p-8 mb-6">
-        <p class="section-eyebrow mb-4">Topic-Breakdown — {results[0]?.kuerzel}</p>
+        <p class="section-eyebrow mb-4">Themen-Nähe zu {top?.kuerzel}</p>
         <p class="text-sm text-ink-muted mb-4">
-          So nah bist du der <strong>{results[0]?.kuerzel}</strong> in jedem Themenbereich:
+          So nah liegen deine Antworten der <strong>{top?.kuerzel}</strong> pro Themenbereich:
         </p>
         <div class="space-y-2.5">
-          {#each results[0]?.topicBreakdown ?? [] as t}
+          {#each breakdown as t}
             <div class="flex items-center gap-3">
               <span class="text-sm text-ink w-32">{t.topicLabel}</span>
               <div class="flex-1 community-bar" style="height: 10px;">
@@ -254,28 +291,65 @@
             </div>
           {/each}
         </div>
+
+        {#if topStrengths.length > 0 || topDifferences.length > 0}
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t" style="border-color: var(--border-light);">
+            {#if topStrengths.length > 0}
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-ink mb-2">Stärkste Übereinstimmungen</p>
+                <ul class="space-y-1.5">
+                  {#each topStrengths as t}
+                    <li class="flex justify-between gap-2 text-sm">
+                      <span class="text-ink">{t.topicLabel}</span>
+                      <span class="font-mono-data text-ink-muted">{t.match}%</span>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+            {#if topDifferences.length > 0}
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-ink mb-2">Grösste Unterschiede</p>
+                <ul class="space-y-1.5">
+                  {#each topDifferences as t}
+                    <li class="flex justify-between gap-2 text-sm">
+                      <span class="text-ink">{t.topicLabel}</span>
+                      <span class="font-mono-data text-ink-muted">{t.match}%</span>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
+            {/if}
+          </div>
+        {/if}
       </div>
 
       <!-- Explanation -->
       <details class="card p-5 mb-6" bind:open={expandedExplanation}>
-        <summary class="font-semibold text-sm text-brand cursor-pointer">Wie wird die Übereinstimmung berechnet?</summary>
+        <summary class="font-semibold text-sm text-brand cursor-pointer">Wie wird die Nähe berechnet?</summary>
         <p class="text-sm text-ink leading-relaxed mt-3">
-          Deine Antworten sind auf einer 1–5-Skala kodiert (1 = volle Ablehnung der Aussage, 5 = volle Zustimmung). Für den Vergleich werden sie mit den Parteipositionen auf dieselbe Richtung gebracht. Pro Frage wird die absolute Differenz berechnet — 0 ergibt 100% Match, 4 ergibt 0% Match. Übersprungene Fragen werden nicht gewichtet. Der Endwert ist der Durchschnitt über alle beantworteten Fragen. Die Themen-Breakdown zeigt denselben Durchschnitt pro Themenbereich.
+          Deine Antworten sind auf einer 1–5-Skala kodiert (1 = volle Ablehnung der Aussage, 5 = volle Zustimmung). Für den Vergleich werden sie mit den Parteipositionen auf dieselbe Richtung gebracht. Pro Frage wird die absolute Differenz berechnet — 0 ergibt 100% Nähe, 4 ergibt 0% Nähe. Übersprungene Fragen werden nicht gewichtet. Der Endwert ist der Durchschnitt über alle beantworteten Fragen. Die Themen-Aufstellung zeigt denselben Durchschnitt pro Themenbereich.
         </p>
         <p class="text-xs text-ink-muted mt-3">
-          Die Parteipositionen basieren auf publizierten Wahlempfehlungen, Parteiprogrammen und Abstimmungsverhalten im Nationalrat. Sie wurden für diesen Prototyp manuell kalibriert.
+          Die Parteipositionen basieren auf publizierten Wahlempfehlungen, Parteiprogrammen und Abstimmungsverhalten im Nationalrat. Sie wurden für diesen Prototyp manuell kalibriert und sind eine vereinfachte Modellierung – keine offizielle Parteiposition.
         </p>
       </details>
 
-      <!-- Actions -->
-      <div class="flex flex-col sm:flex-row gap-3 mb-6">
-        <a href="/parteien/{results[0]?.kuerzel.toLowerCase()}" class="btn-primary flex-1 text-center" style="background: {results[0]?.color};">
-          Mehr über die {results[0]?.kuerzel} erfahren
-        </a>
-        <button type="button" on:click={adjust} class="btn-secondary flex-1">
+      <!-- Actions: beide gleichwertig, Reflexions-CTA zuerst -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-3">
+        <button type="button" on:click={adjust} class="btn-primary flex-1 text-center">
           Antworten überprüfen / anpassen
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M4 20l6-6M20 4l-6 6" />
+          </svg>
         </button>
+        <a href="/parteien/{top?.kuerzel.toLowerCase()}" class="btn-primary flex-1 text-center" style="background: {top?.color};">
+          Mehr über die {top?.kuerzel} erfahren
+        </a>
       </div>
+      <p class="text-xs text-ink-muted text-center mb-6">
+        Dein Ergebnis lässt sich jederzeit anpassen – probier andere Antworten und sieh, wie sich die Nähe verschiebt.
+      </p>
 
       <div class="flex flex-col sm:flex-row gap-3">
         <button type="button" on:click={restart} class="btn-ghost flex-1">
@@ -286,7 +360,10 @@
         </button>
       </div>
 
-      <p class="text-xs text-ink-subtle text-center mt-8">
+      <p class="text-sm text-ink-muted text-center mt-8 max-w-2xl mx-auto leading-relaxed">
+        Der Kompass dient der politischen Orientierung und ersetzt keine persönliche Prüfung der Parteipositionen.
+      </p>
+      <p class="text-xs text-ink-subtle text-center mt-3">
         Ergebnis wird lokal in deinem Browser gespeichert und im Profil angezeigt. Keine Übermittlung an einen Server.
       </p>
     </div>
