@@ -60,22 +60,22 @@ Beispiele bisheriger Commit-Stile aus der Historie:
 
 ## Issue-Management
 
-> **TODO:** Issue-Liste vor der Abgabe als sichtbaren Bestandteil des Repos sicherstellen.
+Das vorbereitete Issue-Set liegt in [`issues.md`](issues.md). Es enthält 15 realistische Issues aus dem Projektverlauf mit Status, Priorität, Label-Vorschlägen, Akzeptanzkriterien, Bewertungsraster-Bezug und Umsetzungshinweisen.
 
-Empfehlung für die Ablage:
+Die Issues wurden bewusst zuerst als Dokumentation vorbereitet und **nicht automatisch auf GitHub erstellt**. Dadurch bleibt kontrollierbar, welche Einträge vor der Abgabe tatsächlich ins GitHub-Issue-Board übernommen werden.
 
-- **Offene Issues** anlegen für die noch unter «Offene Verbesserungen» genannten Punkte (siehe [`05-validate.md`](05-validate.md)).
-- **Geschlossene Issues** im Nachgang anlegen für die wichtigsten Meilensteine, die bereits umgesetzt sind (Voting-Journal, Dark Mode, Kompass V2, Realdaten-Replacement, Admin-CRUD), damit eine Spur des Vorgehens auch in GitHub sichtbar ist.
-- **Labels:** `feature`, `bug`, `ux`, `docs`, `nice-to-have`.
+Empfohlene Nutzung:
 
-Vorschläge für Issues, die bereits jetzt sinnvoll als «Open» geführt werden können:
+- **Done-Issues** auf GitHub anlegen und anschliessend schliessen, um den Projektverlauf sichtbar zu machen.
+- **Open-Issues** als tatsächliche Restaufgaben offen lassen, insbesondere Screenshots, Video, finaler Design-Check und Quellenprüfung.
+- **Labels** gemäss [`issues.md`](issues.md) anlegen oder zuweisen.
 
-- Theme-Toggle auch in Mobile-Nav anbieten
-- Workflow-Schritte vereinheitlichen (Startseite vs. Detail vs. Übersicht)
-- `votesStore` und `engagementStore.journal[].position` konsolidieren
-- 2D-Spektrum-Visualisierung im Kompass-Ergebnis
-- Optionalen Profil-Export (JSON / PDF) bauen
-- E2E-Smoke-Test für Kern-Workflow
+Zusätzlich sind einfache GitHub-Issue-Templates unter `.github/ISSUE_TEMPLATE/` vorbereitet:
+
+- `feature.md`
+- `bug.md`
+- `ux.md`
+- `documentation.md`
 
 ## Wichtige Meilensteine
 
