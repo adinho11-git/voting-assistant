@@ -107,7 +107,7 @@
         </ul>
       </div>
 
-      <button type="button" on:click={start} class="btn-primary text-base">
+      <button type="button" on:click={start} class="btn-primary text-base w-full sm:w-auto">
         Quiz starten
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -141,10 +141,10 @@
         </h2>
 
         <div class="card p-6 md:p-8 mb-6">
-          <div class="grid grid-cols-3 text-xs font-mono-data text-ink-muted uppercase tracking-wider mb-4">
-            <span class="text-left">Stimme gar nicht zu</span>
-            <span class="text-center">Neutral</span>
-            <span class="text-right">Stimme voll zu</span>
+          <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 text-xs font-mono-data text-ink-muted uppercase tracking-wider mb-4">
+            <span class="text-left leading-tight">Stimme gar nicht zu</span>
+            <span class="text-center leading-tight">Neutral</span>
+            <span class="text-right leading-tight">Stimme voll zu</span>
           </div>
 
           <!-- Click-based 5-button scale -->
@@ -178,8 +178,8 @@
           />
         </div>
 
-        <div class="flex justify-between items-center flex-wrap gap-2">
-          <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+          <div class="flex w-full sm:w-auto gap-2">
             <button type="button" on:click={back} class="btn-ghost" disabled={currentStep === 1}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -193,7 +193,7 @@
           <button
             type="button"
             on:click={advance}
-            class="btn-primary"
+            class="btn-primary w-full sm:w-auto"
             disabled={answers[currentFrage.id] === undefined && currentStep === 1}
           >
             {currentStep === totalQuestions ? 'Ergebnis anzeigen' : 'Weiter'}

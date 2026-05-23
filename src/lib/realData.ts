@@ -2,17 +2,17 @@
  * Real Swiss federal vote data, sourced from official channels.
  *
  * - Upcoming (status: 'anstehend')  → 14. Juni 2026 (2 Vorlagen, offiziell vom Bundesrat festgelegt)
- * - Past (status: 'vergangen')      → 6 reale Abstimmungen 2024–2026 mit Endresultaten
+ * - Past (status: 'vergangen')      → 11 kuratierte reale Abstimmungen 2023–2026 mit Endresultaten
  *
  * Quellen: admin.ch (Bundesrat), bk.admin.ch (Bundeskanzlei), Resultate via
- * Bundesamt für Statistik / Bundeskanzlei. Stand: 21. Mai 2026.
+ * Bundesamt für Statistik / Bundeskanzlei. Stand: 23. Mai 2026.
  *
  * Argument-Texte sind sinngemässe Zusammenfassungen der offiziell publizierten
  * Standpunkte; jede Aussage ist mit Originalquelle + Datum hinterlegt.
  */
 import type { Abstimmung } from './types';
 
-const TODAY = '2026-05-21';
+const TODAY = '2026-05-23';
 
 export const realAbstimmungen: Abstimmung[] = [
   // ============================================================
@@ -599,6 +599,337 @@ export const realAbstimmungen: Abstimmung[] = [
       accepted: true,
       source: 'Bundeskanzlei — Abstimmungsdashboard',
       sourceUrl: 'https://abstimmungen.admin.ch/'
+    }
+  },
+
+  // ============================================================
+  // 3. März 2024 — Initiative für eine 13. AHV-Rente (VERGANGEN, angenommen)
+  // ============================================================
+  {
+    id: 'ahv13-2024',
+    slug: '13-ahv-rente-2024',
+    title: 'Volksinitiative «Für ein besseres Leben im Alter (Initiative für eine 13. AHV-Rente)»',
+    shortTitle: '13. AHV-Rente',
+    date: '2024-03-03',
+    type: 'eidgenössisch',
+    category: 'Sozialversicherung · AHV',
+    readTime: 3,
+    status: 'vergangen',
+    dataQuality: 'official',
+    bundesratPosition: 'NEIN',
+    parlamentPosition: 'NEIN',
+    parlamentStimmen: { ja: 79, nein: 157 },
+    parlamentNote: 'Abstimmungsbüchlein: Nationalrat 69 Ja zu 126 Nein, Ständerat 10 Ja zu 31 Nein.',
+    aiSummary:
+      'Die Initiative verlangte eine zusätzliche 13. AHV-Altersrente pro Jahr. Bundesrat und Parlament lehnten sie wegen der zusätzlichen Finanzierungslast ab; das Initiativkomitee argumentierte mit steigenden Lebenshaltungskosten und tieferen Renten. Volk und Stände nahmen die Initiative an.',
+    summarySource: 'admin.ch — Initiative für eine 13. AHV-Rente',
+    summarySourceUrl: 'https://www.admin.ch/de/13-ahv-renten',
+    summaryLastChecked: TODAY,
+    proArguments: [
+      {
+        id: 'ahv13-pro-1',
+        text: 'Stärkt die Kaufkraft von Rentnerinnen und Rentnern bei steigenden Lebenshaltungskosten',
+        source: 'Initiativkomitee / Abstimmungsbüchlein',
+        sourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Marz2024/marzo_DE.pdf.download.pdf/marzo_DE.pdf',
+        sourceDate: '2024-03-03',
+        detail:
+          'Das Initiativkomitee betonte, dass Mieten, Krankenkassenprämien und Lebensmittel die AHV-Renten stärker belasten. Eine 13. Rente sollte die erste Säule spürbar stärken.'
+      }
+    ],
+    contraArguments: [
+      {
+        id: 'ahv13-con-1',
+        text: 'Zusätzliche AHV-Ausgaben erhöhen den Finanzierungsdruck',
+        source: 'Bundesrat / Abstimmungsbüchlein',
+        sourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Marz2024/marzo_DE.pdf.download.pdf/marzo_DE.pdf',
+        sourceDate: '2024-03-03',
+        detail:
+          'Bundesrat und Parlament sahen keinen finanziellen Spielraum für eine zusätzliche Monatsrente und priorisierten die langfristige Stabilisierung der AHV.'
+      }
+    ],
+    parteien: [
+      { kuerzel: 'SP', name: 'Sozialdemokratische Partei', position: 'JA', statement: '«AHV-Renten stärken.»', color: '#E11D48' },
+      { kuerzel: 'GP', name: 'Grüne Partei', position: 'JA', statement: '«Mehr Sicherheit im Alter.»', color: '#16A34A' },
+      { kuerzel: 'GLP', name: 'Grünliberale', position: 'NEIN', statement: '«Finanzierung nicht gelöst.»', color: '#0D9488' },
+      { kuerzel: 'Mitte', name: 'Die Mitte', position: 'NEIN', statement: '«Gezielte Lösungen statt Giesskanne.»', color: '#EA580C' },
+      { kuerzel: 'FDP', name: 'FDP. Die Liberalen', position: 'NEIN', statement: '«AHV langfristig sichern.»', color: '#2563EB' },
+      { kuerzel: 'SVP', name: 'Schweizerische Volkspartei', position: 'NEIN', statement: '«Finanzierungsfrage offen.»', color: '#15803D' }
+    ],
+    result: {
+      jaPercent: 58.3,
+      turnoutPercent: 58.36,
+      accepted: true,
+      votersTotal: 3263179,
+      jaVotes: 1884096,
+      neinVotes: 1350325,
+      staendeJa: 15,
+      staendeNein: 11,
+      source: 'Bundeskanzlei — Detailresultat Vorlage 665',
+      sourceUrl: 'https://www.bk.admin.ch/ch/d/pore/va/20240303/det665.html'
+    }
+  },
+
+  // ============================================================
+  // 3. März 2024 — Renteninitiative (VERGANGEN, abgelehnt)
+  // ============================================================
+  {
+    id: 'renteninitiative-2024',
+    slug: 'renteninitiative-2024',
+    title: 'Volksinitiative «Für eine sichere und nachhaltige Altersvorsorge (Renteninitiative)»',
+    shortTitle: 'Renteninitiative',
+    date: '2024-03-03',
+    type: 'eidgenössisch',
+    category: 'Sozialversicherung · Vorsorge',
+    readTime: 3,
+    status: 'vergangen',
+    dataQuality: 'official',
+    bundesratPosition: 'NEIN',
+    parlamentPosition: 'NEIN',
+    parlamentStimmen: { ja: 51, nein: 175 },
+    parlamentNote: 'Abstimmungsbüchlein: Nationalrat 40 Ja zu 143 Nein, Ständerat 11 Ja zu 32 Nein.',
+    aiSummary:
+      'Die Renteninitiative wollte das Rentenalter zuerst auf 66 Jahre erhöhen und danach an die Lebenserwartung koppeln. Bundesrat und Parlament lehnten den Automatismus als zu starr ab. Die Vorlage wurde von Volk und Ständen deutlich verworfen.',
+    summarySource: 'admin.ch — Renteninitiative',
+    summarySourceUrl: 'https://www.admin.ch/de/renteninitiative',
+    summaryLastChecked: TODAY,
+    proArguments: [
+      {
+        id: 'ri-pro-1',
+        text: 'Sollte die AHV langfristig entlasten, ohne neue Steuern oder höhere Beiträge',
+        source: 'Initiativkomitee / Abstimmungsbüchlein',
+        sourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Marz2024/marzo_DE.pdf.download.pdf/marzo_DE.pdf',
+        sourceDate: '2024-03-03',
+        detail:
+          'Die Befürwortenden argumentierten, eine schrittweise Kopplung an die Lebenserwartung sei generationengerecht und stabilisiere die AHV-Finanzen.'
+      }
+    ],
+    contraArguments: [
+      {
+        id: 'ri-con-1',
+        text: 'Automatische Erhöhung des Rentenalters wäre zu starr',
+        source: 'Bundesrat / Abstimmungsbüchlein',
+        sourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Marz2024/marzo_DE.pdf.download.pdf/marzo_DE.pdf',
+        sourceDate: '2024-03-03',
+        detail:
+          'Bundesrat und Parlament betonten, dass Wirtschaft, Arbeitsmarkt und soziale Belastungen bei Rentenreformen politisch abgewogen werden müssen.'
+      }
+    ],
+    parteien: [
+      { kuerzel: 'SP', name: 'Sozialdemokratische Partei', position: 'NEIN', statement: '«Rentenalter nicht automatisieren.»', color: '#E11D48' },
+      { kuerzel: 'GP', name: 'Grüne Partei', position: 'NEIN', statement: '«Unsozialer Rentenabbau.»', color: '#16A34A' },
+      { kuerzel: 'GLP', name: 'Grünliberale', position: 'NEIN', statement: '«Zu mechanischer Ansatz.»', color: '#0D9488' },
+      { kuerzel: 'Mitte', name: 'Die Mitte', position: 'NEIN', statement: '«AHV-Reform braucht Ausgleich.»', color: '#EA580C' },
+      { kuerzel: 'FDP', name: 'FDP. Die Liberalen', position: 'JA', statement: '«Finanzierung sichern.»', color: '#2563EB' },
+      { kuerzel: 'SVP', name: 'Schweizerische Volkspartei', position: 'JA', statement: '«AHV nachhaltig entlasten.»', color: '#15803D' }
+    ],
+    result: {
+      jaPercent: 25.2,
+      turnoutPercent: 58.13,
+      accepted: false,
+      votersTotal: 3250055,
+      jaVotes: 808578,
+      neinVotes: 2393930,
+      staendeJa: 0,
+      staendeNein: 23,
+      source: 'Bundeskanzlei — Detailresultat Vorlage 666',
+      sourceUrl: 'https://www.bk.admin.ch/ch/d/pore/va/20240303/det666.html'
+    }
+  },
+
+  // ============================================================
+  // 18. Juni 2023 — OECD/G20-Mindestbesteuerung (VERGANGEN, angenommen)
+  // ============================================================
+  {
+    id: 'oecd-mindestbesteuerung-2023',
+    slug: 'oecd-mindestbesteuerung-2023',
+    title: 'Bundesbeschluss über eine besondere Besteuerung grosser Unternehmensgruppen (OECD/G20-Mindestbesteuerung)',
+    shortTitle: 'OECD-Mindestbesteuerung',
+    date: '2023-06-18',
+    type: 'eidgenössisch',
+    category: 'Steuern · Unternehmen',
+    readTime: 3,
+    status: 'vergangen',
+    dataQuality: 'official',
+    bundesratPosition: 'JA',
+    parlamentPosition: 'JA',
+    parlamentStimmen: { ja: 165, nein: 61 },
+    parlamentNote: 'EFD: Nationalrat 127 Ja zu 59 Nein, Ständerat 38 Ja zu 2 Nein.',
+    aiSummary:
+      'Die Vorlage setzte die OECD/G20-Mindestbesteuerung für grosse international tätige Unternehmensgruppen um. Bundesrat und Parlament wollten damit stabile Rahmenbedingungen und zusätzliche Steuereinnahmen in der Schweiz sichern. Die Vorlage wurde deutlich angenommen.',
+    summarySource: 'EFD — OECD-Mindestbesteuerung',
+    summarySourceUrl: 'https://www.efd.admin.ch/de/abstimmung-oecd-mindestbesteuerung',
+    summaryLastChecked: TODAY,
+    proArguments: [
+      {
+        id: 'oecd-pro-1',
+        text: 'Sichert Steuereinnahmen und Rechtssicherheit für international tätige Unternehmen',
+        source: 'EFD',
+        sourceUrl: 'https://www.efd.admin.ch/de/abstimmung-oecd-mindestbesteuerung',
+        sourceDate: '2023-06-18',
+        detail:
+          'Bundesrat und Parlament wollten verhindern, dass zusätzliche Steuern in andere Staaten abfliessen, und die Umsetzung der internationalen Mindestbesteuerung in der Schweiz regeln.'
+      }
+    ],
+    contraArguments: [
+      {
+        id: 'oecd-con-1',
+        text: 'Kritik an Verteilung und internationalem Steuerdruck',
+        source: 'Abstimmungsbüchlein',
+        sourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Juni2023/DE_Erlaeuterungen_Juni_2023_web.pdf.download.pdf/DE_Erlaeuterungen_Juni_2023_web.pdf',
+        sourceDate: '2023-06-18',
+        detail:
+          'Kritische Stimmen sahen die Vorlage als Eingriff in die Steuerautonomie und stellten die Verteilung der zusätzlichen Einnahmen zwischen Bund und Kantonen infrage.'
+      }
+    ],
+    parteien: [
+      { kuerzel: 'SP', name: 'Sozialdemokratische Partei', position: 'JA', statement: '«Internationale Mindestregeln umsetzen.»', color: '#E11D48' },
+      { kuerzel: 'GP', name: 'Grüne Partei', position: 'JA', statement: '«Steuerdumping begrenzen.»', color: '#16A34A' },
+      { kuerzel: 'GLP', name: 'Grünliberale', position: 'JA', statement: '«Planungssicherheit schaffen.»', color: '#0D9488' },
+      { kuerzel: 'Mitte', name: 'Die Mitte', position: 'JA', statement: '«Steuereinnahmen in der Schweiz halten.»', color: '#EA580C' },
+      { kuerzel: 'FDP', name: 'FDP. Die Liberalen', position: 'JA', statement: '«Standort pragmatisch schützen.»', color: '#2563EB' },
+      { kuerzel: 'SVP', name: 'Schweizerische Volkspartei', position: 'NEIN', statement: '«Steuerhoheit verteidigen.»', color: '#15803D' }
+    ],
+    result: {
+      jaPercent: 78.5,
+      turnoutPercent: 42.37,
+      accepted: true,
+      votersTotal: 2358623,
+      jaVotes: 1803309,
+      neinVotes: 495239,
+      staendeJa: 23,
+      staendeNein: 0,
+      source: 'Bundeskanzlei — Detailresultat Vorlage 662',
+      sourceUrl: 'https://www.bk.admin.ch/ch/d/pore/va/20230618/det662.html'
+    }
+  },
+
+  // ============================================================
+  // 18. Juni 2023 — Klima- und Innovationsgesetz (VERGANGEN, angenommen)
+  // ============================================================
+  {
+    id: 'klima-innovationsgesetz-2023',
+    slug: 'klima-innovationsgesetz-2023',
+    title: 'Bundesgesetz über die Ziele im Klimaschutz, die Innovation und die Stärkung der Energiesicherheit',
+    shortTitle: 'Klima- und Innovationsgesetz',
+    date: '2023-06-18',
+    type: 'eidgenössisch',
+    category: 'Klimaschutz · Energiepolitik',
+    readTime: 3,
+    status: 'vergangen',
+    dataQuality: 'official',
+    bundesratPosition: 'JA',
+    parlamentPosition: 'JA',
+    parlamentStimmen: { ja: 177, nein: 55 },
+    parlamentNote: 'BAFU: Nationalrat 139 Ja zu 51 Nein, Ständerat 38 Ja zu 4 Nein.',
+    aiSummary:
+      'Das Gesetz verankerte das Netto-Null-Ziel 2050 und Förderinstrumente für klimafreundliche Heizungen sowie innovative Technologien. Bundesrat und Parlament unterstützten die Vorlage; das Referendum kam von der SVP. Die Stimmberechtigten nahmen das Gesetz an.',
+    summarySource: 'BAFU — Klima- und Innovationsgesetz',
+    summarySourceUrl: 'https://www.bafu.admin.ch/de/klimaschutzgesetz',
+    summaryLastChecked: TODAY,
+    proArguments: [
+      {
+        id: 'klg-pro-1',
+        text: 'Fördert klimafreundliche Technologien und reduziert die Abhängigkeit von fossilen Energien',
+        source: 'BAFU',
+        sourceUrl: 'https://www.bafu.admin.ch/de/klimaschutzgesetz',
+        sourceDate: '2023-06-18',
+        detail:
+          'Bundesrat und Parlament sahen die Vorlage als Rahmen für langfristigen Klimaschutz, Versorgungssicherheit und Innovation ohne neue Verbote oder Abgaben.'
+      }
+    ],
+    contraArguments: [
+      {
+        id: 'klg-con-1',
+        text: 'Gegner warnten vor höheren Kosten und stark steigendem Stromverbrauch',
+        source: 'BAFU — Politische Beratungen',
+        sourceUrl: 'https://www.bafu.admin.ch/de/klimaschutzgesetz',
+        sourceDate: '2023-06-18',
+        detail:
+          'Ablehnende Stimmen kritisierten die erwarteten Kosten des Umbaus und warnten vor zusätzlichem Strombedarf durch Heizungsersatz und Elektromobilität.'
+      }
+    ],
+    parteien: [
+      { kuerzel: 'SP', name: 'Sozialdemokratische Partei', position: 'JA', statement: '«Klimaschutz verbindlich machen.»', color: '#E11D48' },
+      { kuerzel: 'GP', name: 'Grüne Partei', position: 'JA', statement: '«Netto Null gesetzlich verankern.»', color: '#16A34A' },
+      { kuerzel: 'GLP', name: 'Grünliberale', position: 'JA', statement: '«Innovation und Klimaschutz verbinden.»', color: '#0D9488' },
+      { kuerzel: 'Mitte', name: 'Die Mitte', position: 'JA', statement: '«Versorgungssicherheit stärken.»', color: '#EA580C' },
+      { kuerzel: 'FDP', name: 'FDP. Die Liberalen', position: 'JA', statement: '«Technologieoffen vorwärts.»', color: '#2563EB' },
+      { kuerzel: 'SVP', name: 'Schweizerische Volkspartei', position: 'NEIN', statement: '«Kosten und Strombedarf zu hoch.»', color: '#15803D' }
+    ],
+    result: {
+      jaPercent: 59.1,
+      turnoutPercent: 42.54,
+      accepted: true,
+      votersTotal: 2368136,
+      jaVotes: 1380974,
+      neinVotes: 957077,
+      source: 'Bundeskanzlei — Detailresultat Vorlage 663',
+      sourceUrl: 'https://www.bk.admin.ch/ch/d/pore/va/20230618/det663.html'
+    }
+  },
+
+  // ============================================================
+  // 18. Juni 2023 — Covid-19-Gesetz (VERGANGEN, angenommen)
+  // ============================================================
+  {
+    id: 'covid-19-gesetz-2023',
+    slug: 'covid-19-gesetz-2023',
+    title: 'Änderung vom 16. Dezember 2022 des Covid-19-Gesetzes',
+    shortTitle: 'Covid-19-Gesetz',
+    date: '2023-06-18',
+    type: 'eidgenössisch',
+    category: 'Gesundheit · Pandemie',
+    readTime: 3,
+    status: 'vergangen',
+    dataQuality: 'official',
+    bundesratPosition: 'JA',
+    parlamentPosition: 'JA',
+    parlamentStimmen: { ja: 179, nein: 51 },
+    parlamentNote: 'Abstimmungsbüchlein: Nationalrat 140 Ja zu 50 Nein, Ständerat 39 Ja zu 1 Nein.',
+    aiSummary:
+      'Die Änderung verlängerte einzelne gesetzliche Grundlagen des Covid-19-Gesetzes bis Mitte 2024, damit der Bund bei Bedarf weiterhin gezielt reagieren konnte. Bundesrat und Parlament empfahlen ein Ja. Die Vorlage wurde angenommen.',
+    summarySource: 'Abstimmungsbüchlein — Volksabstimmung 18. Juni 2023',
+    summarySourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Juni2023/DE_Erlaeuterungen_Juni_2023_web.pdf.download.pdf/DE_Erlaeuterungen_Juni_2023_web.pdf',
+    summaryLastChecked: TODAY,
+    proArguments: [
+      {
+        id: 'covid-pro-1',
+        text: 'Erhält befristete Grundlagen, um bei einer Lageverschlechterung rasch handeln zu können',
+        source: 'Bundesrat / Abstimmungsbüchlein',
+        sourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Juni2023/DE_Erlaeuterungen_Juni_2023_web.pdf.download.pdf/DE_Erlaeuterungen_Juni_2023_web.pdf',
+        sourceDate: '2023-06-18',
+        detail:
+          'Die Befürwortenden argumentierten, dass einzelne Instrumente weiterhin nötig sein könnten, ohne die früheren breiten Massnahmen vollständig zu verlängern.'
+      }
+    ],
+    contraArguments: [
+      {
+        id: 'covid-con-1',
+        text: 'Gegner sahen keinen Bedarf mehr für verlängerte Sondergrundlagen',
+        source: 'Abstimmungsbüchlein',
+        sourceUrl: 'https://www.admin.ch/dam/gov/de/Dokumentation/Abstimmungen/Juni2023/DE_Erlaeuterungen_Juni_2023_web.pdf.download.pdf/DE_Erlaeuterungen_Juni_2023_web.pdf',
+        sourceDate: '2023-06-18',
+        detail:
+          'Kritische Stimmen störten sich an der weiteren Verlängerung von Kompetenzen und hielten die pandemische Lage für ausreichend normalisiert.'
+      }
+    ],
+    parteien: [
+      { kuerzel: 'SP', name: 'Sozialdemokratische Partei', position: 'JA', statement: '«Gesundheitsschutz absichern.»', color: '#E11D48' },
+      { kuerzel: 'GP', name: 'Grüne Partei', position: 'JA', statement: '«Gezielte Instrumente behalten.»', color: '#16A34A' },
+      { kuerzel: 'GLP', name: 'Grünliberale', position: 'JA', statement: '«Handlungsfähigkeit erhalten.»', color: '#0D9488' },
+      { kuerzel: 'Mitte', name: 'Die Mitte', position: 'JA', statement: '«Pragmatische Verlängerung.»', color: '#EA580C' },
+      { kuerzel: 'FDP', name: 'FDP. Die Liberalen', position: 'JA', statement: '«Befristete Grundlage akzeptieren.»', color: '#2563EB' },
+      { kuerzel: 'SVP', name: 'Schweizerische Volkspartei', position: 'NEIN', statement: '«Sonderrecht beenden.»', color: '#15803D' }
+    ],
+    result: {
+      jaPercent: 61.9,
+      turnoutPercent: 42.48,
+      accepted: true,
+      votersTotal: 2365154,
+      jaVotes: 1438216,
+      neinVotes: 883778,
+      source: 'Bundeskanzlei — Detailresultat Vorlage 664',
+      sourceUrl: 'https://www.bk.admin.ch/ch/d/pore/va/20230618/det664.html'
     }
   }
 ];

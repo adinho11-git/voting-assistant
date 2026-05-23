@@ -355,8 +355,8 @@
       </ul>
 
       <div class="flex flex-wrap gap-3 justify-center mt-8">
-        <a href="/abstimmungen" class="btn-primary">Erste Abstimmung verstehen</a>
-        <a href="/kompass" class="btn-secondary">Partei-Kompass starten</a>
+        <a href="/abstimmungen" class="btn-primary w-full sm:w-auto">Erste Abstimmung verstehen</a>
+        <a href="/kompass" class="btn-secondary w-full sm:w-auto">Partei-Kompass starten</a>
       </div>
     </div>
   </section>
@@ -485,12 +485,12 @@
               {/if}
 
               <div class="flex flex-wrap gap-3 mt-5">
-                <a href="/abstimmungen/{abstimmung.slug}" class="btn-primary text-sm">
+                <a href="/abstimmungen/{abstimmung.slug}" class="btn-primary text-sm w-full sm:w-auto">
                   Briefing öffnen
                 </a>
                 <button
                   type="button"
-                  class="btn-secondary text-sm"
+                  class="btn-secondary text-sm w-full sm:w-auto"
                   on:click={() => removeFavorite(abstimmung.slug, abstimmung.shortTitle)}
                 >
                   Aus Merkliste entfernen
@@ -730,7 +730,7 @@
           <p class="font-display text-lg text-ink leading-tight">Bereit für die nächste Vorlage?</p>
           <p class="text-sm text-ink-muted mt-1">Schau dir weitere Abstimmungen an und erweitere deine Datenbasis.</p>
         </div>
-        <a href="/abstimmungen" class="btn-primary text-sm whitespace-nowrap">Weitere Abstimmungen</a>
+        <a href="/abstimmungen" class="btn-primary text-sm w-full sm:w-auto text-center sm:whitespace-nowrap">Weitere Abstimmungen</a>
       </div>
     </section>
   {/if}

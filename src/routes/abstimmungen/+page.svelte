@@ -2,47 +2,37 @@
   import type { PageData } from './$types';
   import AbstimmungCard from '$lib/components/AbstimmungCard.svelte';
   import Badge from '$lib/components/Badge.svelte';
+  import type { Abstimmung } from '$lib/types';
   import { formatDate } from '$lib/mockData';
   import { votesStore } from '$lib/stores/votes';
 
   export let data: PageData;
 
-  type TabKey = 'anstehend' | 'vergangen' | 'kantonal';
+  type TabKey = 'anstehend' | 'vergangen';
   let searchQuery = '';
   let activeTab: TabKey = 'anstehend';
-  let selectedKanton = 'ZH';
-
-  $: tabDefs = [
-    ['anstehend', `Anstehend (${anstehende.length})`],
-    ['vergangen', `Vergangen (${vergangene.length})`],
-    ['kantonal', 'Kantonal']
-  ] as [TabKey, string][];
-
-  const kantone = [
-    { code: 'ZH', name: 'Zürich' },
-    { code: 'BE', name: 'Bern' },
-    { code: 'LU', name: 'Luzern' },
-    { code: 'BS', name: 'Basel-Stadt' },
-    { code: 'GE', name: 'Genf' },
-    { code: 'TI', name: 'Tessin' }
-  ];
 
   $: anstehende = data.abstimmungen.filter((a) => a.status === 'anstehend' && a.type === 'eidgenössisch');
   $: vergangene = data.abstimmungen.filter((a) => a.status === 'vergangen' && a.type === 'eidgenössisch')
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  $: kantonale = data.cantonal.filter((a) => a.kanton === selectedKanton);
+  $: normalizedQuery = searchQuery.trim().toLowerCase();
+  $: tabDefs = [
+    ['anstehend', `Anstehend (${anstehende.length})`],
+    ['vergangen', `Vergangen (${vergangene.length})`]
+  ] as [TabKey, string][];
 
-  function matchesQuery(a: { shortTitle: string; title: string; category: string }) {
-    const q = searchQuery.toLowerCase();
+  function matchesQuery(a: Pick<Abstimmung, 'shortTitle' | 'title' | 'category' | 'aiSummary'>, q: string) {
+    if (!q) return true;
     return (
       a.shortTitle.toLowerCase().includes(q) ||
       a.title.toLowerCase().includes(q) ||
-      a.category.toLowerCase().includes(q)
+      a.category.toLowerCase().includes(q) ||
+      a.aiSummary.toLowerCase().includes(q)
     );
   }
 
-  $: filteredAnstehende = anstehende.filter(matchesQuery);
-  $: filteredVergangene = vergangene.filter(matchesQuery);
+  $: filteredAnstehende = anstehende.filter((a) => matchesQuery(a, normalizedQuery));
+  $: filteredVergangene = vergangene.filter((a) => matchesQuery(a, normalizedQuery));
 
   $: groupedAnstehende = filteredAnstehende.reduce<Record<string, typeof filteredAnstehende>>((acc, a) => {
     const key = formatDate(a.date);
@@ -61,11 +51,15 @@
   function userPositionFor(slug: string) {
     return $votesStore[slug]?.position;
   }
+
+  function voteCountLabel(count: number) {
+    return `${count} ${count === 1 ? 'Vorlage' : 'Vorlagen'}`;
+  }
 </script>
 
 <svelte:head>
   <title>Abstimmungen – Voting Assistant</title>
-  <meta name="description" content="Anstehende und vergangene eidgenössische Vorlagen — mit Ergebnissen, Pro/Contra und Quellen." />
+  <meta name="description" content="Eidgenössische Vorlagen auswählen, Pro und Contra abwägen, politische Einordnungen vergleichen und die eigene Position speichern." />
 </svelte:head>
 
 <!-- HEADER -->
@@ -73,50 +67,55 @@
   <p class="section-eyebrow mb-2">Übersicht</p>
   <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Abstimmungen</h1>
   <p class="text-ink-muted text-sm md:text-base max-w-2xl">
-    Eidgenössische Volksabstimmungen — anstehend &amp; vergangen — chronologisch sortiert, mit offiziellen Resultaten.
+    Wähle eine eidgenössische Vorlage, prüfe Pro- und Contra-Argumente, vergleiche Einordnungen und speichere am Ende deine eigene Position.
   </p>
-</section>
-
-<!-- TAB BAR (separate from search) -->
-<section class="container-app pb-3">
-  <div role="tablist" aria-label="Status-Filter" class="flex gap-1 bg-surface-alt p-1 rounded-lg w-fit overflow-x-auto">
-    {#each tabDefs as [val, label]}
-      <button
-        type="button"
-        role="tab"
-        aria-selected={activeTab === val}
-        on:click={() => (activeTab = val)}
-        class="px-3 md:px-4 py-1.5 text-sm font-semibold rounded-md transition-colors whitespace-nowrap {activeTab === val
-          ? 'bg-surface text-brand shadow-soft'
-          : 'text-ink-muted hover:text-ink'}"
-      >
-        {label}
-      </button>
+  <div class="overview-workflow" aria-label="Workflow der Entscheidungshilfe">
+    {#each ['Verstehen', 'Abwägen', 'Einordnen', 'Entscheiden'] as step, index}
+      <span>{step}</span>
+      {#if index < 3}
+        <i aria-hidden="true">→</i>
+      {/if}
     {/each}
   </div>
 </section>
 
-<!-- SEARCH (separate row, no overlap) -->
+<!-- FILTER + SEARCH -->
 <section class="container-app pb-8">
-  <div class="card p-4 md:p-5">
-    <label for="vote-search" class="sr-only">Abstimmungen durchsuchen</label>
-    <div class="relative">
-      <span
-        class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-ink-subtle"
-        aria-hidden="true"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </span>
-      <input
-        id="vote-search"
-        type="text"
-        placeholder="Vorlage, Kategorie oder Stichwort suchen ..."
-        bind:value={searchQuery}
-        class="input-field"
-        style="padding-left: 44px;"
-      />
+  <div class="overview-controls">
+    <div role="tablist" aria-label="Status-Filter" class="overview-tabs">
+      {#each tabDefs as [val, label]}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === val}
+          on:click={() => (activeTab = val)}
+          class="overview-tab {activeTab === val ? 'active' : ''}"
+        >
+          {label}
+        </button>
+      {/each}
+    </div>
+
+    <div class="overview-search">
+      <label for="vote-search" class="sr-only">Abstimmungen durchsuchen</label>
+      <div class="relative">
+        <span
+          class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-ink-subtle"
+          aria-hidden="true"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </span>
+        <input
+          id="vote-search"
+          type="text"
+          placeholder="Vorlage, Kategorie oder Stichwort suchen ..."
+          bind:value={searchQuery}
+          class="input-field"
+          style="padding-left: 44px;"
+        />
+      </div>
     </div>
   </div>
 </section>
@@ -128,23 +127,27 @@
       {#each Object.entries(groupedAnstehende) as [date, items]}
         <div class="mb-12">
           <div class="vote-group-header">
-            <span class="font-mono-data text-xs font-semibold uppercase tracking-wider text-brand">
-              {date} · Eidgenössische Abstimmungen
-            </span>
-            <span class="text-xs text-ink-subtle block mt-1">{items.length} Vorlage{items.length === 1 ? '' : 'n'} am selben Abstimmungstermin</span>
+            <div>
+              <span class="font-mono-data text-xs font-semibold uppercase tracking-wider text-brand">
+                {date} · Eidgenössische Abstimmungen
+              </span>
+              <span class="text-xs text-ink-subtle block mt-1">
+                {voteCountLabel(items.length)} am selben Abstimmungstermin.
+              </span>
+            </div>
+            <p class="text-sm text-ink-muted">Wähle eine Vorlage, um die geführte Entscheidungshilfe zu starten.</p>
           </div>
           <div class="grid md:grid-cols-2 gap-5">
             {#each items as abstimmung}
-              <AbstimmungCard {abstimmung} />
+              <AbstimmungCard {abstimmung} ctaLabel="Entscheidungshilfe starten" />
             {/each}
           </div>
         </div>
       {/each}
     {:else}
-      <div class="card p-12 text-center text-ink-muted">
-        <p class="text-3xl mb-2" aria-hidden="true">🔍</p>
+      <div class="card empty-state">
         <p class="font-semibold">Keine Treffer</p>
-        <p class="text-xs mt-1">Suchbegriff anpassen oder Tab wechseln.</p>
+        <p class="text-sm mt-1">Für deine Suche wurden keine anstehenden Vorlagen gefunden.</p>
       </div>
     {/if}
   {:else if activeTab === 'vergangen'}
@@ -152,10 +155,15 @@
       {#each Object.entries(groupedVergangene) as [date, items]}
         <div class="mb-12">
           <div class="vote-group-header">
-            <span class="font-mono-data text-xs font-semibold uppercase tracking-wider text-ink-muted">
-              {date} · Eidgenössische Abstimmungen
-            </span>
-            <span class="text-xs text-ink-subtle block mt-1">Offizielles Endergebnis mit Quellen und Vergleichsmöglichkeit</span>
+            <div>
+              <span class="font-mono-data text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                {date} · Eidgenössische Abstimmungen
+              </span>
+              <span class="text-xs text-ink-subtle block mt-1">
+                {voteCountLabel(items.length)} mit offiziellem Endergebnis.
+              </span>
+            </div>
+            <p class="text-sm text-ink-muted">Ausgewählte vergangene eidgenössische Vorlagen dienen zur Einordnung und Nachvollziehbarkeit offizieller Resultate.</p>
           </div>
           <div class="grid gap-5 {items.length > 1 ? 'xl:grid-cols-2' : ''}">
             {#each items as a}
@@ -195,6 +203,10 @@
                       </span>
                     {/if}
                   </div>
+                  <div class="past-card-action">
+                    <span>Resultat einordnen</span>
+                    <span>Details ansehen</span>
+                  </div>
                 {/if}
               </a>
             {/each}
@@ -202,58 +214,157 @@
         </div>
       {/each}
     {:else}
-      <div class="card p-12 text-center text-ink-muted">
-        <p class="font-semibold">Keine Treffer.</p>
+      <div class="card empty-state">
+        <p class="font-semibold">Keine Treffer</p>
+        <p class="text-sm mt-1">Für deine Suche wurden keine vergangenen Vorlagen gefunden.</p>
       </div>
     {/if}
-  {:else}
-    <!-- KANTONAL -->
-    <div class="mb-6 card p-5 md:p-6">
-      <p class="section-eyebrow mb-2">Kantonale Abstimmungen</p>
-      <p class="text-sm text-ink-muted mb-4">
-        Kantons-Vorlagen sind im Prototyp als <strong style="color: var(--contra);">Demo-Inhalt</strong>
-        deklariert (siehe Methodik). Wähle einen Kanton, um die illustrativen Vorlagen zu sehen.
-      </p>
-      <label for="kanton" class="sr-only">Kanton auswählen</label>
-      <select id="kanton" bind:value={selectedKanton} class="input-field max-w-xs">
-        {#each kantone as k}
-          <option value={k.code}>{k.name} ({k.code})</option>
-        {/each}
-      </select>
-    </div>
-
-    {#if kantonale.length > 0}
-      <div class="grid md:grid-cols-2 gap-5 mb-6">
-        {#each kantonale as a}
-          <AbstimmungCard abstimmung={a} />
-        {/each}
-      </div>
-    {:else}
-      <div class="card p-10 text-center">
-        <p class="font-display text-lg text-ink mb-2">Für {kantone.find((k) => k.code === selectedKanton)?.name} liegen aktuell keine Demo-Vorlagen vor.</p>
-        <p class="text-sm text-ink-muted">
-          Im Prototyp ist Zürich als Beispiel hinterlegt. Reale kantonale Daten würden via offizielle
-          Kantons-Datenquellen integriert.
-        </p>
-      </div>
-    {/if}
-
-    <div class="card p-5 md:p-6 bg-surface-alt">
-      <p class="section-eyebrow mb-2">Hinweis zur Datenqualität</p>
-      <p class="text-sm text-ink-muted">
-        Echte kantonale Abstimmungen werden auf den Kantons-Websites publiziert (z.B. <a href="https://www.zh.ch/de/politik-staat/wahlen-abstimmungen.html" class="source-link" target="_blank" rel="noopener">zh.ch</a>, <a href="https://www.be.ch/abstimmungen" class="source-link" target="_blank" rel="noopener">be.ch</a>).
-        Die Anbindung an offene Kantons-Schnittstellen wäre die nächste produktive Erweiterung.
-      </p>
-    </div>
   {/if}
 </section>
 
 <style>
+  .overview-workflow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--surface-alt) 62%, var(--surface));
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .overview-workflow span,
+  .overview-workflow i {
+    flex-shrink: 0;
+  }
+
+  .overview-workflow i {
+    color: var(--text-subtle);
+    font-style: normal;
+  }
+
+  .overview-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .overview-tabs {
+    display: flex;
+    max-width: 100%;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 4px;
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+  }
+
+  .overview-tab {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border: 0;
+    border-radius: calc(var(--radius) - 2px);
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  }
+
+  .overview-tab:hover,
+  .overview-tab:focus-visible {
+    color: var(--text);
+  }
+
+  .overview-tab:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  .overview-tab.active {
+    background: var(--surface);
+    color: var(--brand);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .overview-search {
+    flex: 1;
+    width: 100%;
+    max-width: 420px;
+    min-width: 260px;
+  }
+
+  .past-card-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+    color: var(--brand);
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .past-card-action span:last-child {
+    color: var(--text-subtle);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .empty-state {
+    padding: 36px 24px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  @media (max-width: 760px) {
+    .overview-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .overview-tabs,
+    .overview-search {
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .overview-workflow {
+      border-radius: var(--radius);
+    }
+
+    .past-card-action {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+    }
   }
 </style>

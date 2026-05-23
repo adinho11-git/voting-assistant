@@ -35,7 +35,7 @@ export const PARTEIEN: ParteiProfil[] = [
     praesident: 'Cédric Wermuth & Mattea Meyer (Co-Präsidium)',
     website: 'sp-ps.ch',
     kurzprofil:
-      'Die SP ist die grösste linke Partei der Schweiz und setzt sich für soziale Gerechtigkeit, Umweltschutz und starke öffentliche Institutionen ein. Sie ist in National- und Ständerat stark vertreten und stellt aktuell zwei Bundesräte.',
+      'Die SP ist eine grosse linke Partei der Schweiz und setzt sich für soziale Gerechtigkeit, Umweltschutz und starke öffentliche Institutionen ein. Sie ist in National- und Ständerat vertreten und gehört zu den Bundesratsparteien.',
     kernthemen: ['Soziale Gerechtigkeit', 'Klimaschutz', 'Gleichstellung', 'AHV-Ausbau', 'Mindestlohn', 'Wohnbau'],
     slogan: 'Für eine gerechte Schweiz.'
   },
@@ -69,7 +69,7 @@ export const PARTEIEN: ParteiProfil[] = [
     praesident: 'Jürg Grossen',
     website: 'grunliberale.ch',
     kurzprofil:
-      'Die GLP verbindet ökologische Nachhaltigkeit mit marktwirtschaftlichen Lösungen. Als jüngste der grossen Parteien wächst sie kontinuierlich und spricht besonders Junge und urban-akademische Schichten an.',
+      'Die GLP verbindet ökologische Nachhaltigkeit mit marktwirtschaftlichen Lösungen. Sie entstand 2007 und setzt Schwerpunkte bei Klima, Innovation, Digitalisierung und institutioneller Reformpolitik.',
     kernthemen: ['Ökologische Marktwirtschaft', 'CO₂-Lenkungsabgabe', 'Digitalisierung', 'Bildung', 'Raumplanung', 'Verkehr'],
     slogan: 'Ökologisch. Liberal. Zukunftsorientiert.'
   },
@@ -103,7 +103,7 @@ export const PARTEIEN: ParteiProfil[] = [
     praesident: 'Thierry Burkart',
     website: 'fdp.ch',
     kurzprofil:
-      'Die FDP steht für wirtschaftliche Freiheit, weniger Staat und individuelle Verantwortung. Sie ist traditionell stark in der Wirtschaft und bei Freiberuflern verankert und stellt aktuell einen Bundesrat.',
+      'Die FDP steht für wirtschaftliche Freiheit, weniger Staat und individuelle Verantwortung. Sie ist traditionell in wirtschaftsnahen Milieus verankert und seit Langem auf Bundesebene vertreten.',
     kernthemen: ['Wirtschaftsfreiheit', 'Bildung & Innovation', 'Steuersenkung', 'Bürokratieabbau', 'Bilaterale', 'Sicherheit'],
     slogan: 'Frei und verantwortlich.'
   },
@@ -120,7 +120,7 @@ export const PARTEIEN: ParteiProfil[] = [
     praesident: 'Marcel Dettling',
     website: 'svp.ch',
     kurzprofil:
-      'Die SVP ist die wählerstärkste Partei der Schweiz. Sie setzt auf strikte Migrationspolitik, direkte Demokratie und Skepsis gegenüber internationalen Institutionen. Sie stellt aktuell zwei Bundesräte.',
+      'Die SVP ist eine der wählerstärksten Parteien der Schweiz. Sie setzt auf strikte Migrationspolitik, direkte Demokratie und Skepsis gegenüber internationalen Institutionen. Sie ist auf Bundesebene stark vertreten.',
     kernthemen: ['Migrationspolitik', 'Neutralität', 'Direktdemokratie', 'Eigenverantwortung', 'Landwirtschaft', 'EU-Skepsis'],
     slogan: 'Sicher. Stark. Frei.'
   }

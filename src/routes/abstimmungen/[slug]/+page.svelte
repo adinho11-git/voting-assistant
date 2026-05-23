@@ -30,6 +30,9 @@
     { label: 'Quellen', href: '#quellen' }
   ];
 
+  let sectionScrollAnimation: number | null = null;
+  let sectionScrollBehaviorBefore: string | null = null;
+
   $: a = data.abstimmung;
   $: dateStr = formatDate(a.date);
   $: parlamentTotal = a.parlamentStimmen.ja + a.parlamentStimmen.nein;
@@ -75,6 +78,68 @@
   function toggleDetailFavorite(): void {
     const next = toggleFavorite(a.slug, a.shortTitle);
     showToast(next ? 'In deiner Merkliste gespeichert.' : 'Aus deiner Merkliste entfernt.', 'success');
+  }
+
+  function updateHash(href: string): void {
+    if (window.location.hash === href) {
+      history.replaceState(null, '', href);
+    } else {
+      history.pushState(null, '', href);
+    }
+  }
+
+  function scrollToSection(event: MouseEvent, href: string): void {
+    if (!href.startsWith('#')) return;
+
+    const target = document.querySelector<HTMLElement>(href);
+    if (!target) return;
+
+    event.preventDefault();
+    updateHash(href);
+
+    if (sectionScrollAnimation !== null) {
+      cancelAnimationFrame(sectionScrollAnimation);
+      sectionScrollAnimation = null;
+      document.documentElement.style.scrollBehavior = sectionScrollBehaviorBefore ?? '';
+      sectionScrollBehaviorBefore = null;
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const startY = window.scrollY;
+    const scrollMarginTop = Number.parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+    const targetY = Math.max(0, target.getBoundingClientRect().top + window.scrollY - scrollMarginTop);
+    const distance = targetY - startY;
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+
+    if (reduceMotion || Math.abs(distance) < 4) {
+      window.scrollTo({ top: targetY, left: 0, behavior: 'auto' });
+      return;
+    }
+
+    root.style.scrollBehavior = 'auto';
+    sectionScrollBehaviorBefore = previousScrollBehavior;
+
+    const duration = Math.min(850, Math.max(420, Math.abs(distance) * 0.42));
+    const startTime = performance.now();
+    const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    const animate = (now: number) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const nextY = startY + distance * easeInOutCubic(progress);
+
+      window.scrollTo({ top: nextY, left: 0, behavior: 'auto' });
+
+      if (progress < 1) {
+        sectionScrollAnimation = requestAnimationFrame(animate);
+      } else {
+        root.style.scrollBehavior = sectionScrollBehaviorBefore ?? previousScrollBehavior;
+        sectionScrollBehaviorBefore = null;
+        sectionScrollAnimation = null;
+      }
+    };
+
+    sectionScrollAnimation = requestAnimationFrame(animate);
   }
 </script>
 
@@ -193,7 +258,7 @@
 <section class="container-app pb-6">
   <nav class="workflow-nav" aria-label="Abschnitte des Entscheidungs-Assistenten">
     {#each sectionLinks as item, index}
-      <a href={item.href}>
+      <a href={item.href} on:click={(event) => scrollToSection(event, item.href)}>
         <span>{index + 1}</span>
         {item.label}
       </a>

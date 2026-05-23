@@ -31,11 +31,12 @@
 
   $: parteiA = data.parteien.find((p) => p.kuerzel === compareA);
   $: parteiB = data.parteien.find((p) => p.kuerzel === compareB);
+  $: sameComparison = compareA === compareB;
 </script>
 
 <svelte:head>
   <title>Schweizer Parteien – Voting Assistant</title>
-  <meta name="description" content="Übersicht der sechs grossen Schweizer Parteien — Profil, politische Ausrichtung, Positionen zu aktuellen Vorlagen, direkter Vergleich." />
+  <meta name="description" content="Vergleiche Schweizer Parteien als Orientierungshilfe: politische Grundausrichtungen, Kernthemen und ausgewählte Abstimmungspositionen im Kontext." />
 </svelte:head>
 
 <!-- HERO -->
@@ -43,22 +44,25 @@
   <p class="section-eyebrow mb-2">Politische Landschaft</p>
   <h1 class="font-display text-3xl md:text-4xl text-ink mb-3">Schweizer Parteien</h1>
   <p class="text-ink-muted text-sm md:text-base max-w-3xl">
-    Die sechs grössten Bundesparteien — Ausrichtung, Kernthemen, Positionen zu aktuellen Vorlagen. Vergleiche zwei Parteien direkt im unteren Bereich.
+    Vergleiche Schweizer Parteien als Orientierungshilfe. Die Seite zeigt politische Grundausrichtungen, Kernthemen und Positionen zu ausgewählten Vorlagen — als Kontext, nicht als Wahlempfehlung.
   </p>
+  <a href="#parteienvergleich" class="inline-flex mt-4 text-sm font-semibold text-brand hover:underline">
+    Zum Parteienvergleich
+  </a>
 </section>
 
 <!-- FILTER (separate row with breathing space) -->
 <section class="container-app pb-8">
-  <div class="filter-panel">
+  <div class="filter-panel max-w-full">
     <p class="font-mono-data text-xs uppercase tracking-wider text-ink-muted mb-3">Politisches Spektrum filtern</p>
-    <div role="tablist" aria-label="Politisches Spektrum" class="flex gap-1 bg-surface-alt p-1 rounded-lg w-fit">
+    <div role="tablist" aria-label="Politisches Spektrum" class="flex max-w-full gap-1 overflow-x-auto bg-surface-alt p-1 rounded-lg w-fit">
       {#each filterTabs as tab}
         <button
           type="button"
           role="tab"
           aria-selected={filter === tab.key}
           on:click={() => (filter = tab.key)}
-          class="px-4 py-1.5 text-sm font-semibold rounded-md transition-colors {filter === tab.key
+          class="shrink-0 px-4 py-1.5 text-sm font-semibold rounded-md transition-colors {filter === tab.key
             ? 'bg-surface text-brand shadow-soft'
             : 'text-ink-muted hover:text-ink'}"
         >
@@ -66,6 +70,9 @@
         </button>
       {/each}
     </div>
+    <p class="text-xs text-ink-muted mt-3 max-w-2xl">
+      Die Einordnung ist eine vereinfachte Orientierung anhand programmatischer Schwerpunkte und ausgewählter Abstimmungspositionen.
+    </p>
   </div>
 </section>
 
@@ -119,7 +126,7 @@
           </div>
 
           <a href="/parteien/{partei.kuerzel.toLowerCase()}" class="btn-primary text-sm mt-auto" style="background: {partei.farbe};">
-            Mehr erfahren
+            Profil ansehen
           </a>
         </div>
         </article>
@@ -129,12 +136,12 @@
 </section>
 
 <!-- COMPARE TWO PARTIES -->
-<section class="container-app pb-16">
+<section id="parteienvergleich" class="container-app pb-16">
   <div class="border-t border-border-light pt-10">
     <p class="section-eyebrow mb-2">Direkter Vergleich</p>
     <h2 class="font-display text-2xl md:text-3xl text-ink mb-3">Zwei Parteien gegenüberstellen</h2>
     <p class="text-ink-muted mb-6 max-w-2xl">
-      Wähle zwei Parteien, um Ausrichtung, Spektrum und Positionen zu aktuellen Vorlagen direkt zu vergleichen.
+      Wähle zwei unterschiedliche Parteien, um Ausrichtung, Spektrum und ausgewählte Abstimmungspositionen direkt zu vergleichen.
     </p>
 
     <div class="card p-5 md:p-7 mb-5">
@@ -156,6 +163,12 @@
           </select>
         </label>
       </div>
+
+      {#if sameComparison}
+        <p class="data-notice data-notice-inline mb-5">
+          Wähle zwei unterschiedliche Parteien, damit der Vergleich einen echten Orientierungskontrast zeigt.
+        </p>
+      {/if}
 
       {#if parteiA && parteiB}
         <div class="grid md:grid-cols-2 gap-5">
@@ -188,7 +201,9 @@
                   <dd class="font-mono-data text-ink">{p.spektrumLR}/100</dd>
                 </div>
               </dl>
-              <p class="font-display italic text-sm text-ink-muted mb-3">«{p.slogan}»</p>
+              <p class="text-sm text-ink-muted mb-3">
+                Kernthemen: {p.kernthemen.slice(0, 3).join(', ')}
+              </p>
               <a href="/parteien/{p.kuerzel.toLowerCase()}" class="text-sm font-semibold hover:underline" style="color: {p.farbe};">
                 Detailseite öffnen →
               </a>
@@ -205,9 +220,9 @@
   <section class="container-app pb-16">
     <div class="border-t border-border-light pt-10">
       <p class="section-eyebrow mb-2">Positionen-Matrix</p>
-      <h2 class="font-display text-2xl md:text-3xl text-ink mb-3">Parteipositionen zu aktuellen Vorlagen</h2>
+      <h2 class="font-display text-2xl md:text-3xl text-ink mb-3">Ausgewählte Parteipositionen zu Abstimmungen</h2>
       <p class="text-ink-muted mb-6 max-w-2xl">
-        Auf einen Blick: Wer empfiehlt JA, wer NEIN — zu den anstehenden und zuletzt entschiedenen Vorlagen.
+        Die Matrix zeigt ausgewählte Parteiempfehlungen und Parolen zu Vorlagen. Sie dient der politischen Einordnung und ersetzt keine eigene Bewertung der Argumente.
       </p>
 
       <div class="card overflow-x-auto">
@@ -258,7 +273,7 @@
       <div class="card p-6">
         <h3 class="font-display text-lg text-ink mb-3">Spektrum (Links–Rechts)</h3>
         <p class="text-sm text-ink-muted leading-relaxed mb-4">
-          Die Werte basieren auf publizierten Wahlempfehlungen, Parteiprogrammen und der Abstimmungsanalyse im Nationalrat. Sie sind eine Annäherung — Parteien sind nicht in einem einzigen Wert erfassbar.
+          Die Werte basieren auf programmatischen Schwerpunkten und ausgewählten Abstimmungspositionen. Positionen und Spektrumwerte wurden für den Prototyp vereinfacht zusammengefasst — Parteien sind nicht in einem einzigen Wert erfassbar.
         </p>
         <div class="spektrum-bar mb-2"></div>
         <div class="flex justify-between text-xs font-mono-data text-ink-muted">
@@ -270,12 +285,20 @@
 
       <div class="card p-6">
         <h3 class="font-display text-lg text-ink mb-3">Quellen</h3>
-        <ul class="text-sm text-ink leading-relaxed space-y-2">
-          <li>· Offizielle Websites der sechs Parteien (sp-ps.ch, gruene.ch, grunliberale.ch, die-mitte.ch, fdp.ch, svp.ch)</li>
-          <li>· Bundeskanzlei — Abstimmungsdashboard (abstimmungen.admin.ch)</li>
-          <li>· easyvote.ch (Abstimmungsparolen)</li>
-          <li>· Année politique suisse (annee­politique.swiss)</li>
-        </ul>
+        <div class="space-y-4 text-sm text-ink leading-relaxed">
+          <div>
+            <p class="font-semibold text-ink mb-1">Offizielle Parteiwebsites</p>
+            <p class="text-ink-muted">sp-ps.ch, gruene.ch, grunliberale.ch, die-mitte.ch, fdp.ch, svp.ch</p>
+          </div>
+          <div>
+            <p class="font-semibold text-ink mb-1">Bundeskanzlei / Abstimmungsdashboard</p>
+            <p class="text-ink-muted">abstimmungen.admin.ch</p>
+          </div>
+          <div>
+            <p class="font-semibold text-ink mb-1">Ergänzende Orientierung</p>
+            <p class="text-ink-muted">easyvote.ch und Année politique suisse</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

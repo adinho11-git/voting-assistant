@@ -40,32 +40,56 @@
   </div>
 
   <div class="feedback-grid">
-    <label>
-      <span>Verständlichkeit</span>
-      <div class="rating-row">
+    <div class="feedback-rating-group">
+      <span id="feedback-clarity">Verständlichkeit</span>
+      <div class="rating-row" role="group" aria-labelledby="feedback-clarity">
         {#each [1, 2, 3, 4, 5] as value}
-          <button type="button" class:active={clarity === value} on:click={() => (clarity = value)}>{value}</button>
+          <button
+            type="button"
+            class:active={clarity === value}
+            aria-pressed={clarity === value}
+            aria-label="Verständlichkeit mit {value} von 5 bewerten"
+            on:click={() => (clarity = value)}
+          >
+            {value}
+          </button>
         {/each}
       </div>
-    </label>
+    </div>
 
-    <label>
-      <span>Neutralität</span>
-      <div class="rating-row">
+    <div class="feedback-rating-group">
+      <span id="feedback-neutrality">Neutralität</span>
+      <div class="rating-row" role="group" aria-labelledby="feedback-neutrality">
         {#each [1, 2, 3, 4, 5] as value}
-          <button type="button" class:active={neutrality === value} on:click={() => (neutrality = value)}>{value}</button>
+          <button
+            type="button"
+            class:active={neutrality === value}
+            aria-pressed={neutrality === value}
+            aria-label="Neutralität mit {value} von 5 bewerten"
+            on:click={() => (neutrality = value)}
+          >
+            {value}
+          </button>
         {/each}
       </div>
-    </label>
+    </div>
 
-    <label>
-      <span>Nützlichkeit</span>
-      <div class="rating-row">
+    <div class="feedback-rating-group">
+      <span id="feedback-usefulness">Nützlichkeit</span>
+      <div class="rating-row" role="group" aria-labelledby="feedback-usefulness">
         {#each [1, 2, 3, 4, 5] as value}
-          <button type="button" class:active={usefulness === value} on:click={() => (usefulness = value)}>{value}</button>
+          <button
+            type="button"
+            class:active={usefulness === value}
+            aria-pressed={usefulness === value}
+            aria-label="Nützlichkeit mit {value} von 5 bewerten"
+            on:click={() => (usefulness = value)}
+          >
+            {value}
+          </button>
         {/each}
       </div>
-    </label>
+    </div>
   </div>
 
   <label class="feedback-comment">
@@ -104,7 +128,7 @@
     margin-top: 22px;
   }
 
-  .feedback-grid label,
+  .feedback-rating-group,
   .feedback-comment {
     display: grid;
     gap: 9px;
@@ -134,12 +158,23 @@
     transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
   }
 
-  .rating-row button:hover,
   .rating-row button.active {
     transform: translateY(-1px);
     color: white;
     border-color: var(--brand);
     background: var(--brand);
+  }
+
+  .rating-row button:hover:not(.active) {
+    transform: translateY(-1px);
+    color: var(--brand);
+    border-color: color-mix(in srgb, var(--brand) 42%, var(--border-light));
+    background: var(--brand-soft);
+  }
+
+  .rating-row button:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
   }
 
   .feedback-comment {

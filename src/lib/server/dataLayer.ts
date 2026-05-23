@@ -4,6 +4,7 @@
  */
 import type { Abstimmung, Argument, Partei, Position } from '$lib/types';
 import { getCollection, COLLECTIONS, shouldUseMock } from './db';
+import { getAbstimmungBySlug, realAbstimmungen } from '$lib/realData';
 import {
   listAbstimmungen as memList,
   getAbstimmung as memGet,
@@ -19,29 +20,36 @@ import { addInteresse as memAddInteresse, listInteressen as memListInteressen, t
 
 // ---------- ABSTIMMUNGEN ----------
 
+function withOfficialSeed(items: Abstimmung[]): Abstimmung[] {
+  const bySlug = new Map<string, Abstimmung>();
+  for (const seed of realAbstimmungen) bySlug.set(seed.slug, structuredClone(seed));
+  for (const item of items) bySlug.set(item.slug, structuredClone(item));
+  return Array.from(bySlug.values());
+}
+
 export async function listAbstimmungen(): Promise<Abstimmung[]> {
   const col = await getCollection<Abstimmung>(COLLECTIONS.abstimmungen);
-  if (!col) return memList();
+  if (!col) return withOfficialSeed(memList());
   try {
     const items = await col.find({}, { projection: { _id: 0 } }).toArray();
-    if (items.length === 0) return memList();
-    return items as Abstimmung[];
+    if (items.length === 0) return withOfficialSeed(memList());
+    return withOfficialSeed(items as Abstimmung[]);
   } catch (err) {
     console.error('[dataLayer] listAbstimmungen DB error:', err);
-    return memList();
+    return withOfficialSeed(memList());
   }
 }
 
 export async function getAbstimmung(slug: string): Promise<Abstimmung | null> {
   const col = await getCollection<Abstimmung>(COLLECTIONS.abstimmungen);
-  if (!col) return memGet(slug);
+  if (!col) return memGet(slug) ?? getAbstimmungBySlug(slug) ?? null;
   try {
     const doc = await col.findOne({ slug }, { projection: { _id: 0 } });
     if (doc) return doc as Abstimmung;
-    return memGet(slug);
+    return memGet(slug) ?? getAbstimmungBySlug(slug) ?? null;
   } catch (err) {
     console.error('[dataLayer] getAbstimmung DB error:', err);
-    return memGet(slug);
+    return memGet(slug) ?? getAbstimmungBySlug(slug) ?? null;
   }
 }
 

@@ -72,11 +72,18 @@ html {
   min-height: 100%;
   overflow-y: scroll;
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
   color-scheme: light;
 }
 
 html[data-theme='dark'] {
   color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 html,
@@ -719,11 +726,13 @@ span {
   align-items: center;
   justify-content: space-between;
   height: 64px;
-  gap: 24px;
+  gap: clamp(12px, 2vw, 24px);
   min-width: 0;
 }
 
 .top-nav-link {
+  display: inline-flex;
+  align-items: center;
   font-size: 14px;
   font-weight: 500;
   color: var(--text-muted);
@@ -977,6 +986,7 @@ span {
   display: inline-block;
   width: auto;
   max-width: 100%;
+  overflow-x: auto;
   padding: 16px 20px;
   background: var(--surface);
   border: 1px solid var(--border-light);

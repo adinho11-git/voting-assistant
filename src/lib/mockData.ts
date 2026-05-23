@@ -5,7 +5,7 @@
  * mockAbstimmungen now contains:
  *   • 2 real upcoming votes (14. Juni 2026)
  *   • 1 demo cantonal vote (clearly labelled)
- *   • 6 real past votes (2024–2026) with official results
+ *   • 11 curated real past votes (2023–2026) with official results
  */
 export {
   realAbstimmungen as mockAbstimmungen,

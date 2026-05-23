@@ -2,7 +2,7 @@
   import type { PageData } from './$types';
   import AppBar from '$lib/components/AppBar.svelte';
   import Badge from '$lib/components/Badge.svelte';
-  import InteresseForm from '$lib/components/InteresseForm.svelte';
+  import ParteiReflection from '$lib/components/ParteiReflection.svelte';
   import { formatDate } from '$lib/mockData';
 
   export let data: PageData;
@@ -402,23 +402,8 @@
     }
   };
 
-  const topicTitleMap: Record<string, string> = {
-    Aussenpolitik: 'Aussen-politik',
-    'Bildung & Innovation': 'Bildung & Innovation',
-    'CO₂-Lenkungsabgabe': 'CO₂-Lenkungs-abgabe',
-    Direktdemokratie: 'Direkt-demokratie',
-    Digitalisierung: 'Digitali-sierung',
-    Eigenverantwortung: 'Eigen-verantwortung',
-    Familienpolitik: 'Familien-politik',
-    Landwirtschaft: 'Land-wirtschaft',
-    Migrationspolitik: 'Migrations-politik',
-    Neutralität: 'Neutralität',
-    'Ökologische Marktwirtschaft': 'Ökologische Markt-wirtschaft',
-    Wirtschaftsfreiheit: 'Wirtschafts-freiheit'
-  };
-
   function topicTitle(topic: string): string {
-    return topicTitleMap[topic] ?? topic;
+    return topic;
   }
 
   function topicKind(topic: string): string {
@@ -434,7 +419,48 @@
     return 'default';
   }
 
+  const topicIconMap: Record<string, string> = {
+    'Soziale Gerechtigkeit': '<path d="M12 4v16"/><path d="M5 8h14"/><path d="M7 8l-3 6h6L7 8Z"/><path d="M17 8l-3 6h6l-3-6Z"/>',
+    Klimaschutz: '<path d="M5 13c4-7 10-8 14-8-1 7-5 12-12 12"/><path d="M8 16c2-4 5-7 10-10"/>',
+    Gleichstellung: '<circle cx="12" cy="12" r="8"/><path d="M8 10h8"/><path d="M8 14h8"/>',
+    'AHV-Ausbau': '<path d="M6 20V9a6 6 0 0 1 12 0v11"/><path d="M4 20h16"/><path d="M9 13h6"/><path d="M9 16h6"/>',
+    Mindestlohn: '<circle cx="8" cy="14" r="4"/><path d="M14 15V7"/><path d="M10 11l4-4 4 4"/>',
+    Wohnbau: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/>',
+    Klimakrise: '<path d="M14 14.8V5a2 2 0 0 0-4 0v9.8"/><path d="M8 17a4 4 0 1 0 8 0c0-1.3-.6-2.4-2-3.2"/><path d="M18 5l1-1"/><path d="M20 9h2"/><path d="M18 13l1 1"/>',
+    Biodiversität: '<path d="M12 20v-7"/><path d="M8 13c-3 0-5-2-5-5 3 0 5 2 5 5Z"/><path d="M16 13c3 0 5-2 5-5-3 0-5 2-5 5Z"/><circle cx="12" cy="8" r="2"/>',
+    'Erneuerbare Energien': '<circle cx="8" cy="8" r="3"/><path d="M8 1v2"/><path d="M8 13v2"/><path d="M1 8h2"/><path d="M13 8h2"/><path d="M15 13h5l-4 8h5"/>',
+    Verkehrswende: '<path d="M5 17h14"/><path d="M7 17V7h10v10"/><path d="M9 7V5h6v2"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>',
+    'Soziale Ökologie': '<path d="M7 17c3-6 7-8 12-8-1 6-4 9-10 9"/><path d="M5 20c2-4 5-7 10-10"/><circle cx="6" cy="8" r="3"/><path d="M3 14c1.2-2 4.8-2 6 0"/>',
+    Tierschutz: '<circle cx="12" cy="14" r="3"/><circle cx="7" cy="10" r="1.6"/><circle cx="10" cy="7" r="1.6"/><circle cx="14" cy="7" r="1.6"/><circle cx="17" cy="10" r="1.6"/>',
+    'Ökologische Marktwirtschaft': '<path d="M4 18h16"/><path d="M7 15l4-4 3 3 5-7"/><path d="M6 8c3-4 7-4 10-4-1 4-4 7-9 7"/>',
+    'CO₂-Lenkungsabgabe': '<path d="M4 12a8 8 0 0 1 13-6"/><path d="M17 6h-4V2"/><path d="M20 12a8 8 0 0 1-13 6"/><path d="M7 18h4v4"/><circle cx="12" cy="12" r="2.5"/>',
+    Digitalisierung: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/><path d="M12 1v3"/><path d="M12 20v3"/><path d="M1 12h3"/><path d="M20 12h3"/>',
+    Bildung: '<path d="M4 6.5c2-1 5-1 8 1v11c-3-2-6-2-8-1v-11Z"/><path d="M12 7.5c3-2 6-2 8-1v11c-2-1-5-1-8 1v-11Z"/>',
+    Raumplanung: '<path d="M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2V6Z"/><path d="M9 4v14"/><path d="M15 6v14"/>',
+    Verkehr: '<path d="M5 18c5-8 9-8 14 0"/><path d="M5 18h14"/><circle cx="8" cy="18" r="2"/><circle cx="16" cy="18" r="2"/><path d="M12 10v4"/>',
+    Familienpolitik: '<path d="M4 12l8-7 8 7"/><path d="M6 11v9h12v-9"/><circle cx="10" cy="14" r="1.7"/><circle cx="14" cy="14" r="1.7"/><path d="M9 18c1.5-2 4.5-2 6 0"/>',
+    Landwirtschaft: '<path d="M4 19c4-6 12-6 16 0"/><path d="M12 19V7"/><path d="M8 11c-2 0-4-2-4-4 3 0 5 1.5 6 4"/><path d="M16 11c2 0 4-2 4-4-3 0-5 1.5-6 4"/>',
+    Gesundheit: '<path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6V4Z"/>',
+    Föderalismus: '<circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M8 7.5l3 8"/><path d="M16 7.5l-3 8"/><path d="M8 6h8"/>',
+    'KMU-Förderung': '<path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M6 10v10h12V10"/><path d="M9 20v-5h6v5"/><path d="M4 10c0 2 3 2 4 0 1 2 5 2 6 0 1 2 4 2 6 0"/>',
+    Aussenpolitik: '<circle cx="11" cy="11" r="7"/><path d="M4 11h14"/><path d="M11 4c2 2 3 4.4 3 7s-1 5-3 7"/><path d="M11 4c-2 2-3 4.4-3 7s1 5 3 7"/><path d="M18 14l3 2-3 2v-4Z"/>',
+    Wirtschaftsfreiheit: '<path d="M4 18h16"/><path d="M6 15l4-4 3 3 5-7"/><path d="M18 7v5h-5"/>',
+    'Bildung & Innovation': '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M8 14a6 6 0 1 1 8 0c-.8.6-1 1.5-1 2H9c0-.5-.2-1.4-1-2Z"/><path d="M12 8v4l2 2"/>',
+    Steuersenkung: '<circle cx="7" cy="8" r="3"/><path d="M15 5v12"/><path d="M11 13l4 4 4-4"/><path d="M5 18h15"/>',
+    Bürokratieabbau: '<path d="M7 4h10v16H7z"/><path d="M9 8h6"/><path d="M9 12h5"/><path d="M9 16h3"/><path d="M4 20L20 4"/>',
+    Bilaterale: '<path d="M8 12l-2 2a3 3 0 0 0 4 4l2-2"/><path d="M16 12l2-2a3 3 0 0 0-4-4l-2 2"/><path d="M9 15l6-6"/>',
+    Sicherheit: '<path d="M12 3l7 3v5c0 4.5-2.8 8-7 10-4.2-2-7-5.5-7-10V6l7-3Z"/><path d="M9.5 12l1.8 1.8 3.4-4"/>',
+    Migrationspolitik: '<path d="M4 12h13"/><path d="M13 8l4 4-4 4"/><path d="M20 5v14"/><path d="M6 7v10"/>',
+    Neutralität: '<path d="M12 3l7 4v5c0 4-2.5 7-7 9-4.5-2-7-5-7-9V7l7-4Z"/><path d="M10 8h4v3h3v4h-3v3h-4v-3H7v-4h3V8Z"/>',
+    Direktdemokratie: '<path d="M5 11h14v9H5z"/><path d="M8 11l4-7 4 7"/><path d="M9 15h6"/>',
+    Eigenverantwortung: '<circle cx="12" cy="8" r="3"/><path d="M6 20c1-4 11-4 12 0"/><path d="M15 12l2 2 4-5"/>',
+    'EU-Skepsis': '<circle cx="12" cy="12" r="8"/><path d="M7 17L17 7"/><path d="M8 9l1-.8"/><path d="M12 7l.3-1"/><path d="M16 9l1-.8"/><path d="M9 15l-1 .8"/><path d="M15 15l1 .8"/>'
+  };
+
   function iconForTopic(topic: string): string {
+    const topicIcon = topicIconMap[topic];
+    if (topicIcon) return topicIcon;
+
     const kind = topicKind(topic);
     if (kind === 'climate') return '<path d="M12 21C8 17 5 13.7 5 9a7 7 0 0 1 14 0c0 4.7-3 8-7 12Z"/><path d="M9 10c2.5.2 4.5-1 6-3"/>';
     if (kind === 'foreign') return '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2 2.2 3 4.9 3 8s-1 5.8-3 8M12 4c-2 2.2-3 4.9-3 8s1 5.8 3 8"/>';
@@ -563,11 +589,11 @@
 
 <!-- HERO with party color -->
 <section
-  class="border-b border-border-light"
-  style="background: linear-gradient(135deg, {p.farbeLight} 0%, var(--surface) 100%);"
+  class="party-hero border-b border-border-light"
+  style="--party-color: {p.farbe}; --party-soft: {p.farbeLight};"
 >
   <div class="container-app py-10 md:py-14">
-    <a href="/parteien" class="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold mb-6" style="color: {p.farbe};">
+    <a href="/parteien" class="party-hero-link hidden md:inline-flex items-center gap-1.5 text-sm font-semibold mb-6">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
@@ -583,13 +609,13 @@
         {p.kuerzel.slice(0, 4)}
       </div>
       <div class="flex-1 min-w-0">
-        <p class="font-mono-data text-xs uppercase tracking-wider mb-1" style="color: {p.farbe};">
+        <p class="party-hero-meta font-mono-data text-xs uppercase tracking-wider mb-1">
           {p.ausrichtung} · seit {p.gegruendet}
         </p>
         <h1 class="font-display text-3xl md:text-5xl text-ink leading-tight mb-2">
           {p.name}
         </h1>
-        <p class="font-display italic text-base md:text-lg text-ink-muted">«{p.slogan}»</p>
+        <p class="text-base md:text-lg text-ink-muted">Profil, Kernthemen und ausgewählte Abstimmungspositionen im Kontext.</p>
       </div>
     </div>
   </div>
@@ -612,17 +638,17 @@
         <div class="card p-5" style="border-top: 4px solid {p.farbe};">
           <p class="section-eyebrow mb-2">Politische Rolle</p>
           <p class="text-sm text-ink-muted leading-relaxed">
-            Mit einer Position von <strong style="color: {p.farbe};">{p.spektrumLR}/100</strong> auf der Links-Rechts-Achse
+            Mit einer Position von <strong class="party-inline-accent">{p.spektrumLR}/100</strong> auf der Links-Rechts-Achse
             steht die Partei im Bereich <strong>{p.ausrichtung}</strong>. In Abstimmungen ist sie besonders relevant,
             wenn Vorlagen Wertefragen mit Kosten-, Freiheits- oder Standortfragen verbinden.
           </p>
         </div>
         <div class="card p-5" style="border-top: 4px solid {p.farbe};">
-          <p class="section-eyebrow mb-2">Wählerprofil</p>
+          <p class="section-eyebrow mb-2">Einordnung im Kompass</p>
           <p class="text-sm text-ink-muted leading-relaxed">
-            Die Partei spricht Personen an, die ihre Prioritäten bei {p.kernthemen.slice(0, 3).join(', ')}
-            setzen. Der Kompass vergleicht deine Antworten mit diesen programmatischen Schwerpunkten und mit
-            konkreten Parolen zu Abstimmungen.
+            Für die Einordnung sind unter anderem {p.kernthemen.slice(0, 3).join(', ')} relevant.
+            Der Kompass vergleicht deine Antworten mit programmatischen Schwerpunkten und ausgewählten
+            Parolen zu Abstimmungen, ohne daraus eine Wahlempfehlung abzuleiten.
           </p>
         </div>
       </div>
@@ -700,7 +726,7 @@
         <p class="section-eyebrow mb-1">Kernthemen im Detail</p>
         <h3 class="font-display text-2xl md:text-3xl text-ink">Wofür die {p.kuerzel} politisch steht</h3>
         <p class="theme-explorer-lead">
-          Wähle ein Thema aus: links als kompakte Themenwürfel, rechts mit Haltung, Abstimmungslogik,
+          Wähle ein Thema aus: links als kompakte Themenliste, rechts mit Haltung, Abstimmungslogik,
           typischem Gegenargument und den wichtigsten Prüffragen.
         </p>
       </div>
@@ -708,16 +734,17 @@
     </div>
 
     <div class="theme-explorer-grid">
-      <div class="theme-cube-grid" aria-label="Kernthema auswählen">
+      <nav class="theme-topic-nav" aria-label="Kernthema auswählen">
         {#each p.kernthemen as thema}
           <button
             type="button"
-            class="theme-cube"
+            class="theme-topic-button"
             class:active={selectedTopic === thema}
             on:click={() => (selectedTopic = thema)}
             aria-pressed={selectedTopic === thema}
+            aria-label={selectedTopic === thema ? `${topicTitle(thema)} ist aktiv` : `${topicTitle(thema)} öffnen`}
           >
-            <span class="theme-icon" aria-hidden="true">
+            <span class="theme-topic-icon" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -729,11 +756,15 @@
                 {@html iconForTopic(thema)}
               </svg>
             </span>
-            <span class="theme-title">{topicTitle(thema)}</span>
-            <span class="theme-cta">{selectedTopic === thema ? 'Aktiv' : 'Öffnen'}</span>
+            <span class="theme-topic-text">
+              <span class="theme-title">{topicTitle(thema)}</span>
+              {#if selectedTopic === thema}
+                <span class="theme-cta">Aktiv</span>
+              {/if}
+            </span>
           </button>
         {/each}
-      </div>
+      </nav>
 
       <div class="theme-detail-wrap">
         {#key selectedTopic}
@@ -752,7 +783,6 @@
                 </svg>
               </span>
               <div>
-                <p class="section-eyebrow mb-1" style="color: {p.farbe};">Ausgewähltes Kernthema</p>
                 <h4>{selectedTopic}</h4>
               </div>
             </div>
@@ -790,8 +820,11 @@
 {#if data.positionen.length > 0}
   <section class="container-app pb-12">
     <div class="border-b border-border-light pb-2 mb-5">
-      <p class="section-eyebrow mb-1">Aktuelle Vorlagen</p>
-      <h2 class="font-display text-2xl text-ink">Positionen zu Abstimmungen</h2>
+      <p class="section-eyebrow mb-1">Ausgewählte Vorlagen</p>
+      <h2 class="font-display text-2xl text-ink">Ausgewählte Positionen zu Abstimmungen</h2>
+      <p class="text-sm text-ink-muted mt-2 max-w-2xl">
+        Die Einträge zeigen kuratierte Parteiempfehlungen und Positionen aus dem Prototyp-Datensatz. Sie dienen als Kontext und suggerieren keine laufende Aktualität.
+      </p>
     </div>
 
     <div class="space-y-3">
@@ -817,12 +850,36 @@
   </section>
 {/if}
 
-<!-- INTERESSE FORM (Feature 3) -->
+<!-- Lokale Reflexion zur Partei -->
 <section class="container-app pb-20">
-  <InteresseForm parteiKuerzel={p.kuerzel} parteiName={p.name} parteiFarbe={p.farbe} />
+  <ParteiReflection parteiKuerzel={p.kuerzel} parteiName={p.name} parteiFarbe={p.farbe} />
 </section>
 
 <style>
+  .party-hero {
+    background:
+      radial-gradient(circle at left 55%, color-mix(in srgb, var(--party-soft) 72%, transparent), transparent 34%),
+      linear-gradient(135deg, color-mix(in srgb, var(--party-soft) 82%, var(--surface)) 0%, var(--surface) 72%);
+  }
+
+  .party-hero-link,
+  .party-hero-meta,
+  .party-inline-accent {
+    color: var(--party-color);
+  }
+
+  .party-hero-link {
+    transition: color 160ms ease;
+  }
+
+  .party-hero-link:hover {
+    color: color-mix(in srgb, var(--party-color) 78%, var(--text));
+  }
+
+  .party-inline-accent {
+    font-weight: 800;
+  }
+
   .profile-copy {
     color: var(--text-muted);
     display: grid;
@@ -842,14 +899,10 @@
   }
 
   .theme-explorer {
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-lg, 16px);
-    background:
-      radial-gradient(circle at top left, color-mix(in srgb, var(--party-soft) 82%, transparent), transparent 34%),
-      radial-gradient(circle at right 45%, color-mix(in srgb, var(--party-color) 10%, transparent), transparent 32%),
-      linear-gradient(135deg, color-mix(in srgb, var(--party-soft) 48%, var(--surface)) 0%, var(--surface) 62%);
-    box-shadow: var(--shadow-sm);
-    padding: clamp(1.05rem, 2.4vw, 1.65rem);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
   }
 
   .theme-explorer-head {
@@ -881,111 +934,92 @@
   }
 
   .theme-explorer-grid {
-    align-items: stretch;
+    align-items: start;
     display: grid;
-    gap: clamp(1rem, 2vw, 1.5rem);
-    grid-template-columns: minmax(330px, 0.62fr) minmax(0, 1.38fr);
+    gap: clamp(1rem, 2.2vw, 1.65rem);
+    grid-template-columns: minmax(230px, 0.36fr) minmax(0, 1.64fr);
   }
 
-  .theme-cube-grid {
-    display: grid;
-    gap: 0.75rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .theme-cube {
-    appearance: none;
-    background:
-      linear-gradient(145deg, color-mix(in srgb, var(--surface) 92%, var(--party-soft)), var(--surface));
-    border: 1px solid var(--border-light);
+  .theme-topic-nav {
+    align-content: start;
+    align-self: start;
+    background: color-mix(in srgb, var(--surface) 86%, var(--party-soft));
+    border: 1px solid color-mix(in srgb, var(--party-color) 13%, var(--border-light));
     border-radius: var(--radius, 12px);
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+    display: grid;
+    gap: 0.28rem;
+    height: fit-content;
+    padding: 0.4rem;
+  }
+
+  .theme-topic-button {
+    appearance: none;
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-left: 3px solid transparent;
+    border-radius: 9px;
     color: var(--text);
     cursor: pointer;
-    display: grid;
-    gap: 0.62rem;
-    grid-template-rows: auto 1fr auto;
-    aspect-ratio: 1 / 1;
-    min-height: 0;
+    display: flex;
+    gap: 0.58rem;
+    min-height: 44px;
     overflow: hidden;
-    padding: clamp(0.85rem, 1.3vw, 1rem);
+    padding: 0.52rem 0.6rem 0.52rem 0.5rem;
     position: relative;
     text-align: left;
     transition:
       transform 190ms ease,
       border-color 190ms ease,
       background 190ms ease,
-      box-shadow 190ms ease;
+      box-shadow 190ms ease,
+      color 190ms ease;
   }
 
-  .theme-cube::after {
-    background: var(--party-color);
-    border-radius: 999px;
-    bottom: 0.75rem;
-    content: '';
-    height: 4px;
-    left: 0.9rem;
-    opacity: 0;
-    position: absolute;
-    transform: scaleX(0.18);
-    transform-origin: left;
-    transition: transform 220ms ease, opacity 220ms ease;
-    width: 46px;
+  .theme-topic-button:hover {
+    background: color-mix(in srgb, var(--party-soft) 50%, var(--surface));
+    border-color: color-mix(in srgb, var(--party-color) 20%, var(--border-light));
   }
 
-  .theme-cube::before {
-    background: radial-gradient(circle, color-mix(in srgb, var(--party-color) 13%, transparent), transparent 60%);
-    content: '';
-    height: 90px;
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    right: -32px;
-    top: -34px;
-    transition: opacity 220ms ease;
-    width: 90px;
+  .theme-topic-button:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--party-color) 72%, white);
+    outline-offset: 2px;
   }
 
-  .theme-cube:hover {
-    border-color: color-mix(in srgb, var(--party-color) 58%, var(--border-light));
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-  }
-
-  .theme-cube.active {
-    background:
-      linear-gradient(145deg, color-mix(in srgb, var(--party-soft) 82%, var(--surface)), var(--surface));
-    border-color: color-mix(in srgb, var(--party-color) 72%, var(--border-light));
+  .theme-topic-button.active {
+    background: color-mix(in srgb, var(--party-soft) 72%, var(--surface));
+    border-color: color-mix(in srgb, var(--party-color) 24%, var(--border-light));
+    border-left-color: var(--party-color);
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--party-color) 58%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--party-color) 12%, transparent),
       var(--shadow-sm);
   }
 
-  .theme-cube.active::before,
-  .theme-cube:hover::before {
-    opacity: 1;
+  .theme-topic-icon {
+    align-items: center;
+    background: color-mix(in srgb, var(--party-soft) 78%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--party-color) 18%, transparent);
+    border-radius: 999px;
+    color: var(--party-color);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 24px;
+    justify-content: center;
+    width: 24px;
   }
 
-  .theme-cube.active::after {
-    opacity: 1;
-    transform: scaleX(1);
+  .theme-topic-icon svg {
+    height: 13px;
+    width: 13px;
   }
 
   .theme-icon {
     align-items: center;
     background: color-mix(in srgb, var(--party-soft) 78%, var(--surface));
     border: 1px solid color-mix(in srgb, var(--party-color) 25%, transparent);
-    border-radius: 14px;
     color: var(--party-color);
     display: inline-flex;
-    height: 38px;
     justify-content: center;
-    width: 38px;
-  }
-
-  .theme-icon svg {
-    height: 20px;
-    width: 20px;
   }
 
   .theme-icon.large {
@@ -1001,22 +1035,27 @@
   }
 
   .theme-title {
-    align-self: start;
     color: var(--text);
-    font-size: clamp(0.95rem, 1.25vw, 1.1rem);
-    font-weight: 850;
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 760;
     hyphens: manual;
-    line-height: 1.15;
-    overflow-wrap: normal;
-    padding-right: 0.3rem;
+    line-height: 1.22;
+    overflow-wrap: anywhere;
     word-break: normal;
   }
 
   .theme-cta {
-    color: var(--party-color);
-    font: 700 0.68rem/1 var(--font-mono, 'IBM Plex Mono', monospace);
+    color: color-mix(in srgb, var(--party-color) 78%, var(--text-muted));
+    display: block;
+    font: 700 0.56rem/1.2 var(--font-mono, 'IBM Plex Mono', monospace);
     letter-spacing: 0.06em;
+    margin-top: 0.14rem;
     text-transform: uppercase;
+  }
+
+  .theme-topic-text {
+    min-width: 0;
   }
 
   .theme-detail-wrap {
@@ -1126,12 +1165,87 @@
     padding: 0.45rem 0.7rem;
   }
 
+  :global(html[data-theme='dark']) .party-hero {
+    background:
+      radial-gradient(circle at left 55%, color-mix(in srgb, var(--party-color) 22%, transparent), transparent 36%),
+      linear-gradient(135deg, color-mix(in srgb, var(--surface-alt) 88%, var(--party-color)) 0%, var(--surface) 72%);
+    border-bottom-color: var(--border-light);
+  }
+
+  :global(html[data-theme='dark']) .party-hero h1 {
+    color: var(--text);
+  }
+
+  :global(html[data-theme='dark']) .party-hero .text-ink-muted {
+    color: color-mix(in srgb, var(--text) 84%, var(--text-muted));
+  }
+
+  :global(html[data-theme='dark']) .party-hero-link,
+  :global(html[data-theme='dark']) .party-hero-meta,
+  :global(html[data-theme='dark']) .party-inline-accent,
+  :global(html[data-theme='dark']) .theme-detail-label,
+  :global(html[data-theme='dark']) .theme-cta,
+  :global(html[data-theme='dark']) .theme-explorer-count {
+    color: color-mix(in srgb, var(--party-color) 62%, white);
+  }
+
+  :global(html[data-theme='dark']) .party-hero-link:hover {
+    color: color-mix(in srgb, var(--party-color) 48%, white);
+  }
+
+  :global(html[data-theme='dark']) .theme-detail-card {
+    background:
+      radial-gradient(circle at 96% 4%, color-mix(in srgb, var(--party-color) 15%, transparent), transparent 30%),
+      linear-gradient(140deg, color-mix(in srgb, var(--surface-alt) 90%, var(--party-color)), var(--surface));
+    border-color: color-mix(in srgb, var(--party-color) 28%, var(--border));
+  }
+
   :global(html[data-theme='dark']) .theme-question-list span {
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--party-color) 22%, var(--surface-alt)), var(--surface-alt));
     border-color: color-mix(in srgb, var(--party-color) 42%, var(--border));
     color: var(--text);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  :global(html[data-theme='dark']) .theme-explorer {
+    background: transparent;
+  }
+
+  :global(html[data-theme='dark']) .theme-explorer-head {
+    border-bottom-color: color-mix(in srgb, var(--text) 18%, var(--border));
+  }
+
+  :global(html[data-theme='dark']) .theme-explorer-lead,
+  :global(html[data-theme='dark']) .theme-focus,
+  :global(html[data-theme='dark']) .theme-detail-section p:last-child {
+    color: color-mix(in srgb, var(--text) 82%, var(--text-muted));
+  }
+
+  :global(html[data-theme='dark']) .theme-detail-top h4,
+  :global(html[data-theme='dark']) .theme-title {
+    color: var(--text);
+  }
+
+  :global(html[data-theme='dark']) .theme-topic-nav {
+    background: color-mix(in srgb, var(--surface-alt) 92%, var(--party-color));
+    border-color: color-mix(in srgb, var(--party-color) 28%, var(--border));
+  }
+
+  :global(html[data-theme='dark']) .theme-topic-button:hover {
+    background: color-mix(in srgb, var(--surface-alt) 82%, var(--party-color));
+    border-color: color-mix(in srgb, var(--party-color) 30%, var(--border));
+  }
+
+  :global(html[data-theme='dark']) .theme-topic-button.active {
+    background: color-mix(in srgb, var(--surface-alt) 72%, var(--party-color));
+    border-color: color-mix(in srgb, var(--party-color) 32%, var(--border));
+    border-left-color: var(--party-color);
+  }
+
+  :global(html[data-theme='dark']) .theme-topic-icon {
+    background: color-mix(in srgb, var(--surface) 70%, var(--party-color));
+    border-color: color-mix(in srgb, var(--party-color) 38%, var(--border));
   }
 
   @keyframes topic-detail-reveal {
@@ -1157,19 +1271,20 @@
       flex-direction: column;
     }
 
-    .theme-cube-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .theme-topic-nav {
+      gap: 0.35rem;
+      padding: 0.45rem;
     }
 
-    .theme-cube {
-      aspect-ratio: auto;
-      min-height: 118px;
+    .theme-topic-button {
+      min-height: 50px;
+      padding: 0.62rem 0.65rem;
     }
   }
 
   @media (max-width: 420px) {
-    .theme-cube-grid {
-      grid-template-columns: 1fr;
+    .theme-topic-button {
+      min-height: 48px;
     }
   }
 </style>

@@ -34,7 +34,7 @@
         Diese App ist eine im Modul Prototyping (ZHAW FS 2026) entwickelte Demo —
         <strong style="color: var(--brand);">keine offizielle Abstimmungshilfe.</strong>
         Reale Vorlagen, Argumente und Ergebnisse stammen von admin.ch /
-        bk.admin.ch (Stand 21. Mai 2026); kantonale Inhalte sind als Demo markiert.
+        bk.admin.ch (Stand 23. Mai 2026); die Übersicht fokussiert auf eidgenössische Vorlagen.
         <a href="/quellen" class="source-link" style="font-size: 12px;">Quellen &amp; Medienberichte</a>
       </span>
       <button

@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { Abstimmung } from '$lib/types';
   import Badge from './Badge.svelte';
+  import DataQualityBadge from './DataQualityBadge.svelte';
   import { formatDate, getDaysUntil } from '$lib/mockData';
   import { votesStore } from '$lib/stores/votes';
 
   export let abstimmung: Abstimmung;
   export let featured: boolean = false;
+  export let ctaLabel: string | undefined = undefined;
 
   const categoryAccent: Record<string, string> = {
     'Klimaschutz · Energiepolitik': '#16A34A',
@@ -25,6 +27,12 @@
   $: days = getDaysUntil(abstimmung.date);
   $: userEntry = $votesStore[abstimmung.slug];
   $: isPast = abstimmung.status === 'vergangen';
+  $: isDemo = abstimmung.dataQuality === 'demo';
+  $: actionLabel =
+    ctaLabel ?? (isPast ? 'Details ansehen' : isDemo ? 'Demo-Detail ansehen' : 'Entscheidungshilfe starten');
+  $: decisionStatus = userEntry?.position && userEntry.position !== 'UNENTSCHIEDEN'
+    ? 'Position gespeichert'
+    : 'Noch nicht entschieden';
 </script>
 
 {#if featured}
@@ -58,7 +66,7 @@
         {/if}
       </div>
       <span class="btn-primary text-sm w-full sm:w-auto">
-        Briefing starten
+        {actionLabel}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
@@ -76,6 +84,9 @@
         <p class="font-mono-data text-[10px] text-ink-subtle uppercase tracking-wider">
           {abstimmung.category}
         </p>
+        {#if isDemo}
+          <DataQualityBadge quality={abstimmung.dataQuality} />
+        {/if}
         {#if isPast && abstimmung.result}
           <span class="{abstimmung.result.accepted ? 'badge-ja' : 'badge-nein'}" style="font-size:9px;">
             {abstimmung.result.accepted ? 'ANGENOMMEN' : 'ABGELEHNT'}
@@ -109,8 +120,21 @@
           </span>
         {/if}
       </div>
+      <div class="card-action-row">
+        <span class="card-cta">
+          {actionLabel}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </span>
+        {#if !isPast}
+          <span class="card-status {decisionStatus === 'Position gespeichert' ? 'saved' : ''}">
+            {decisionStatus}
+          </span>
+        {/if}
+      </div>
     </div>
-    <div class="flex-shrink-0 self-center">
+    <div class="flex-shrink-0 self-start pt-1" aria-hidden="true">
       <svg class="w-5 h-5 text-ink-subtle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
@@ -138,6 +162,44 @@
   .featured-footer {
     margin-top: auto;
     padding-top: 10px;
+  }
+
+  .card-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+    flex-wrap: wrap;
+  }
+
+  .card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--brand);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .card-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .card-status.saved {
+    background: var(--pro-soft);
+    color: var(--pro);
   }
 
   @media (min-width: 1024px) {
