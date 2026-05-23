@@ -24,6 +24,7 @@
 11. [Erweiterungen](#erweiterungen-über-den-mindestumfang-hinaus)
 12. [Video-Walkthrough](#video-walkthrough)
 13. [Projektkontext](#projektkontext)
+14. [Projektdokumentation (`docs/`)](#projektdokumentation-docs)
 
 ---
 
@@ -448,6 +449,27 @@ Vorgeschlagene Struktur (5–7 Min.):
 | **Entwickler** | Adi Lama |
 | **Dozierende** | Max Meisterhans, Mirella Moser |
 | **Konzept** | Übung 8 → 9 → 10 → 11 → Sprint 1 (Redesign + 10 Features) → Sprint 2 (Realdaten + V2-Repositioning) |
+
+---
+
+## Projektdokumentation (`docs/`)
+
+Die methodische Dokumentation zu Vorgehen, Evaluation und KI-Einsatz liegt vollständig im Ordner [`docs/`](docs/) und ergänzt die in diesem README zusammengefassten Highlights. Ein:e Dozent:in findet dort alle Phasen-Artefakte, die Evaluations-Beobachtungstabelle, die KI-Einsatz-Deklaration im Detail sowie die Ablage-Anleitungen für Mockups und Screenshots.
+
+| Dokument | Inhalt |
+|---|---|
+| [`docs/01-understand.md`](docs/01-understand.md) | Phase 1 — Problemraum, Persona, Annahmen, Risiken bei politischen Themen |
+| [`docs/02-sketch.md`](docs/02-sketch.md) | Phase 2 — Frühe Ideen, Variantenvergleich, Skizzen |
+| [`docs/03-decide.md`](docs/03-decide.md) | Phase 3 — Gewählte Lösung, MoSCoW-Priorisierung, Abgrenzungen |
+| [`docs/04-prototype.md`](docs/04-prototype.md) | Phase 4 — Finale Seitenstruktur, Workflows, technische Umsetzung |
+| [`docs/05-validate.md`](docs/05-validate.md) | Phase 5 — Evaluationsplan, Testaufgaben, Beobachtungstabelle, Erkenntnisse |
+| [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md) | KI-Tools, Anwendungsbereiche, manuelle Qualitätsprüfung, Reflexion |
+| [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) | Repository, Branches, Commits, Issues, Deployment, technische Schulden, Future Work |
+| [`docs/video-script.md`](docs/video-script.md) | Drehbuch und Sprechertext für den 5-Minuten-Walkthrough |
+| [`docs/mockups/`](docs/mockups/README.md) | Ablage und Checkliste für Skizzen und Mockups |
+| [`docs/screenshots/`](docs/screenshots/README.md) | Ablage und Checkliste für finale App-Screenshots |
+
+> Die Doku ist absichtlich phasenweise getrennt, damit sich die in der Aufgabenstellung verlangten Phasen Understand → Sketch → Decide → Prototype → Validate eins-zu-eins nachvollziehen lassen.
 
 ---
 
