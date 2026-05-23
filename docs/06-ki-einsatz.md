@@ -1,102 +1,144 @@
 # KI-Einsatz im Projekt
 
-> Diese Dokumentation listet sämtliche KI-Werkzeuge auf, die für den Voting Assistant eingesetzt wurden, sowie die manuellen Qualitätsprüfungen, die parallel stattgefunden haben.
+> Diese Dokumentation listet die KI-Werkzeuge auf, die im Verlauf des Voting Assistant eingesetzt wurden, ihre jeweilige Hauptaufgabe und die manuellen Qualitätssicherungen, die parallel stattgefunden haben. Ziel ist eine ehrliche, professionelle und vollständig transparente Deklaration.
 
 ---
 
-## Eingesetzte KI-Werkzeuge
+## Eingesetzte KI-Werkzeuge im Überblick
 
 | Tool | Anbieter | Hauptzweck im Projekt |
 |---|---|---|
-| **Claude Opus 4.7** | Anthropic | Code-Assistent für SvelteKit-Komponenten, Refactorings, Architektur-Diskussionen, Doku-Strukturierung |
-| **Claude Code (CLI)** | Anthropic | Direkter Editor-Zugriff für mehrteilige Dateiänderungen, Reviews und das Erstellen dieser Dokumentation |
-| **ChatGPT** (gelegentlich) | OpenAI | Stichproben-Vergleich für UX-Formulierungen und alternative Codebeispiele |
+| **Claude Code / Claude Opus 4.7** | Anthropic | Code-Analyse, Refactoring, Dokumentationsstruktur, UX-Verbesserungen, technische Reviews |
+| **Codex** | OpenAI | Fokussierte Coding-Tasks, UI- und Workflow-Verbesserungen, Code-Audits, Umsetzung einzelner Features und Fixes |
+| **ChatGPT / GPT-5.5** | OpenAI | Projektstrategie, Bewertungsraster-Interpretation, Prompt-Erstellung, UX-Kritik, Priorisierung und Reflexion |
 
-> **TODO:** Falls weitere Tools eingesetzt wurden (Codex, Cursor, Gemini, Copilot, Midjourney etc.), hier nachtragen mit Anbieter und Zweck.
+Die Werkzeuge wurden jeweils dort eingesetzt, wo sie ihre spezifischen Stärken am besten ausspielen. Die Entscheidung, welches Werkzeug welche Aufgabe übernimmt, lag durchgehend beim Entwickler.
 
 ---
 
-## Wofür KI eingesetzt wurde
+## Detaillierter Einsatz pro Tool
+
+### Claude Code / Claude Opus 4.7
+
+Eingesetzt für Aufgaben, die ein längeres, zusammenhängendes Verstehen der Codebasis erfordern.
+
+- **Code-Analyse über mehrere Dateien hinweg**: Aufdecken von Inkonsistenzen, doppelten State-Stellen (`votesStore` vs. `engagementStore.journal`) und Architektur-Schwächen.
+- **Refactoring-Vorschläge** mit Bezug auf konkrete Datei-Stellen und Begründung.
+- **Aufbau dieser Dokumentationsstruktur**: Erstellung der Phasen-Dateien `01-understand.md` bis `07-projektorganisation.md` mit konsistenter Form und Sprache.
+- **UX-Verbesserungen**: Vorschläge zur Vereinheitlichung des Workflow-Schritte-Modells, Hero-Straffung, Kompass-Spektrum-Idee.
+- **Technische Reviews**: Sicherheits-Hinweise zum Admin-Passwort-Fallback, Bewertung der Mongo-Fallback-Strategie.
+- **Bewertungsraster-Abgleich**: Strukturierte Auseinandersetzung mit dem ZHAW-Bewertungsraster, Mapping der Code-Stellen auf Kriterien.
+
+### Codex
+
+Eingesetzt für klar abgegrenzte Coding-Tasks, bei denen ein schneller, fokussierter Output gefragt ist.
+
+- **Komponenten-Boilerplate** für Svelte-Komponenten und neue Routen.
+- **UI- und Workflow-Verbesserungen**: konkrete Umsetzung von Layout-Anpassungen, Tailwind-Class-Cleanup, Component-Splits.
+- **Code-Audits einzelner Dateien** zur Qualitätssicherung (z. B. typsichere Reducer im Engagement-Store).
+- **Einzelne Features**: Umsetzung von Detail-Funktionalitäten, kleinere Refactorings, Bug-Fixes.
+- **Validierungs-Logik** für Formulare im Admin-Bereich.
+
+### ChatGPT / GPT-5.5
+
+Eingesetzt für strategische und reflexive Aufgaben, ausserhalb der Code-Detailtiefe.
+
+- **Projektstrategie**: Diskussion der Hauptlösung, Abwägung von Erweiterungen, Roadmap-Entscheidungen.
+- **Bewertungsraster-Interpretation**: Vertieftes Verständnis, wie die Kriterien gemeint sind, was als «Vorgehen» oder «Methode/Artefakt» zählt.
+- **Prompt-Erstellung**: Vorlagen für effektive Coding-Prompts an Claude Code und Codex.
+- **UX-Kritik**: Heuristische Reviews der Startseite und der Detailseite, kritische Rückmeldung zur Workflow-Sprache.
+- **Priorisierung**: Sortierung von To-dos nach Noten-Wirkung, MoSCoW-Diskussion.
+- **Reflexion**: Schreib-Sparring für die Phasen-Dokumente, Konsistenzprüfung der Argumentationen.
+
+---
+
+## Wofür KI insgesamt verwendet wurde — nach Kategorien
 
 ### Code
 
-- **Komponentengerüste** für Svelte-Komponenten (z. B. `VoteSection`, `ArgumentWeighting`, `VotingJournal`).
-- **TypeScript-Typsystem** in `src/lib/types.ts` und Refinements an den Server-Stores.
-- **Refactorings**: konsistente Klassennutzung, Aufteilung grosser Komponenten, Tailwind-Class-Cleanup.
-- **Tailwind-Konfiguration** und das CSS-Token-System in `src/app.css` (Light + Dark).
-- **MongoDB-Wrapper** in `src/lib/server/db.ts` und das `dataLayer.ts`-Pattern.
-- **API-Routes** für Vote-Endpoints und CSV-Export.
-- **Boilerplate** für Form-Validierung im Admin-Bereich.
+- Komponenten-Gerüste (z. B. `VoteSection`, `ArgumentWeighting`, `VotingJournal`).
+- TypeScript-Typsystem in `src/lib/types.ts`.
+- Refactorings: konsistente Klassennutzung, Aufteilung grosser Komponenten, Tailwind-Cleanup.
+- Tailwind-Konfiguration und CSS-Token-System in `src/app.css`.
+- MongoDB-Wrapper in `src/lib/server/db.ts` und das `dataLayer.ts`-Pattern.
+- API-Routes für Vote-Endpoints und CSV-Export.
+- Form-Validierung im Admin-Bereich.
 
 ### Inhalt
 
-- **Erste Entwürfe** von Argument-Texten auf Basis der amtlichen Vorlagen-Texte (Bundesrat-Botschaft, Komitee-Argumentarien).
-- **Strukturierung** der KI-Briefings unter Wahrung der Quelle (admin.ch).
-- **Sprachliche Verdichtung** langer amtlicher Texte in 3–5-Satz-Briefings.
-- **Erste Vorschläge** für die 18 Kompass-Szenarien und ihre 10 Themen.
+- Erste Entwürfe von Argument-Texten auf Basis der amtlichen Vorlagen-Texte (Bundesrat-Botschaft, Komitee-Argumentarien).
+- Strukturierung der Briefings unter Wahrung der Originalquelle.
+- Sprachliche Verdichtung langer amtlicher Texte zu 3–5-Satz-Briefings.
+- Erste Vorschläge für die 18 Kompass-Szenarien und deren 10 Themen.
 
 ### UX und Kommunikation
 
-- **UX-Kritik** zum Workflow-Aufbau (Anzahl Schritte, Bezeichnungen, Reihenfolge).
-- **Formulierungs-Reviews** für vorsichtige, nicht-manipulative Sprache (Tendenz statt Empfehlung).
-- **Microcopy** für Toasts, Hinweise, Empty-States.
-- **Disclaimer-Texte** für die Kennzeichnung als studentischer Prototyp.
+- Workflow-Kritik (Anzahl Schritte, Bezeichnungen, Reihenfolge).
+- Formulierungs-Reviews für nicht-manipulative, vorsichtige Sprache (Tendenz statt Empfehlung).
+- Microcopy für Toasts, Hinweise, Empty-States.
+- Disclaimer-Texte für die Kennzeichnung als studentischer Prototyp.
 
 ### Methodik und Bewertung
 
-- **Bewertungsraster-Analyse**: Strukturierte Auseinandersetzung mit dem Modul-Bewertungsraster, um den Stand des Projekts gegenüber jedem Kriterium einschätzen zu können.
-- **Doku-Struktur**: Aufbau dieser Phasen-Dateien (`01-understand.md` bis `07-projektorganisation.md`).
-- **README-Konsolidierung** und Konsistenzprüfung.
+- Bewertungsraster-Analyse.
+- Aufbau der Phasen-Dateien und Konsistenzprüfung.
+- README-Konsolidierung.
 
 ---
 
-## Was manuell geprüft und entschieden wurde
+## Was manuell überprüft und entschieden wurde
 
-Sämtliche KI-Outputs sind vor der Übernahme manuell geprüft worden. Insbesondere:
+Sämtliche KI-Outputs wurden vor der Übernahme manuell geprüft. Insbesondere:
 
-- **Politische Inhalte** — jedes Argument wurde mit der angegebenen Originalquelle verglichen. Argumente, die KI «plausibel klangen», aber nicht in der Quelle stehen, wurden verworfen.
-- **Quellen-Links und Daten** — `sourceUrl` und `sourceDate` wurden manuell geprüft, Tippfehler bei URLs sind häufiger, als man denkt.
-- **Bundesrat- und Parlaments-Positionen, Endresultate** — direkt von admin.ch / bk.admin.ch übernommen, nicht aus KI-Outputs.
-- **Parteipositionen** — auf Parteiwebsites und in Mediencoverage gegengeprüft.
-- **Kompass-Fragen** — Parteipositionen pro Frage wurden manuell kalibriert und auf Bias hin geprüft.
-- **Neutralität der Sprache** — Pro/Contra-Argumente wurden auf vergleichbaren Tonfall und vergleichbare Schärfe geprüft.
-- **Funktionale Korrektheit** — jeder generierte Code wurde lokal getestet, Fehler korrigiert, Edge-Cases nachgezogen.
-- **Architekturentscheidungen** — Datenmodell, Routing-Struktur, Persistenz-Strategie, Auth-Mechanismus wurden bewusst entschieden, nicht von KI vorgeschlagen.
-- **Visuelles Design** — Token-System, Typografie, Farbpalette wurden vom Entwickler festgelegt; KI hat nur bei der Umsetzung geholfen.
+- **Politische Inhalte**: Jedes Argument wurde mit der angegebenen Originalquelle verglichen. Argumente, die KI «plausibel klangen», aber nicht in der Quelle stehen, wurden verworfen.
+- **Quellen-Links und Daten**: `sourceUrl` und `sourceDate` wurden manuell geprüft.
+- **Neutralität der Sprache**: Pro- und Contra-Argumente wurden auf vergleichbaren Tonfall und vergleichbare Schärfe geprüft.
+- **Bundesrat- und Parlaments-Positionen, Endresultate**: direkt von admin.ch / bk.admin.ch übernommen, nicht aus KI-Outputs.
+- **Parteipositionen**: auf Parteiwebsites und in Mediencoverage gegengeprüft.
+- **Kompass-Fragen**: Parteipositionen pro Frage manuell kalibriert und auf Bias hin geprüft.
+- **Funktionale Korrektheit**: jeder generierte Code wurde lokal getestet, Fehler korrigiert, Edge-Cases ergänzt.
+- **Architektur-Entscheidungen**: Datenmodell, Routing-Struktur, Persistenz-Strategie und Auth-Mechanismus wurden bewusst vom Entwickler entschieden, nicht von KI vorgeschlagen.
+- **Visuelles Design**: Token-System, Typografie, Farbpalette wurden vom Entwickler festgelegt; KI hat bei der Umsetzung geholfen.
+- **Finale Inhalts-Entscheidungen**: Auswahl der Vorlagen, Auswahl der Argumente, Auswahl der Quellen und Medienberichte.
 
 ---
 
 ## Beispiel-Prompts
 
-> Die nachfolgenden Prompts illustrieren den Stil, in dem KI eingesetzt wurde. Sie sind verkürzt wiedergegeben.
+Die nachfolgenden Prompts illustrieren den Stil, in dem die Werkzeuge eingesetzt wurden. Sie sind verkürzt wiedergegeben.
 
-### Beispiel 1 — Code-Assistent
+### Beispiel 1 — Claude Code / Claude Opus 4.7 (Code-Analyse + Refactoring)
 
-> «Erstelle eine Svelte 4-Komponente `ArgumentWeighting.svelte`, die für jede Vorlage zwei Spalten (Pro / Contra) zeigt. Pro Argument 4 Buttons (0–3) für die Gewichtung. Live berechnen: Pro-Score, Contra-Score, Tendenz (JA/NEIN/Unsicher). Verwende den Engagement-Store `setArgumentWeight(slug, argId, side, weight)`. Setze beim Klick auf «Tendenz speichern» einen Eintrag im Voting-Journal mit Typ `weights`.»
+> «Analysiere [`src/lib/stores/votes.ts`] und [`src/lib/stores/engagement.ts`]. Beide speichern eine `position`. Wer ist Single Source of Truth? Gibt es eine Stelle, an der diese inkonsistent werden können? Schlage einen Refactoring-Pfad vor, der die App-Logik unverändert lässt.»
 
-### Beispiel 2 — UX-Kritik
+### Beispiel 2 — Codex (fokussierte Umsetzung)
 
-> «Hier ist die aktuelle Startseite [Quellcode]. Bitte sag mir aus UX-Sicht: ist der Hero zu lang? Wo verliere ich Erst-Nutzende? Welche Sektion ist redundant zu welcher? Konkrete Vorschläge in priorisierter Reihenfolge.»
+> «Erstelle eine Svelte-Komponente `ArgumentWeighting.svelte` mit zwei Spalten Pro/Contra. Pro Argument vier Buttons (0–3) für die Gewichtung. Live berechnen: Pro-Score, Contra-Score, Tendenz JA/NEIN/Unsicher. Nutze den Engagement-Store. Setze beim Klick auf «Tendenz speichern» einen Timeline-Eintrag vom Typ `weights`.»
 
-### Beispiel 3 — Inhalt strukturieren
+### Beispiel 3 — ChatGPT / GPT-5.5 (Strategie und Priorisierung)
 
-> «Hier ist die offizielle Bundesrat-Botschaft zur Nachhaltigkeitsinitiative [Original-Link]. Bitte verdichte den Kern in drei Sätze in neutralem Schweizer Deutsch. Verwende keine wertenden Adjektive. Erwähne, dass Bundesrat und Parlament die Initiative ablehnen, ohne zu werten warum.»
+> «Hier ist das ZHAW-Bewertungsraster [PDF] und der aktuelle Projektstand [Code-Übersicht]. Schätze die aktuelle Punktzahl pro Kriterium und priorisiere die drei wichtigsten Verbesserungen für die bessere Note. Konzentriere dich auf Massnahmen mit hoher Wirkung pro Aufwand.»
 
-### Beispiel 4 — Bewertungsraster-Analyse
+### Beispiel 4 — ChatGPT / GPT-5.5 (UX-Kritik)
 
-> «Hier ist das ZHAW-Bewertungsraster [PDF-Inhalt] und der aktuelle Projektstand [Code-Übersicht]. Bewerte das Projekt streng nach jedem Kriterium, schätze die Punkte und priorisiere die wichtigsten 3 Verbesserungen für eine bessere Note.»
+> «Hier ist die aktuelle Startseite [Quellcode]. Beurteile aus UX-Sicht: Ist der Hero zu lang? Wo verliere ich Erst-Nutzende? Welche Sektion ist redundant zu welcher? Konkrete Vorschläge in priorisierter Reihenfolge.»
 
-> **TODO:** Falls eine vollständige Promptliste gewünscht ist, hier oder in einer eigenen Datei `docs/prompts.md` einen tagebuchartigen Auszug der wichtigsten Sessions ergänzen.
+### Beispiel 5 — Claude Code (Doku-Struktur)
+
+> «Erstelle eine Doku-Struktur in `docs/` mit Phasen-Dateien `01-understand.md` bis `07-projektorganisation.md`. Pro Datei: klarer Titel, Einleitungssatz, danach strukturierter Inhalt nach dem ZHAW-Bewertungsraster. Verwende deutsche Sprache, keine erfundenen Testergebnisse.»
+
+> **TODO:** Falls eine ausführliche Promptliste gewünscht ist, kann sie in einer eigenen Datei `docs/prompts.md` als tagebuchartiger Auszug der wichtigsten Sessions ergänzt werden.
 
 ---
 
 ## Abgrenzung — was die KI ausdrücklich nicht macht
 
 - **Keine politische Wertung.** KI generiert keine Aussagen über «richtige» oder «falsche» politische Positionen.
+- **Keine Wahlempfehlung.** Weder die App noch ihre Inhalte sind aus KI-Outputs als Empfehlung übernommen.
 - **Keine erfundenen Quellen.** Quellen-Links wurden manuell geprüft; URL-Halluzinationen wurden konsequent verworfen.
-- **Keine fiktiven Resultate.** Endresultate vergangener Abstimmungen kommen direkt von der Bundeskanzlei, nicht aus dem Sprachmodell.
+- **Keine fiktiven Resultate.** Endresultate vergangener Abstimmungen kommen direkt von der Bundeskanzlei.
 - **Keine Personendaten.** Die App speichert keine personenbezogenen Daten serverseitig; KI hat keinen Zugriff auf Nutzer-Stimmen.
-- **Keine Entscheidung über die App-Identität.** Konzept, Zielgruppe, Workflow und Tonalität wurden vom Entwickler festgelegt.
+- **Keine Entscheidung über die Projektidentität.** Konzept, Zielgruppe, Workflow und Tonalität wurden vom Entwickler festgelegt.
 
 ---
 
@@ -104,27 +146,26 @@ Sämtliche KI-Outputs sind vor der Übernahme manuell geprüft worden. Insbesond
 
 ### Nutzen
 
-- **Erheblicher Geschwindigkeitsgewinn** bei Boilerplate (Komponenten-Skelette, Form-Validierung, MongoDB-Wrapper). Realistisch geschätzt: Faktor 3–4 schneller als manuell.
-- **Frühe Konsistenz** im Design-System, weil KI gut Tokens und Spacing einhält, wenn man eines vorgibt.
-- **UX-Sparringspartner**, der jederzeit gegenliest und kritische Fragen stellt.
-- **Doku-Beschleuniger**, der Strukturen und Tabellen schnell vorschlägt.
+- **Geschwindigkeitsgewinn** bei Boilerplate-Aufgaben.
+- **Frühe Konsistenz** im Design-System.
+- **Sparringspartner**, der jederzeit gegenliest und kritische Fragen stellt.
+- **Doku-Beschleuniger** mit Strukturvorschlägen.
+- **Bewertungs-Sparring**, das die eigene Selbsteinschätzung schärft.
 
 ### Risiken und wie sie adressiert wurden
 
 | Risiko | Adressierung |
 |---|---|
-| **Quellen-Halluzination** (KI erfindet Links / Daten) | Manuelle Prüfung aller URLs und Datumsangaben |
-| **«Plausibel klingender» falscher Inhalt** | Quellenvergleich pro Argument, Verzicht auf Aussagen, die nicht belegt sind |
-| **Bias zur populärsten Position** | Bewusste Kalibrierung von Pro/Contra in Anzahl, Wortlänge und Schärfe |
-| **Code, der auf den ersten Blick funktioniert, aber Edge-Cases ignoriert** | Lokales Testen, Type-Check (`svelte-check`), manuelle Code-Review |
-| **Subtile Anglizismen und ungewollte Übersetzungen** | Manuelle Sprach-Review aller User-facing Texte auf Deutsch / Schweizer Deutsch |
-| **Überspezifizierung in Prompts** | Iterativer Stil mit kleinen Schritten, statt einer einzigen «Build the whole app»-Anweisung |
+| Quellen-Halluzination | Manuelle Prüfung aller URLs und Datumsangaben |
+| Plausibel klingender, aber inhaltlich falscher Output | Quellenvergleich pro Argument, Verzicht auf nicht-belegbare Aussagen |
+| Bias zur populärsten Position | Bewusste Kalibrierung von Pro/Contra in Anzahl, Wortlänge und Schärfe |
+| Code mit nicht-offensichtlichen Edge-Cases | Lokales Testen, Type-Check (`svelte-check`), manuelle Code-Review |
+| Subtile Anglizismen oder ungewollte Übersetzungen | Manuelle Sprach-Review aller User-facing Texte auf Deutsch / Schweizer Deutsch |
+| Über-Promptig zu Beginn | Iteratives Vorgehen mit kleinen Schritten statt einer einzigen «Build the whole app»-Anweisung |
 
-### Qualitätssicherung — Checkliste
+### Qualitätssicherung — Checkliste pro KI-Output
 
-Pro KI-Output wurde geprüft:
-
-- [x] Liegt eine Originalquelle vor, ist die URL korrekt, ist das Datum plausibel?
+- [x] Liegt eine Originalquelle vor? Ist die URL korrekt? Ist das Datum plausibel?
 - [x] Stimmt der Inhalt mit der amtlichen Quelle überein?
 - [x] Ist die Sprache neutral, nicht-wertend, nicht-manipulativ?
 - [x] Funktioniert der Code lokal und in der Produktion?
@@ -137,10 +178,10 @@ Pro KI-Output wurde geprüft:
 
 Die KI-Nutzung ist nicht nur in der Doku, sondern auch in der App selbst sichtbar:
 
-- **Startseite, Abschnitt «KI-Einsatz in dieser App»** — explizite Liste, was KI macht und was nicht.
-- **Quellen-Seite, Abschnitt «Methodik & Transparenz»** — KI als «Verdichtung, nicht Quelle» klar markiert.
-- **Disclaimer-Ribbon** — kennzeichnet die App als studentischen Prototyp.
-- **Datenqualitäts-Badges** auf Vorlagen — `official` / `official-pending` / `demo`.
+- **Startseite, Abschnitt «KI-Einsatz in dieser App»**: explizite Liste, was KI macht und was nicht.
+- **Quellen-Seite, Abschnitt «Methodik & Transparenz»**: KI als «Verdichtung, nicht Quelle» klar markiert.
+- **Disclaimer-Ribbon**: kennzeichnet die App als studentischen Prototyp.
+- **Datenqualitäts-Badges** auf Vorlagen: `official` / `official-pending` / `demo`.
 
 ---
 

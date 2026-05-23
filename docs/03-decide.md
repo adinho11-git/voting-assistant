@@ -17,6 +17,13 @@ Die Sketch-Phase hat fünf Varianten geliefert (siehe [`02-sketch.md`](02-sketch
 
 **Ergebnis:** Variante B (Voting-Assistent mit Argument-Gewichtung) als Kern, ergänzt durch Variante C (Partei-Kompass), D (Voting-Journal) und E (Quellen-Seite) als integrierte Erweiterungen.
 
+Zusätzlich wurde die Entscheidung durch die Sketch- und Mockup-Artefakte konkretisiert:
+
+- **Split Screen Pro/Contra** aus Übung 9 wurde als zentrales Muster für das Abwägen übernommen.
+- **Parteipositionen** wurden als Orientierungshilfe ergänzt, inspiriert durch das Parteien-Meinungsraster.
+- **Quellen/Transparenz** wurden aufgrund des Peer-Feedbacks als sichtbarer Bestandteil der App priorisiert.
+- **Geführter Happy Path** aus Übung 10 wurde zur Grundlage für die spätere Seiten- und Navigationsstruktur.
+
 ## Gewählte Hauptlösung
 
 Eine SvelteKit-Webanwendung, die Stimmberechtigte entlang eines **sechsstufigen Workflows** pro Vorlage führt:
@@ -37,6 +44,39 @@ Ergänzt um:
 - **Parteienbereich** für Detail- und Vergleichsansichten (`/parteien`, `/parteien/[kuerzel]`).
 - **Quellen & Medienberichte** als Transparenzschicht (`/quellen`).
 - **Admin-Bereich** (`/admin/*`) für die Datenpflege.
+
+## Vom Mobile-Wireframe zur responsiven Web-App
+
+Das Referenz-Mockup aus [`mockups/Uebung10_Abgabe_Adi_Lama.pdf`](mockups/Uebung10_Abgabe_Adi_Lama.pdf) war ein klickbarer **Mobile-First-Figma-Prototyp** im iPhone-Format. Es zeigte den Kernfluss:
+
+> App öffnen → Home → Abstimmungsliste → Briefing → Argument-Detail / Parteipositionen / Quellen & FAQ
+
+Für den finalen SvelteKit-Prototyp wurde dieser mobile Wireframe nicht 1:1 nachgebaut, sondern in eine responsive Web-App erweitert. Die mobile Logik blieb als Ausgangspunkt erhalten, während für Desktop grössere Layoutflächen, TopNav, breitere Cards und dichtere Informationsbereiche ergänzt wurden.
+
+### Übernommene Mockup-Elemente
+
+| Mockup-Element | Übernahme in der finalen App |
+|---|---|
+| Home / Einstieg | Startseite mit Hauptnutzen, aktuellen Abstimmungen und Einstieg in den Workflow |
+| Abstimmungsliste | Übersicht mit anstehenden und vergangenen Abstimmungen |
+| Briefing | Detailseite mit neutralem Überblick pro Vorlage |
+| Pro/Contra-Argumente | Argumentbereich mit klarer Gegenüberstellung |
+| Parteipositionen | Orientierung über Parteipositionen pro Vorlage |
+| Quellen / FAQ | Quellen- und Transparenzbereich, später als eigene Quellen-Seite erweitert |
+| Bottom Navigation / Navigationslogik | Mobile Navigation als Grundlogik, ergänzt durch Desktop TopNav |
+| Argument-Detail / Quellenbezug | Detailansicht und Quellenangaben pro Argument |
+
+### Erweiterungen im finalen Prototyp
+
+| Erweiterung | Grund für die Ergänzung |
+|---|---|
+| Argumentgewichtung | Macht das Abwägen aktiv und persönlich statt rein lesend |
+| Live-Tendenz | Zeigt transparent, wie die eigenen Gewichtungen eine Tendenz erzeugen |
+| Partei-Kompass | Bietet einen zweiten Orientierungsworkflow unabhängig von einzelnen Vorlagen |
+| Profil / Voting-Journal | Macht gespeicherte Positionen, Notizen und Reflexion sichtbar |
+| Quellen & Medienberichte | Erweitert die einfache Quellen-/FAQ-Idee um Methodik und Medienkontext |
+| Dark Mode | Verbessert Nutzungskomfort und entspricht modernen UI-Erwartungen |
+| Admin / CRUD | Unterstützt Datenpflege und erfüllt den technischen Anspruch an Datenaktualisierung, sofern im aktuellen Stand aktiviert |
 
 ## MoSCoW-Priorisierung
 
@@ -152,11 +192,14 @@ Damit klar ist, was der Prototyp **nicht** versucht zu sein:
 - **Keine wissenschaftliche Studie.** Die Kompass-Berechnung ist transparent erklärt, aber methodisch eine vereinfachte Modellierung.
 - **Keine Daten-Sammlung für Werbung oder Analyse.** Persönliche Daten bleiben lokal.
 
-## Referenz-Mockup
+## Referenz-Mockups
 
-> **TODO:** Finale Mockup-Screenshots als PNGs unter `docs/mockups/` ablegen und hier referenzieren. Eine Ablage-Anleitung findet sich in [`mockups/README.md`](mockups/README.md).
+Die Referenz-Artefakte liegen unter [`mockups/`](mockups/README.md):
 
-Der gewählte Workflow und die wichtigsten Bildschirme wurden vor der Implementierung als Mobile-First-Wireframes in Figma festgelegt. Das Mockup diente als verbindliche Vorlage für die Komponenten-Hierarchie, die Sektions-Reihenfolge auf der Detailseite und die Navigation (TopNav / BottomNav).
+- [`mockups/Uebung9_Abgabe_Adi_Lama.pdf`](mockups/Uebung9_Abgabe_Adi_Lama.pdf) — Crazy-8s, Dot-Voting, Peer-Feedback und Happy-Path-Skizze.
+- [`mockups/Uebung10_Abgabe_Adi_Lama.pdf`](mockups/Uebung10_Abgabe_Adi_Lama.pdf) — klickbarer Figma-Prototyp mit Mobile-Wireframes und Activity Diagram.
+
+Diese Mockups waren der Ausgangspunkt für Komponenten-Hierarchie, Informationsarchitektur und Navigation. Der finale Prototyp wurde danach iterativ erweitert; insbesondere Argumentgewichtung, Live-Tendenz, Kompass, Profil/Voting-Journal, Desktop-Optimierung und Quellen-/Medienberichte gehen über das ursprüngliche Mockup hinaus.
 
 ---
 

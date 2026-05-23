@@ -6,19 +6,45 @@
 
 ## Vorgehen in der Sketch-Phase
 
-Aus dem Problem Statement und der How-Might-We-Frage (siehe [`01-understand.md`](01-understand.md)) wurden zunächst möglichst breite Lösungsansätze skizziert, ohne sich technisch oder gestalterisch zu früh festzulegen. Methode: Crazy-8-artige Schnellskizzen auf Papier, anschliessend Übertragung der erfolgversprechendsten Bildschirme nach Figma als Low-Fidelity-Wireframe.
+Aus dem Problem Statement und der How-Might-We-Frage (siehe [`01-understand.md`](01-understand.md)) wurden zunächst möglichst breite Lösungsansätze skizziert, ohne sich technisch oder gestalterisch zu früh festzulegen. Die zentrale Methode war **Crazy-8s**: In kurzer Zeit entstanden acht Varianten für den **Abstimmungs-Briefing-Screen**, also für den wichtigsten Moment der App, in dem Nutzer:innen eine Vorlage verstehen und erste Argumente einordnen.
 
-Folgende Bereiche wurden skizziert:
+Die Original-Abgabe liegt als PDF unter [`mockups/Uebung9_Abgabe_Adi_Lama.pdf`](mockups/Uebung9_Abgabe_Adi_Lama.pdf). Sie enthält:
+
+- Crazy-8s zum Abstimmungs-Briefing-Screen.
+- Acht Varianten des Briefing-Screens.
+- Dot-Voting und Peer-Feedback.
+- Eine ausgearbeitete Happy-Path-Skizze mit Split Screen Pro/Contra, Parteienraster, Quellen-Footer und CTA.
+
+Folgende Bereiche wurden in der Sketch-Phase besonders untersucht:
 
 1. **Einstieg / Startseite** — was sieht ein:e Nutzer:in zuerst?
 2. **Listendarstellung** — wie werden anstehende und vergangene Abstimmungen unterschieden?
-3. **Detail-Workflow einer Abstimmung** — wie viele Schritte? In welcher Reihenfolge?
-4. **Reflexions-/Profil-Bereich** — als eigene Seite oder als Modal?
-5. **Partei-Komponente** — als eigener Bereich oder integriert in Abstimmungen?
+3. **Briefing einer Abstimmung** — wie werden neutrale Zusammenfassung, Pro/Contra und Quellen verständlich gebündelt?
+4. **Argument-Vertiefung** — wie kommen Nutzer:innen von einem kompakten Argument zur Quelle?
+5. **Parteipositionen** — als eigener Bereich oder direkt im Abstimmungs-Flow?
 
-## Geprüfte Varianten
+## Crazy-8s: Acht Varianten des Briefing-Screens
 
-Es wurden fünf Konzepte gegeneinander abgewogen.
+Die acht Skizzen dienten nicht dazu, sofort ein fertiges Interface festzulegen, sondern verschiedene Interaktionslogiken schnell gegeneinander sichtbar zu machen. Im Dot-Voting erhielt **Variante 3 «Split Screen Pro/Contra»** die meisten Punkte. **Variante 6 «Parteien-Meinungsraster»** wurde ebenfalls als wertvoll bewertet und später als ergänzendes Orientierungselement übernommen.
+
+Das wichtigste Ergebnis aus Peer-Feedback und Diskussion war die Forderung nach **Quellen-Transparenz**: Argumente sollten nicht nur nebeneinanderstehen, sondern anklickbar sein und nachvollziehbar zeigen, woher die Aussage kommt. Dieses Feedback floss später in Argument-Detailseiten, Quellenangaben pro Argument und die separate Quellen-/Medienberichte-Seite ein.
+
+## Verworfene Richtungen
+
+Einige frühe Interaktionsideen wurden bewusst nicht als Hauptlösung weiterverfolgt:
+
+| Richtung | Warum verworfen |
+|---|---|
+| Swipe-Logik | Für politische Argumente wirkte eine schnelle Ja/Nein-Mechanik zu oberflächlich. Sie hätte die App näher an ein Reaktionsspiel gebracht, statt Reflexion zu fördern. |
+| Chat-Ansatz | Ein Chat hätte zwar niedrigschwellig gewirkt, aber die Nachvollziehbarkeit von Quellen, Gegenargumenten und Parteipositionen erschwert. Zudem wäre stärker der Eindruck entstanden, die KI führe oder empfehle. |
+| One-Pager | Ein langer One-Pager hätte alle Informationen sichtbar gemacht, aber wenig Führung geboten. Für die Zielgruppe war ein klarer Schritt-für-Schritt-Happy-Path hilfreicher. |
+| Reine Info-Seite | Zu wenig Interaktion und zu geringer Unterschied zu bestehenden Quellen wie Bundesbüchlein oder admin.ch. |
+
+Die Entscheidung fiel deshalb auf eine geführte Struktur: erst verstehen, dann Pro/Contra abwägen, Parteien einordnen, Quellen prüfen und eine eigene Position festhalten.
+
+## Geprüfte Produktvarianten
+
+Neben den Layout-Skizzen wurden fünf grössere Produktkonzepte gegeneinander abgewogen.
 
 ### Variante A — Reine Info-Website
 
@@ -72,7 +98,7 @@ Es wurden fünf Konzepte gegeneinander abgewogen.
 
 ## Bewertung und Kombination
 
-Die fünf Varianten wurden gegen vier Kriterien bewertet: **Mehrwert für die Zielgruppe**, **Erfüllung des Mindestumfangs**, **Risiko bei politischen Inhalten** und **Realistische Umsetzbarkeit in der zur Verfügung stehenden Zeit**.
+Die fünf Produktvarianten wurden gegen vier Kriterien bewertet: **Mehrwert für die Zielgruppe**, **Erfüllung des Mindestumfangs**, **Risiko bei politischen Inhalten** und **realistische Umsetzbarkeit in der zur Verfügung stehenden Zeit**.
 
 Ergebnis:
 
@@ -94,24 +120,11 @@ Drei Gründe sprachen für den interaktiven Entscheidungs-Assistenten als Kern:
 
 ## Skizzen und Mockups
 
-> **TODO: Tatsächliche Skizzen und Mockup-Screenshots als Bilder unter `docs/mockups/` ablegen und hier referenzieren.**
+Die Sketch-Phase ist im Ordner [`mockups/`](mockups/README.md) dokumentiert. Relevant für diese Phase ist insbesondere:
 
-Geplant sind folgende Mockup-Bilder:
+- [`mockups/Uebung9_Abgabe_Adi_Lama.pdf`](mockups/Uebung9_Abgabe_Adi_Lama.pdf) — Crazy-8s, Dot-Voting, Peer-Feedback und Happy-Path-Skizze.
 
-- `mockups/01-startseite.png` — Low-Fi-Wireframe der Startseite (Hero, anstehende Vorlagen, Workflow-Erklärung).
-- `mockups/02-detail-workflow.png` — Sechsstufiger Workflow auf der Detailseite.
-- `mockups/03-argumentgewichtung.png` — Pro/Contra-Spalten mit 4-Stufen-Skala.
-- `mockups/04-kompass.png` — Fragestellung mit 5-Stufen-Skala und Ergebnis-Ranking.
-- `mockups/05-profil.png` — Statistiken, Journal-Karten, Partei-Übereinstimmung.
-- `mockups/06-quellen.png` — Trennung amtlich / Partei / Medien.
-
-Eine Ablage-Anleitung für `docs/mockups/` findet sich in [`mockups/README.md`](mockups/README.md).
-
-Wenn Bilder ergänzt sind, hier verlinken:
-
-```markdown
-![Startseiten-Mockup](mockups/01-startseite.png)
-```
+Die spätere Mockup-Phase ist in [`03-decide.md`](03-decide.md) und [`mockups/Uebung10_Abgabe_Adi_Lama.pdf`](mockups/Uebung10_Abgabe_Adi_Lama.pdf) beschrieben. Der finale SvelteKit-Prototyp übernahm die Grundlogik der Sketches, wurde aber iterativ erweitert und ist nicht als 1:1-Umsetzung des Wireframes zu verstehen.
 
 ---
 

@@ -1,65 +1,91 @@
 # Mockups und Skizzen
 
-> Dieser Ordner enthält die Skizzen, Wireframes und Figma-Exports aus den Phasen **Sketch** und **Decide** (siehe [`../02-sketch.md`](../02-sketch.md) und [`../03-decide.md`](../03-decide.md)).
+> Dieser Ordner enthält die Sketch- und Mockup-Artefakte aus den Phasen **Sketch** und **Decide**. Sie dokumentieren, wie aus frühen Papierideen ein Figma-Wireframe und daraus ein iterativ erweiterter SvelteKit-Prototyp entstanden ist.
 
 ---
 
-## Wozu dieser Ordner
+## Vorhandene Artefakte
 
-In den Phasen Sketch und Decide wurde der Lösungsraum aufgemacht, Varianten verglichen und ein verbindliches Mockup erstellt, bevor mit der Implementierung begonnen wurde. Die in diesem Ordner abgelegten Bilder belegen dieses Vorgehen für die Bewertung.
+| Datei | Phase | Inhalt |
+|---|---|---|
+| [`Uebung9_Abgabe_Adi_Lama.pdf`](Uebung9_Abgabe_Adi_Lama.pdf) | Übung 9 — Skizzieren | Crazy-8s zum Abstimmungs-Briefing, 8 Varianten, Dot-Voting, Peer-Feedback, ausgearbeitete Happy-Path-Skizze |
+| [`Uebung10_Abgabe_Adi_Lama.pdf`](Uebung10_Abgabe_Adi_Lama.pdf) | Übung 10 — UI Prototyping / Mockup | Klickbarer Figma-Prototyp, Mobile-App-Wireframes im iPhone-Format, Activity Diagram / Happy Path |
 
-## Was hier abgelegt werden soll
+Die PDFs sind bewusst als Original-Artefakte abgelegt. Sie belegen nicht nur das finale Aussehen einzelner Screens, sondern auch den methodischen Weg: Variantenbildung, Auswahl, Feedback und Weiterentwicklung.
 
-- **Frühe Skizzen** (Crazy-8s, Papier-Wireframes, Fotos davon).
-- **Variantenvergleiche** als Bild oder PDF.
-- **Mid-Fidelity-Wireframes** (z. B. aus Figma exportiert).
-- **High-Fidelity-Mockup** der finalen Variante, die als Vorlage für die Implementierung diente.
-- **Mobile- und Desktop-Mockups**, falls beide entstanden sind.
+## Übung 9 — Sketching und Variantenfindung
 
-Empfohlene Formate: PNG (verlustfrei, gut für Wireframes), JPG für Fotos von Papierskizzen, optional PDF für mehrseitige Dokumente.
+Übung 9 fokussierte auf den zentralen **Abstimmungs-Briefing-Screen**. Mit einer Crazy-8s-Methode wurden acht unterschiedliche Varianten skizziert, um verschiedene Informationsarchitekturen schnell sichtbar zu machen.
 
-## Datei-Namensschema (Vorschlag)
+Wesentliche Ergebnisse:
 
-```
-01-startseite.png
-02-detail-workflow.png
-03-argumentgewichtung.png
-04-kompass.png
-05-profil.png
-06-quellen.png
-```
+- **Variante 3 «Split Screen Pro/Contra»** erhielt im Dot-Voting die meisten Punkte.
+- **Variante 6 «Parteien-Meinungsraster»** wurde nicht als Hauptscreen gewählt, aber als ergänzendes Orientierungselement übernommen.
+- Das Peer-Feedback betonte **Quellen und Transparenz**: Argumente sollten nicht nur sichtbar sein, sondern bei Bedarf anklickbar sein und Quellen anzeigen.
+- Die ausgearbeitete Happy-Path-Skizze kombinierte Split-Screen Pro/Contra, Parteienraster, Quellen-Footer und einen klaren CTA.
 
-## TODO-Checkliste
+Damit entstand die Grundlage für den späteren Kern der App: neutrale Information, strukturierte Gegenüberstellung, politische Einordnung und nachvollziehbare Quellen.
 
-Diese Mockups / Skizzen werden für die Doku idealerweise erstellt:
+## Übung 10 — UI-Prototyping und Figma-Mockup
 
-- [ ] Startseite (Hero, anstehende Vorlagen, Workflow-Erklärung)
-- [ ] Abstimmungsdetailseite (sechsstufiger Workflow, Sektionen 1–5)
-- [ ] Argumentgewichtung (4-Stufen-Skala, Pro/Contra nebeneinander)
-- [ ] Partei-Kompass (Frage-Layout + Ergebnis-Ranking)
-- [ ] Profil / Voting-Journal (Stats, Journal-Karte, Übereinstimmungen)
-- [ ] Quellen-Seite (Trennung amtlich / Partei / Medien)
-- [ ] Mobile-Navigation (BottomNav)
-- [ ] Desktop-Navigation (TopNav)
+Übung 10 überführte die Sketch-Entscheidung in einen **klickbaren Mobile-First-Figma-Prototyp**. Der Prototyp war als iPhone-Wireframe aufgebaut und zeigte den wichtigsten Happy Path:
 
-Bei Bedarf zusätzlich:
+> App öffnen → Home → Abstimmungsliste → Briefing → Argument-Detail / Parteipositionen / Quellen & FAQ
 
-- [ ] Variantenvergleich (siehe `02-sketch.md`) als Übersichtsbild
-- [ ] Foto der Papierskizzen aus der frühen Phase
-- [ ] Spätere Iterationen (z. B. nach den Usability-Tests)
+Enthaltene Screens:
 
-## Wie die Bilder in der Doku verwendet werden
+1. **Home**
+2. **Abstimmungsliste**
+3. **Briefing**
+4. **Argument-Detail**
+5. **Parteipositionen**
+6. **Quellen & FAQ**
 
-Sobald Bilder hier abgelegt sind, können sie in den Phasen-Dokumenten referenziert werden:
+Dokumentierte Designentscheidungen:
 
-```markdown
-![Startseiten-Mockup](mockups/01-startseite.png)
-```
+- Mobile First als Ausgangspunkt.
+- Bottom Navigation für schnelle Orientierung auf kleinen Screens.
+- Hierarchischer Drilldown von Übersicht zu Detailinformationen.
+- Split-Screen Pro/Contra als zentrales Briefing-Muster.
+- Quellen-Transparenz als sichtbarer Bestandteil der Informationsarchitektur.
+- KI-Funktion sichtbar deklarieren, damit Nutzer:innen die Textaufbereitung einordnen können.
 
-Empfehlung: Im jeweiligen Phasen-Dokument (`02-sketch.md` für frühe Skizzen, `03-decide.md` für das finale Mockup) eine kurze Bildunterschrift ergänzen, damit klar ist, was der Bewertende sieht.
+## Weiterverwendung im finalen Prototyp
 
-## Hinweis
+Die Artefakte wurden im finalen SvelteKit-Prototyp nicht 1:1 kopiert, sondern als **Ausgangspunkt für die iterative Umsetzung** genutzt. Erkennbar übernommen wurden vor allem:
 
-Falls die ZHAW-Übungs-Abgaben (Übung 8 / 9 / 10) bereits PDFs mit Skizzen und Mockups enthalten, können diese ebenfalls hier abgelegt werden — entweder als ganzer PDF-Anhang oder als ausgeschnittene PNGs.
+- Einstieg über Home und Abstimmungsliste.
+- Briefing als geführter Einstieg in eine Vorlage.
+- Pro-/Contra-Gegenüberstellung.
+- Parteienpositionen als Orientierungshilfe.
+- Argument-Detail bzw. Quellenbezug.
+- Quellen-/FAQ-Logik als Transparenzebene.
+- Mobile Navigationslogik, später ergänzt durch Desktop-Navigation.
 
-> **TODO:** Mockup-Bilder einfügen.
+Im finalen Prototyp wurden diese Grundlagen erweitert, insbesondere um Argumentgewichtung, Live-Tendenz, Partei-Kompass, Profil/Voting-Journal, Quellen & Medienberichte, Dark Mode sowie technische Datenpflege über Admin-/CRUD-Funktionen, sofern im aktuellen Stand aktiviert.
+
+## Unterschiede zwischen Mockup und finaler App
+
+| Bereich | Mockup / Wireframe | Finaler SvelteKit-Prototyp |
+|---|---|---|
+| Plattform | Mobile-App-Wireframe im iPhone-Format | Responsive Web-App für Mobile und Desktop |
+| Navigation | Bottom Navigation als Mobile-Konzept | Mobile Navigation plus Desktop TopNav |
+| Briefing | Einzelner Briefing-Flow mit Drilldown | Geführter Entscheidungs-Assistent mit mehreren Abschnitten |
+| Pro/Contra | Statische Gegenüberstellung | Interaktive Argumentgewichtung mit Live-Tendenz |
+| Parteien | Parteienraster / Positionen | Parteienübersicht, Detailseiten, Positionen und Kompass-Bezug |
+| Quellen | Quellen-Footer und Quellen & FAQ | Eigene Quellen- und Medienberichte-Seite mit Methodik-/KI-Transparenz |
+| Persönliche Reflexion | Im Mockup nur angedeutet | Position speichern, Sicherheit, Notiz und Voting-Journal |
+| Umfang | Fokus auf Kern-Happy-Path | Erweiterter Prototyp mit zusätzlichen Workflows und Datenstrukturen |
+
+## Bedeutung für das Bewertungsraster
+
+Die Artefakte belegen, dass der finale Prototyp nicht direkt aus Code entstanden ist, sondern aus einem nachvollziehbaren Prototyping-Prozess:
+
+- **Nutzerzentrierung & Bedienbarkeit:** Der zentrale UI-Flow wurde skizziert, diskutiert und in der App wiedererkennbar umgesetzt.
+- **Vorgehen:** Crazy-8s, Dot-Voting, Peer-Feedback und Figma-Wireframe dokumentieren die methodische Entwicklung.
+- **Zusätzliche Methoden / Artefakte:** Die PDFs ergänzen Code und App um sichtbare Prototyping-Artefakte.
+- **Dokumentation:** Der Weg von Sketch zu finaler App ist über [`../02-sketch.md`](../02-sketch.md), [`../03-decide.md`](../03-decide.md) und [`../04-prototype.md`](../04-prototype.md) nachvollziehbar.
+
+## Offene Ergänzungen
+
+Die Original-PDFs sind abgelegt. Optional könnten für die finale Abgabe noch einzelne Screens daraus als PNGs exportiert und direkt in die Phasen-Dokumente eingebettet werden, damit Bewertende die wichtigsten Skizzen ohne PDF-Wechsel sehen.

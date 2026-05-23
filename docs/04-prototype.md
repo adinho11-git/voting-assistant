@@ -12,6 +12,23 @@ Live: <https://friendly-llama-b738d4.netlify.app>
 
 Die App ist responsiv von 360 px bis 1920 px+ und auf Tastatur- und Screenreader-Bedienung ausgelegt (Skip-Link, ARIA-Attribute, semantische HTML-Struktur, `prefers-reduced-motion`).
 
+## Bezug zwischen Mockup und finalem Prototyp
+
+Die Sketches und Figma-Wireframes aus [`mockups/Uebung9_Abgabe_Adi_Lama.pdf`](mockups/Uebung9_Abgabe_Adi_Lama.pdf) und [`mockups/Uebung10_Abgabe_Adi_Lama.pdf`](mockups/Uebung10_Abgabe_Adi_Lama.pdf) dienten als Ausgangspunkt für Informationsarchitektur, Happy Path und zentrale Screen-Muster. Der finale SvelteKit-Prototyp setzt diese Grundlagen erkennbar um, erweitert sie aber bewusst zu einer responsiven Web-App mit zusätzlichen Workflows.
+
+| Mockup-Artefakt | Umsetzung im finalen Prototyp | Anpassung / Weiterentwicklung |
+|---|---|---|
+| Home Screen | Startseite mit Hero und aktuellen Abstimmungen | Erweitert um klaren Hauptworkflow, Methodik-Hinweise und CTAs |
+| Abstimmungsliste | Abstimmungsübersicht | Erweitert um Desktop-Layout, Cards, Tabs, Filter und Suche |
+| Briefing Screen | Abstimmungsdetailseite | Erweitert zum geführten Entscheidungs-Assistenten |
+| Split Pro/Contra | Argumentbereich | Erweitert um Gewichtung und Live-Tendenz |
+| Parteienraster | Parteipositionen | Erweitert mit Parteidetailseiten, Parteienübersicht und Kompass-Bezug |
+| Argument-Detail | Quellenbezug pro Argument | Erweitert um Argument-Detailseiten und Quellen-/Medienberichte |
+| Quellen & FAQ | Quellen & Medienberichte | Erweitert um Methodik, Quellenkategorien und KI-Transparenz |
+| Bottom Navigation | Responsive Navigation | Erweitert um Desktop TopNav und Mobile Navigation |
+
+Damit erfüllt der Prototyp das Ziel, dass Mockup und finale UI/Flows methodisch zusammenhängen, ohne zu behaupten, dass das finale Produkt eine 1:1-Umsetzung des ursprünglichen Wireframes ist.
+
 ## Seitenstruktur
 
 | Route | Datei | Inhalt |

@@ -17,18 +17,19 @@
 3. [Wichtigste User-Workflows](#wichtigste-user-workflows)
 4. [Features](#features)
 5. [Bezug zum Bewertungsraster](#bezug-zum-bewertungsraster)
-6. [Tech Stack](#tech-stack)
-7. [Architektur und Datenüberblick](#architektur-und-datenüberblick)
-8. [Setup und Installation](#setup-und-installation)
-9. [Deployment](#deployment)
-10. [Screenshots](#screenshots)
-11. [Projektdokumentation (`docs/`)](#projektdokumentation-docs)
-12. [Evaluation](#evaluation)
-13. [KI-Einsatz](#ki-einsatz)
-14. [Rechtliche und ethische Hinweise](#rechtliche-und-ethische-hinweise)
-15. [Bekannte Grenzen und Future Work](#bekannte-grenzen-und-future-work)
-16. [Video-Walkthrough](#video-walkthrough)
-17. [Projektkontext](#projektkontext)
+6. [Sketches, Mockups und Prototyping-Artefakte](#sketches-mockups-und-prototyping-artefakte)
+7. [Tech Stack](#tech-stack)
+8. [Architektur und Datenüberblick](#architektur-und-datenüberblick)
+9. [Setup und Installation](#setup-und-installation)
+10. [Deployment](#deployment)
+11. [Screenshots](#screenshots)
+12. [Projektdokumentation (`docs/`)](#projektdokumentation-docs)
+13. [Evaluation](#evaluation)
+14. [KI-Einsatz](#ki-einsatz)
+15. [Rechtliche und ethische Hinweise](#rechtliche-und-ethische-hinweise)
+16. [Bekannte Grenzen und Future Work](#bekannte-grenzen-und-future-work)
+17. [Video-Walkthrough](#video-walkthrough)
+18. [Projektkontext](#projektkontext)
 
 ---
 
@@ -130,7 +131,7 @@ Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
 | Kriterium | Punkte | Beleg im Projekt |
 |---|---|---|
 | Kernfunktionalität & technische Qualität | 15 | Mehrere Pages und Workflows, MongoDB mit In-Memory-Fallback, Admin-CRUD, strukturiertes Datenmodell in [`src/lib/types.ts`](src/lib/types.ts) |
-| Nutzerzentrierung & Bedienbarkeit | 15 | Sechsstufiger Workflow konsistent im UI sichtbar, Live-Feedback, Toast-System, Mockup-Bezug dokumentiert in [`docs/03-decide.md`](docs/03-decide.md) |
+| Nutzerzentrierung & Bedienbarkeit | 15 | Sechsstufiger Workflow konsistent im UI sichtbar, Live-Feedback, Toast-System, Mockup-Bezug dokumentiert in [`docs/03-decide.md`](docs/03-decide.md) und [`docs/mockups/`](docs/mockups/README.md) |
 | Vorgehen | 15 | Phasen Understand → Sketch → Decide → Prototype → Validate vollständig dokumentiert in [`docs/01-understand.md`](docs/01-understand.md) bis [`docs/05-validate.md`](docs/05-validate.md) |
 | Evaluation | 10 | Plan, Testaufgaben, Beobachtungstabelle und Auswertungsstruktur in [`docs/05-validate.md`](docs/05-validate.md) |
 | Dokumentation & Video | 5 | Diese README, vollständige `docs/`-Struktur, Drehbuch für 5-Minuten-Walkthrough in [`docs/video-script.md`](docs/video-script.md) |
@@ -141,7 +142,7 @@ Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
 |---|---|---|
 | Hohe Qualität im Mindestumfang | 10 | Robuste Code-Struktur, TypeScript strict, Accessibility, Dark Mode, Mobile-First |
 | Produkt-/Funktions-Erweiterungen | 15 | Partei-Kompass, Argument-Gewichtung, Voting-Journal mit Activity-Timeline, Parteienvergleich, Positionen-Matrix, Community-Votes, CSV-Export, MongoDB-Anbindung, SwissPartyMap |
-| Zusätzliche Methoden / Artefakte | 10 | Persona, MoSCoW-Priorisierung, Mockup-Phase, Variantenvergleich, KI-Einsatz-Reflexion, technische Schulden mit Massnahmen — siehe [`docs/02-sketch.md`](docs/02-sketch.md), [`docs/03-decide.md`](docs/03-decide.md), [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) |
+| Zusätzliche Methoden / Artefakte | 10 | Persona, Crazy-8s, Dot-Voting, Figma-Wireframe, MoSCoW-Priorisierung, Mockup-Phase, Variantenvergleich, KI-Einsatz-Reflexion, technische Schulden mit Massnahmen — siehe [`docs/02-sketch.md`](docs/02-sketch.md), [`docs/03-decide.md`](docs/03-decide.md), [`docs/mockups/`](docs/mockups/README.md), [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) |
 | Projektorganisation | 5 | Repo-Struktur, Branch- und Commit-Strategie, Issue-Vorschläge, Deployment-Prozess, Artefakt-Ablage — siehe [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) |
 
 ### Mindestanforderungen
@@ -157,6 +158,18 @@ Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
 | Evaluation mit Auswertung | 🟡 Plan und Struktur stehen — echte Testergebnisse werden vor der Abgabe eingetragen |
 | Rechtliche Rahmenbedingungen | ✅ Quellen verlinkt, Disclaimer, keine personenbezogene Server-Speicherung |
 | KI-Einsatz transparent | ✅ Doku in [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), In-App-Transparenz auf Start- und Quellen-Seite |
+
+---
+
+## Sketches, Mockups und Prototyping-Artefakte
+
+Die frühen Sketch- und Mockup-Artefakte sind unter [`docs/mockups/`](docs/mockups/README.md) abgelegt und in den Phasen-Dokumenten eingeordnet:
+
+- [`docs/02-sketch.md`](docs/02-sketch.md) dokumentiert Crazy-8s, acht Varianten des Briefing-Screens, Dot-Voting, Peer-Feedback und die Entscheidung für Split Screen Pro/Contra mit Parteienraster und Quellen-Transparenz.
+- [`docs/03-decide.md`](docs/03-decide.md) erklärt, wie der Mobile-First-Figma-Wireframe aus Übung 10 in eine responsive SvelteKit-Web-App übersetzt und erweitert wurde.
+- [`docs/04-prototype.md`](docs/04-prototype.md) zeigt tabellarisch, welche Mockup-Elemente im finalen Prototyp erkennbar umgesetzt und welche Funktionen später ergänzt wurden.
+
+Der finale Prototyp entstand damit nachvollziehbar aus **Crazy-8s → Dot-Voting → Figma-Wireframe → Evaluation → iterativer SvelteKit-Umsetzung**. Das Bewertungsraster-Kriterium, dass ein Mockup verwendet wurde und in UI beziehungsweise Flows erkennbar ist, wird durch diese Artefakte und die dokumentierte Überleitung erfüllt. Gleichzeitig ist die finale App keine 1:1-Kopie des Mockups, sondern eine erweiterte Web-App mit zusätzlichen Workflows wie Argumentgewichtung, Partei-Kompass und Voting-Journal.
 
 ---
 
