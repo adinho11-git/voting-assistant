@@ -153,8 +153,8 @@ Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
 | Online zugängliche App | ✅ Netlify-Deployment |
 | GitHub-Repository mit Code und Dokumentation | ✅ |
 | Mehrere Pages und Workflows | ✅ 19+ Routen |
-| Daten aus Datenquelle | ✅ MongoDB Atlas + strukturierte TypeScript-Datenquelle |
-| Daten erstellen / aktualisieren | ✅ Admin-CRUD, persönliche Stimmen, Community-Votes |
+| Daten aus Datenquelle | ✅ MongoDB Atlas bei `MONGODB_URI` + `USE_MOCK_DATA=false`, mit Seed-/Fallback-Datenmodus |
+| Daten erstellen / aktualisieren | ✅ Admin-CRUD, Community-Votes, Interessen-Registrierungen und lokale persönliche Daten |
 | Evaluation mit Auswertung | 🟡 Plan und Struktur stehen — echte Testergebnisse werden vor der Abgabe eingetragen |
 | Rechtliche Rahmenbedingungen | ✅ Quellen verlinkt, Disclaimer, keine personenbezogene Server-Speicherung |
 | KI-Einsatz transparent | ✅ Doku in [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), In-App-Transparenz auf Start- und Quellen-Seite |
@@ -220,10 +220,27 @@ voting-assistant/
 
 **Datenflüsse:**
 
-- **Strukturierte Daten** (Abstimmungen, Argumente, Parteipositionen): in `realData.ts` typsicher gepflegt, über die `dataLayer`-Schicht entweder aus MongoDB Atlas oder dem In-Memory-Store geladen.
+- **MongoDB / Server-Daten** (Abstimmungen, Argumente, Parteipositionen, Community-Votes, Interessen-Registrierungen): über die `dataLayer`-Schicht aus MongoDB Atlas geladen, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt.
+- **Seed-/Fallback-Daten**: Wenn MongoDB nicht aktiv oder nicht erreichbar ist, nutzt die App strukturierte Seed-Daten aus `realData.ts` sowie In-Memory-Stores. Dadurch bleibt der Prototyp lokal und im Demo-Fall lauffähig.
+- **Statische strukturierte Daten**: Parteienprofile und Kompass-Fragen liegen in TypeScript-Dateien (`parteiData.ts`, `kompass.ts`), weil sie keine User- oder Admin-Daten sind.
 - **Persönliche User-Daten** (Stimmen, Notizen, Sicherheit, Bookmarks, Kompass-Resultate, Argumentgewichtungen): ausschliesslich im `localStorage`.
-- **Community-Votes**: anonymes Server-Aggregat (`/api/abstimmungen/[slug]/vote`).
-- **Admin-CRUD**: persistiert bei aktiver MongoDB-Verbindung direkt in die Collection, sonst In-Memory.
+- **Admin-CRUD**: persistiert bei aktiver MongoDB-Verbindung direkt in die Collection `abstimmungen`, sonst im In-Memory-Fallback.
+
+**MongoDB-Collections:**
+
+| Collection | Zweck |
+|---|---|
+| `abstimmungen` | Vorlagen, Briefings, Pro-/Contra-Argumente und Parteipositionen |
+| `communityVotes` | Anonyme aggregierte JA/NEIN-Stimmen pro Vorlage |
+| `parteiInteressen` | Interessen-Registrierungen aus dem Parteienbereich |
+
+**CRUD-Erfüllung für das Bewertungsraster:**
+
+- Admin kann Abstimmungen erstellen, bearbeiten und löschen.
+- Admin kann Metadaten, Pro-/Contra-Argumente und Parteipositionen pflegen.
+- User können Community-Votes abgeben; bestehende Stimmen werden pro Browser-Cookie aktualisiert.
+- User können persönliche Positionen, Notizen, Argumentgewichtungen, Feedback und Kompass-Ergebnisse lokal speichern, ändern oder löschen.
+- Interessen-Registrierungen werden serverseitig erfasst und im Admin-Bereich als CSV exportierbar gemacht.
 
 ---
 
@@ -280,6 +297,7 @@ Aufruf unter `/admin/login`. Login mit dem in `.env` gesetzten `ADMIN_PASSWORD`.
 - **Build-Auslöser:** jeder Push auf `main` löst automatisch ein Netlify-Build aus.
 - **Aktuelle URL:** <https://friendly-llama-b738d4.netlify.app>
 - **Custom Domain:** noch nicht konfiguriert.
+- **Produktiver Datenmodus:** Für MongoDB Atlas müssen in Netlify `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt sein. Die tatsächlichen Secret-Werte werden nicht im Repository dokumentiert.
 
 > **TODO:** Falls noch eine andere Deployment-URL kommt oder eine Custom-Domain konfiguriert wird, hier eintragen.
 

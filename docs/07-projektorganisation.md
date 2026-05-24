@@ -62,7 +62,7 @@ Beispiele bisheriger Commit-Stile aus der Historie:
 
 Das vorbereitete Issue-Set liegt in [`issues.md`](issues.md). Es enthält 15 realistische Issues aus dem Projektverlauf mit Status, Priorität, Label-Vorschlägen, Akzeptanzkriterien, Bewertungsraster-Bezug und Umsetzungshinweisen.
 
-Die Issues wurden bewusst zuerst als Dokumentation vorbereitet und **nicht automatisch auf GitHub erstellt**. Dadurch bleibt kontrollierbar, welche Einträge vor der Abgabe tatsächlich ins GitHub-Issue-Board übernommen werden.
+Die Issues wurden zuerst als Dokumentation vorbereitet und anschliessend mit GitHub CLI ins Repository übertragen. Bereits umgesetzte Punkte sind geschlossen, offene Abgabe-Aufgaben bleiben im Issue-Board sichtbar.
 
 Empfohlene Nutzung:
 
@@ -76,6 +76,16 @@ Zusätzlich sind einfache GitHub-Issue-Templates unter `.github/ISSUE_TEMPLATE/`
 - `bug.md`
 - `ux.md`
 - `documentation.md`
+
+## Architectural Decision Records
+
+Zentrale Architektur- und Produktentscheidungen sind als ADRs dokumentiert. Sie zeigen, welche technischen und methodischen Entscheidungen bewusst getroffen wurden und welche Trade-offs daraus entstehen.
+
+- [ADR 001: MongoDB mit Fallback](adr/001-mongodb-mit-fallback.md)
+- [ADR 002: LocalStorage für persönliche Daten](adr/002-localstorage-fuer-persoenliche-daten.md)
+- [ADR 003: KI-Unterstützung mit Quellenprüfung](adr/003-ki-unterstuetzung-mit-quellenpruefung.md)
+- [ADR 004: SvelteKit und Netlify](adr/004-sveltekit-und-netlify.md)
+- [ADR 005: Kompass und Argumentgewichtung](adr/005-kompass-und-argumentgewichtung.md)
 
 ## Wichtige Meilensteine
 
@@ -116,17 +126,36 @@ Sämtliche Artefakte sind im Repo selbst greifbar — kein Cloud-Ordner, kein Dr
 - **Build-Befehle:** standard (`npm install` → `npm run build`).
 - **Environment-Variablen in Netlify:**
   - `MONGODB_URI` — Connection-String für MongoDB Atlas.
-  - `USE_MOCK_DATA` — `false` für Produktion mit DB, `true` für Mock-Modus.
+  - `USE_MOCK_DATA` — muss für den produktiven MongoDB-Modus exakt auf `false` gesetzt sein; sonst nutzt die App den Seed-/Fallback-Modus.
   - `ADMIN_PASSWORD` — Passwort für den Admin-Bereich.
 - **Aktuelle URL:** <https://friendly-llama-b738d4.netlify.app>
 - **Custom Domain:** noch nicht konfiguriert. **TODO:** Falls gewünscht, in Netlify hinterlegen und in der README ergänzen.
+
+Keine geheimen Werte werden im Repository dokumentiert. Für die Abgabe reicht die transparente Beschreibung der Variablen und der Nachweis im Admin-Dashboard, dass der produktive Datenmodus aktiv ist.
+
+### Datenbank- und CRUD-Nachweis
+
+Die Mindestanforderung «Daten werden aus einer Datenbank geladen und angezeigt; Daten können erstellt und/oder aktualisiert werden» wird organisatorisch wie folgt nachgewiesen:
+
+| Nachweis | Umsetzung |
+|---|---|
+| Datenbank-Anbindung | MongoDB Atlas über `src/lib/server/db.ts` und `src/lib/server/dataLayer.ts` |
+| Produktiver Modus | Aktiv, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt |
+| Fallback | Seed-/In-Memory-Modus für lokale Entwicklung und robuste Demo-Anzeige |
+| Collections | `abstimmungen`, `communityVotes`, `parteiInteressen` |
+| Daten laden und anzeigen | Öffentliche Seiten laden Abstimmungen, Argumente, Parteipositionen und Community-Aggregate über den Data Layer |
+| Daten erstellen / aktualisieren | Admin-CRUD für Abstimmungen, Argumente und Parteipositionen; Community-Votes; Interessen-Registrierungen |
+| Persönliche Daten | Stimmen, Notizen, Journal und Kompass-Ergebnis bleiben im Browser-`localStorage` |
+
+Für das Video und die Screenshots sollte mindestens eine Admin-Ansicht sichtbar sein, idealerweise das Dashboard mit Datenbankstatus sowie eine konkrete Bearbeitung einer Abstimmung oder eines Arguments.
 
 ### Vorgehen beim Deployen
 
 1. Lokal `npm run check` und `npm run build` durchlaufen lassen.
 2. Commit + Push auf `main`.
-3. Netlify-Dashboard prüfen (Build erfolgreich, Logs sauber).
+3. Netlify-Dashboard prüfen (Build erfolgreich, Logs sauber, `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt).
 4. Live-URL aufrufen, kritische Routen kurz prüfen (`/`, `/abstimmungen`, `/kompass`, `/profil`, `/admin/login`).
+5. Admin-Dashboard prüfen: Für die finale Abgabe sollte dort MongoDB Atlas beziehungsweise der produktive Datenmodus sichtbar sein.
 
 ## Bekannte technische Schulden
 
