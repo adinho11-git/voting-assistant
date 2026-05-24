@@ -225,7 +225,7 @@
         Die Matrix zeigt ausgewählte Parteiempfehlungen und Parolen zu Vorlagen. Sie dient der politischen Einordnung und ersetzt keine eigene Bewertung der Argumente.
       </p>
 
-      <div class="card overflow-x-auto">
+      <div class="party-matrix-scroll card overflow-x-auto" role="region" aria-label="Parteipositionen horizontal scrollen">
         <table class="w-full text-sm min-w-[640px]">
           <thead class="bg-surface-alt text-ink-muted font-mono-data text-xs uppercase tracking-wider">
             <tr>
@@ -303,3 +303,38 @@
     </div>
   </div>
 </section>
+
+<style>
+  .party-matrix-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .party-matrix-scroll table {
+    max-width: none;
+  }
+
+  @media (max-width: 640px) {
+    .party-matrix-scroll {
+      margin-inline: 0;
+    }
+
+    .party-matrix-scroll::after {
+      content: 'Seitlich scrollen';
+      position: sticky;
+      left: 0;
+      display: block;
+      border-top: 1px solid var(--border-light);
+      padding: 0.45rem 0.75rem;
+      background: var(--surface);
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', ui-monospace, monospace;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  }
+</style>

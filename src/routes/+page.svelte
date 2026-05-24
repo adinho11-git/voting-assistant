@@ -27,8 +27,10 @@
 
   <div class="hero-accent mb-8 max-w-3xl home-hero-copy">
     <p class="section-eyebrow mb-3">Eidgenössische Volksabstimmung · 14. Juni 2026</p>
-    <h1 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.05] text-ink mb-4">
-      Abstimmungen verstehen.<br />Argumente gewichten.<br />Eigene Position finden.
+    <h1 class="home-hero-title font-display text-ink mb-4">
+      <span>Abstimmungen verstehen.</span>
+      <span>Argumente gewichten.</span>
+      <span>Eigene Position finden.</span>
     </h1>
     <p class="text-base md:text-lg text-ink-muted leading-relaxed mb-5">
       Dein geführter Entscheidungsassistent für Schweizer Abstimmungen: Briefing lesen, Pro &amp; Contra abwägen, Parteipositionen einordnen und deine Position im Journal speichern.

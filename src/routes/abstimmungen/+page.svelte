@@ -224,8 +224,9 @@
 
 <style>
   .overview-workflow {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 14px;
     padding: 8px 10px;
@@ -236,13 +237,14 @@
     font-size: 12px;
     font-weight: 800;
     line-height: 1.2;
+    width: fit-content;
     max-width: 100%;
-    overflow-x: auto;
+    overflow: visible;
   }
 
   .overview-workflow span,
   .overview-workflow i {
-    flex-shrink: 0;
+    min-width: 0;
   }
 
   .overview-workflow i {
@@ -359,12 +361,22 @@
   @media (max-width: 480px) {
     .overview-workflow {
       border-radius: var(--radius);
+      gap: 6px 7px;
+      letter-spacing: 0;
     }
 
     .past-card-action {
       align-items: flex-start;
       flex-direction: column;
       gap: 4px;
+    }
+
+    .line-clamp-2 {
+      display: block;
+      overflow: visible;
+      -webkit-line-clamp: initial;
+      line-clamp: initial;
+      -webkit-box-orient: initial;
     }
   }
 </style>

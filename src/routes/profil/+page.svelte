@@ -412,8 +412,8 @@
   <div class="profile-hero">
     <div>
       <p class="section-eyebrow mb-2">Persönlicher Reflexionsraum</p>
-      <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Mein politisches Profil</h1>
-      <p class="text-ink-muted text-sm md:text-base max-w-2xl">
+      <h1 class="profile-title font-display text-3xl md:text-4xl text-ink mb-2">Mein politisches Profil</h1>
+      <p class="profile-lead text-ink-muted text-sm md:text-base max-w-2xl">
         Hier findest du deine gespeicherten Positionen, das Kompass-Ergebnis und einen Vergleich mit Parteipositionen — als Grundlage für deine eigene politische Orientierung.
       </p>
     </div>
@@ -946,6 +946,14 @@
     align-items: start;
   }
 
+  .profile-title,
+  .profile-lead {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
   .profile-export-mini {
     display: grid;
     justify-items: end;
@@ -1471,6 +1479,17 @@
     .profile-hero {
       grid-template-columns: 1fr;
       gap: 1rem;
+    }
+
+    .profile-title {
+      font-size: clamp(1.85rem, 7.4vw, 2.2rem);
+      line-height: 1.08;
+      hyphens: auto;
+    }
+
+    .profile-lead {
+      font-size: 0.96rem;
+      line-height: 1.58;
     }
 
     .profile-export-mini {

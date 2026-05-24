@@ -29,18 +29,18 @@
 {#if visible}
   <div class="disclaimer-ribbon" role="note">
     <div class="container-app">
-      <strong>Studentischer Prototyp</strong>
-      <span>
-        Diese App ist eine im Modul Prototyping (ZHAW FS 2026) entwickelte Demo —
-        <strong style="color: var(--brand);">keine offizielle Abstimmungshilfe und keine Wahlempfehlung.</strong>
-        Reale Vorlagen, Argumente und Ergebnisse stammen von admin.ch /
-        bk.admin.ch (Stand 23. Mai 2026); die Übersicht fokussiert auf eidgenössische Vorlagen.
-        <a href="/quellen" class="source-link" style="font-size: 12px;">Quellen &amp; Medienberichte</a>
-      </span>
+      <div class="disclaimer-content">
+        <strong>Studentischer Prototyp</strong>
+        <span class="disclaimer-copy">
+          Demo aus ZHAW Prototyping (FS 2026) - keine offizielle Abstimmungshilfe und keine Wahlempfehlung.
+          Quellen: admin.ch / bk.admin.ch.
+          <a href="/quellen" class="source-link" style="font-size: inherit;">Quellen</a>
+        </span>
+      </div>
       <button
         type="button"
         on:click={dismiss}
-        class="ml-auto text-xs text-ink-muted underline hover:text-ink whitespace-nowrap"
+        class="disclaimer-dismiss"
         aria-label="Hinweis ausblenden"
       >
         Verstanden

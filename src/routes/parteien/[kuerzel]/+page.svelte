@@ -592,7 +592,7 @@
   class="party-hero border-b border-border-light"
   style="--party-color: {p.farbe}; --party-soft: {p.farbeLight};"
 >
-  <div class="container-app py-10 md:py-14">
+  <div class="container-app party-hero-inner py-10 md:py-14">
     <a href="/parteien" class="party-hero-link hidden md:inline-flex items-center gap-1.5 text-sm font-semibold mb-6">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -600,9 +600,9 @@
       Alle Parteien
     </a>
 
-    <div class="flex items-start gap-5">
+    <div class="party-hero-lockup flex items-start gap-5">
       <div
-        class="w-20 h-20 rounded-full flex items-center justify-center text-white text-base font-bold flex-shrink-0 shadow-card"
+        class="party-logo w-20 h-20 rounded-full flex items-center justify-center text-white text-base font-bold flex-shrink-0 shadow-card"
         style="background-color: {p.farbe};"
         aria-hidden="true"
       >
@@ -612,10 +612,10 @@
         <p class="party-hero-meta font-mono-data text-xs uppercase tracking-wider mb-1">
           {p.ausrichtung} · seit {p.gegruendet}
         </p>
-        <h1 class="font-display text-3xl md:text-5xl text-ink leading-tight mb-2">
+        <h1 class="party-title font-display text-3xl md:text-5xl text-ink leading-tight mb-2">
           {p.name}
         </h1>
-        <p class="text-base md:text-lg text-ink-muted">Profil, Kernthemen und ausgewählte Abstimmungspositionen im Kontext.</p>
+        <p class="party-hero-subtitle text-base md:text-lg text-ink-muted">Profil, Kernthemen und ausgewählte Abstimmungspositionen im Kontext.</p>
       </div>
     </div>
   </div>
@@ -887,6 +887,9 @@
     gap: 0.9rem;
     line-height: 1.72;
     max-width: 74ch;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .profile-copy p {
@@ -1266,6 +1269,55 @@
   }
 
   @media (max-width: 620px) {
+    .party-hero-inner {
+      padding-bottom: 1.75rem;
+      padding-top: 1.5rem;
+    }
+
+    .party-hero-lockup {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .party-logo {
+      height: 64px;
+      width: 64px;
+    }
+
+    .party-title {
+      font-size: clamp(1.85rem, 7.4vw, 2.2rem);
+      line-height: 1.08;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      hyphens: auto;
+    }
+
+    .party-hero-subtitle {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      line-height: 1.45;
+    }
+
+    .party-hero-meta {
+      max-width: 100%;
+      line-height: 1.35;
+      letter-spacing: 0.055em;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .profile-copy {
+      font-size: 0.96rem;
+      gap: 0.8rem;
+      line-height: 1.65;
+      max-width: 100%;
+    }
+
+    .profile-copy p:first-child {
+      font-size: 1rem;
+    }
+
     .theme-explorer-head {
       align-items: flex-start;
       flex-direction: column;

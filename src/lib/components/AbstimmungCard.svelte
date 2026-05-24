@@ -209,4 +209,46 @@
       max-height: 4.95em;
     }
   }
+
+  @media (max-width: 560px) {
+    :global(.hero-accent).card {
+      padding: 18px;
+    }
+
+    h2,
+    h3,
+    p,
+    span {
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      hyphens: auto;
+    }
+
+    .line-clamp-2,
+    .featured-summary {
+      display: block;
+      max-height: none;
+      overflow: visible;
+      -webkit-line-clamp: initial;
+      line-clamp: initial;
+      -webkit-box-orient: initial;
+    }
+
+    .featured-footer {
+      align-items: stretch;
+    }
+
+    .card-action-row {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .card-cta,
+    .card-status {
+      justify-content: center;
+      width: 100%;
+    }
+  }
 </style>

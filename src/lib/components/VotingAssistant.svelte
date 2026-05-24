@@ -335,8 +335,32 @@
   }
 
   @media (max-width: 560px) {
+    .assistant-shell {
+      padding: 18px;
+      overflow: visible;
+    }
+
+    .assistant-result {
+      padding: 16px;
+    }
+
     .assistant-actions a {
       width: 100%;
+    }
+
+    .assistant-steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-left: 0;
+      margin-right: 0;
+      overflow: visible;
+      padding: 0;
+    }
+
+    .assistant-step {
+      min-height: 0;
+      padding: 12px;
     }
   }
 </style>

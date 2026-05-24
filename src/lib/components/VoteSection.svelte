@@ -148,7 +148,7 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div
-  class="card p-6 md:p-8 reveal-stage {revealed ? 'is-visible' : ''}"
+  class="vote-section-card card p-6 md:p-8 reveal-stage {revealed ? 'is-visible' : ''}"
   style="border-left: 4px solid var(--brand);"
   use:inView
   on:reveal|once={() => (revealed = true)}
@@ -421,13 +421,31 @@
   }
 
   @media (max-width: 560px) {
+    .vote-section-card {
+      padding: 18px;
+    }
+
     .decision-options {
       grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .decision-option {
+      min-height: 58px;
     }
 
     .decision-actions .btn-primary,
     .decision-actions .btn-ghost {
       width: 100%;
+    }
+
+    .confidence-row {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .confidence-row strong {
+      text-align: left;
     }
   }
 </style>

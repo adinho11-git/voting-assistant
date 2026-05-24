@@ -346,4 +346,20 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media (max-width: 560px) {
+    .journal-editor,
+    .timeline-panel {
+      padding: 18px;
+    }
+
+    .journal-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .journal-actions .btn-primary {
+      width: 100%;
+    }
+  }
 </style>

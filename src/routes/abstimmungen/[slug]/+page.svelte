@@ -31,6 +31,17 @@
     { label: 'Quellen', href: '#quellen' }
   ];
 
+  const titleBreakMap = new Map<string, string[]>([
+    ['10-Millionen-Schweiz', ['10-Millionen-', 'Schweiz']],
+    ['Nachhaltigkeitsinitiative', ['Nachhaltigkeits', 'initiative']],
+    ['Zivildienstgesetz', ['Zivildienst', 'gesetz']],
+    ['Zivildienstgesetzes', ['Zivildienst', 'gesetzes']]
+  ]);
+  const titleBreakPattern = new RegExp(
+    `(${Array.from(titleBreakMap.keys()).sort((a, b) => b.length - a.length).join('|')})`,
+    'g'
+  );
+
   let sectionScrollAnimation: number | null = null;
   let sectionScrollBehaviorBefore: string | null = null;
 
@@ -144,6 +155,14 @@
 
     sectionScrollAnimation = requestAnimationFrame(animate);
   }
+
+  function titleSegments(title: string): Array<{ text: string; breakAfter: boolean }> {
+    return title.split(titleBreakPattern).flatMap((part) => {
+      const split = titleBreakMap.get(part);
+      if (!split) return [{ text: part, breakAfter: false }];
+      return split.map((text, index) => ({ text, breakAfter: index < split.length - 1 }));
+    });
+  }
 </script>
 
 <svelte:head>
@@ -174,9 +193,11 @@
     {/if}
   </div>
 
-  <div class="flex items-start justify-between gap-5 mb-5">
-    <h1 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] text-ink max-w-4xl">
-      {a.title}
+  <div class="vote-detail-heading flex items-start justify-between gap-5 mb-5">
+    <h1 class="vote-detail-title font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] text-ink max-w-4xl">
+      {#each titleSegments(a.title) as segment}
+        {segment.text}{#if segment.breakAfter}<wbr />{/if}
+      {/each}
     </h1>
     <div class="hidden md:block flex-shrink-0 pt-2">
       <FavoriteButton slug={a.slug} title={a.shortTitle} />
@@ -405,11 +426,11 @@
     </p>
     {#if isPast}
       <div class="flex flex-wrap gap-3 justify-center">
-        <a href="/abstimmungen" class="btn-primary">Aktuelle Abstimmungen</a>
-        <a href="/profil" class="btn-secondary">Mein Profil</a>
+        <a href="/abstimmungen" class="btn-primary w-full sm:w-auto">Aktuelle Abstimmungen</a>
+        <a href="/profil" class="btn-secondary w-full sm:w-auto">Mein Profil</a>
       </div>
     {:else}
-      <a href="https://www.ch.ch/de/abstimmungen/" target="_blank" rel="noopener" class="btn-primary">
+      <a href="https://www.ch.ch/de/abstimmungen/" target="_blank" rel="noopener" class="btn-primary w-full sm:w-auto">
         Offizielle Abstimmungsinfos öffnen
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -610,11 +631,21 @@
     }
 
     .workflow-nav {
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 8px;
+      overflow: visible;
     }
 
     .workflow-nav a {
+      justify-content: flex-start;
       min-width: 0;
+      padding-inline: 9px;
+    }
+
+    .workflow-nav a:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
     }
 
     .section-heading,
@@ -629,12 +660,30 @@
   }
 
   @media (max-width: 560px) {
-    .workflow-nav {
-      grid-template-columns: 1fr;
+    .vote-detail-heading {
+      display: block;
+    }
+
+    .vote-detail-title {
+      font-size: clamp(1.7rem, 7vw, 2.05rem);
+      line-height: 1.08;
+      hyphens: auto;
+      max-width: 100%;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: normal;
     }
 
     .party-row {
       align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .party-avatar {
+      height: 38px;
+      width: 38px;
+      font-size: 10px;
     }
   }
 </style>

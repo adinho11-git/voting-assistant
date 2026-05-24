@@ -702,13 +702,22 @@
 
   @media (max-width: 720px) {
     .party-map-toolbar {
-      overflow-x: auto;
-      flex-wrap: nowrap;
-      padding-bottom: 2px;
+      position: static;
+      overflow-x: visible;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding-bottom: 0;
+    }
+
+    .party-map-toolbar button {
+      flex: 1 1 calc(33.333% - 8px);
+      justify-content: center;
+      min-width: 0;
+      padding-inline: 9px;
     }
 
     .canton-map-stage {
-      min-height: 300px;
+      min-height: auto;
       padding: 14px;
     }
 
@@ -719,6 +728,12 @@
       bottom: 34px;
       width: 100%;
       transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 380px) {
+    .party-map-toolbar button {
+      flex-basis: calc(50% - 8px);
     }
   }
 

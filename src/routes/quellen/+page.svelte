@@ -249,8 +249,8 @@
 <section class="container-app pt-8 md:pt-14 pb-16">
   <div class="sources-hero">
     <p class="section-eyebrow mb-2">Transparenz & Einordnung</p>
-    <h1 class="font-display text-3xl md:text-5xl text-ink mb-4">Quellen &amp; Medienberichte</h1>
-    <p class="text-ink-muted text-base md:text-lg leading-relaxed max-w-3xl">
+    <h1 class="sources-title font-display text-3xl md:text-5xl text-ink mb-4">Quellen &amp; Medienberichte</h1>
+    <p class="sources-lead text-ink-muted text-base md:text-lg leading-relaxed max-w-3xl">
       Diese Seite trennt offizielle Quellen, Parteipositionen, Medienberichte und KI-gestützte Hilfstexte bewusst voneinander.
     </p>
   </div>
@@ -417,6 +417,14 @@
     border-left: 4px solid var(--brand);
     padding-left: clamp(1rem, 2vw, 1.5rem);
     margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .sources-title,
+  .sources-lead {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .source-section {
@@ -771,6 +779,53 @@
   }
 
   @media (max-width: 640px) {
+    .sources-hero {
+      padding-left: 1rem;
+    }
+
+    .sources-title {
+      font-size: clamp(1.85rem, 7.4vw, 2.2rem);
+      line-height: 1.08;
+      hyphens: auto;
+    }
+
+    .sources-lead {
+      font-size: 0.96rem;
+      line-height: 1.58;
+    }
+
+    .source-pill {
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    .source-card,
+    .party-source-card,
+    .media-card,
+    .method-item,
+    .transparency-note {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .source-card-tag,
+    .media-category,
+    .media-medium,
+    .media-meta {
+      max-width: 100%;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .media-notice {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .media-notice strong {
+      white-space: normal;
+    }
+
     .media-tabs button {
       flex: 1 1 auto;
     }

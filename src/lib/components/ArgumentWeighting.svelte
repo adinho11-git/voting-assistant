@@ -832,6 +832,16 @@
   }
 
   @media (max-width: 560px) {
+    .weighting-shell {
+      padding: 18px;
+    }
+
+    .weighting-score,
+    .weighting-column,
+    .weight-card {
+      padding: 14px;
+    }
+
     .column-actions {
       grid-template-columns: 1fr;
     }
@@ -842,6 +852,10 @@
 
     .weight-card-head {
       grid-template-columns: 1fr;
+    }
+
+    .source-pill {
+      max-width: 100%;
     }
 
     .impact-orb {

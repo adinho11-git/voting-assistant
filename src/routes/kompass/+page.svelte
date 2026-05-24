@@ -169,10 +169,10 @@
     <!-- INTRO -->
     <div in:fade={{ duration: 250 }}>
       <p class="section-eyebrow mb-3">Partei-Kompass · {totalQuestions} Fragen</p>
-      <h1 class="font-display text-4xl md:text-5xl text-ink leading-tight mb-4">
+      <h1 class="kompass-title font-display text-4xl md:text-5xl text-ink leading-tight mb-4">
         Wo liegt deine politische Nähe?
       </h1>
-      <p class="text-base md:text-lg text-ink-muted leading-relaxed mb-8 max-w-2xl">
+      <p class="kompass-lead text-base md:text-lg text-ink-muted leading-relaxed mb-8 max-w-2xl">
         Beantworte {totalQuestions} realistische Schweizer Szenario-Fragen aus 10 Themenbereichen — von Migration und Klima bis Wohnen und EU-Politik. Wir berechnen, welchen Parteipositionen deine Antworten inhaltlich näher liegen, und zeigen pro Themenbereich, wo Nähe oder Distanz entsteht.
       </p>
 
@@ -288,7 +288,7 @@
     <!-- RESULTAT -->
     <div in:fade={{ duration: 300 }}>
       <p class="section-eyebrow mb-2">Deine Orientierung · {answeredCount} von {totalQuestions} Fragen beantwortet{skippedCount > 0 ? ' (' + skippedCount + ' übersprungen)' : ''}</p>
-      <h1 class="font-display text-3xl md:text-4xl text-ink leading-tight mb-3">
+      <h1 class="kompass-title font-display text-3xl md:text-4xl text-ink leading-tight mb-3">
         Deine stärkste politische Nähe: <span style="color: {top?.color};">{top?.kuerzel}</span>
       </h1>
       <p class="text-sm text-ink-muted mb-3 max-w-2xl">
@@ -529,6 +529,14 @@
 </section>
 
 <style>
+  .kompass-title,
+  .kompass-lead {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
   .compass-frame {
     position: relative;
     height: clamp(300px, 46vw, 420px);
@@ -721,6 +729,17 @@
   }
 
   @media (max-width: 520px) {
+    .kompass-title {
+      font-size: clamp(1.85rem, 7.4vw, 2.2rem);
+      line-height: 1.08;
+      hyphens: auto;
+    }
+
+    .kompass-lead {
+      font-size: 0.98rem;
+      line-height: 1.58;
+    }
+
     .compass-frame {
       height: 320px;
     }
