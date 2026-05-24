@@ -157,7 +157,7 @@ Strukturierte Schweizer Abstimmungsdaten sind in [`src/lib/realData.ts`](../src/
 ### Server-Schicht
 
 - [`db.ts`](../src/lib/server/db.ts) — MongoDB-Connection mit Timeout, Cache und Fallback.
-- [`dataLayer.ts`](../src/lib/server/dataLayer.ts) — Unified Data Layer: nutzt MongoDB falls verfügbar, sonst In-Memory-Store. Routen importieren ausschliesslich aus dem Data Layer.
+- [`dataLayer.ts`](../src/lib/server/dataLayer.ts) — Unified Data Layer: nutzt MongoDB, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt; sonst In-Memory-Store mit Seed-Daten. Routen importieren ausschliesslich aus dem Data Layer.
 - [`abstimmungenStore.ts`](../src/lib/server/abstimmungenStore.ts), [`communityStore.ts`](../src/lib/server/communityStore.ts), [`interesseStore.ts`](../src/lib/server/interesseStore.ts) — In-Memory-Implementierungen.
 - [`hooks.server.ts`](../src/hooks.server.ts) — Admin-Auth-Guard: setzt `event.locals.adminAuthed`, redirected geschützte Routen zur Login-Seite, lässt Login-Seite nicht durch, wenn schon authentifiziert.
 
@@ -188,6 +188,40 @@ Strukturierte Schweizer Abstimmungsdaten sind in [`src/lib/realData.ts`](../src/
 - **Server-seitig:** MongoDB Atlas (Collections `abstimmungen`, `communityVotes`, `parteiInteressen`).
 - **Client-seitig:** `localStorage` (Keys `votes_v2`, `engagement_v1`, `theme_v1`, `kompass_v1`).
 - **Cookies:** `admin_session` für die Admin-Auth, anonymes Client-Cookie für Vote-Idempotenz.
+
+### Datenbank- und CRUD-Erfüllung
+
+Die App erfüllt die Mindestanforderung **«Daten werden aus einer Datenbank geladen und angezeigt; Daten können erstellt und/oder aktualisiert werden»** über eine klare Server-Schicht:
+
+- MongoDB Atlas wird verwendet, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt.
+- Ohne diese Konfiguration nutzt die App einen Seed-/Fallback-Modus mit strukturierten Daten und In-Memory-Stores, damit der Prototyp lokal und für Demos weiterhin funktioniert.
+- Secret-Werte wie `MONGODB_URI` und `ADMIN_PASSWORD` werden nicht im Repository dokumentiert.
+
+| Bereich | Quelle / Persistenz | Zweck |
+|---|---|---|
+| Abstimmungen, Argumente, Parteipositionen | MongoDB Collection `abstimmungen` | Öffentliche Seiten laden Vorlagen, Briefings, Argumente und Parteipositionen über den Data Layer |
+| Community Votes | MongoDB Collection `communityVotes` | Anonyme JA/NEIN-Aggregation pro Vorlage |
+| Interessen-Registrierungen | MongoDB Collection `parteiInteressen` | Server-seitige Erfassung und Admin-/CSV-Auswertung |
+| Persönliche Positionen, Notizen, Journal | `localStorage` | Datenschutzfreundliche persönliche Daten ohne Konto |
+| Kompass-Ergebnis | `localStorage` | Persönliches Ergebnis bleibt im Browser |
+| Parteienprofile und Kompass-Fragen | Statische TypeScript-Daten | Strukturierte Referenzdaten, keine User- oder Admin-Daten |
+| Seed-/Fallback-Daten | `realData.ts` + In-Memory-Stores | Robuste Anzeige, wenn MongoDB nicht aktiv ist |
+
+CRUD-Funktionen:
+
+| Aktion | Ort | Persistenz bei aktivem MongoDB-Modus |
+|---|---|---|
+| Abstimmung erstellen | `/admin/abstimmungen/new` | Neuer Eintrag in `abstimmungen` |
+| Abstimmung löschen | `/admin/abstimmungen` | Löschen aus `abstimmungen` |
+| Metadaten bearbeiten | `/admin/abstimmungen/[slug]/edit` | Update in `abstimmungen` |
+| Argument hinzufügen / löschen | `/admin/abstimmungen/[slug]/edit` | Update der Pro-/Contra-Argumente in `abstimmungen` |
+| Parteipositionen bearbeiten | `/admin/abstimmungen/[slug]/edit` | Update des Parteien-Arrays in `abstimmungen` |
+| Community Vote abgeben | `/api/abstimmungen/[slug]/vote` | Upsert in `communityVotes` pro Browser-Cookie |
+| Interessen erfassen | `/api/parteien/interesse` | Neuer Eintrag in `parteiInteressen` |
+| Interessen exportieren | `/api/admin/interessen.csv` | CSV aus `parteiInteressen` |
+| Persönliche Position / Notiz ändern | Detailseite und Profil | Update im Browser-`localStorage` |
+
+Für die Bewertung sollte im Video explizit gezeigt werden: Admin-Login, Dashboard mit MongoDB-Status, Bearbeiten einer Vorlage oder eines Arguments, sichtbare Änderung auf der öffentlichen Seite sowie ein Community-Vote mit aggregierter Anzeige.
 
 ## Interaktivität — Highlights
 

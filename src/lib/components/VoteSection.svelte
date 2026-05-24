@@ -231,11 +231,10 @@
         </div>
       {:else if userVote}
         <h3 class="font-display text-xl text-ink mb-3">
-          Du würdest aktuell mit
+          Deine gespeicherte Position:
           <span class="{userVote === 'JA' ? 'text-pro' : userVote === 'NEIN' ? 'text-contra' : 'text-ink-muted'}">
             {formatPosition(userVote)}
-          </span>
-          stimmen.
+          </span>.
         </h3>
         <div class="saved-decision {pulse ? 'badge-pulse' : ''}">
           <span class="{positionClass(userVote)} text-sm px-4 py-1.5" style="font-size:13px;">
@@ -286,7 +285,7 @@
           </div>
         {/if}
         <div class="flex items-center justify-between gap-3 py-1.5">
-          <span class="text-sm text-ink">Community-Stimmung</span>
+          <span class="text-sm text-ink">Prototyp-Community</span>
           <span class="font-mono-data text-xs text-ink-muted">{community.total} Stimme{community.total === 1 ? '' : 'n'}</span>
         </div>
       </div>
@@ -302,7 +301,7 @@
       </div>
 
       <p class="text-xs text-ink-subtle mt-3">
-        Anonyme Aggregation aller Nutzer-Stimmen. Quelle: dieser Prototyp.
+        Community-Werte stammen aus diesem Prototyp und können im Demo-/Seed-Modus Beispielwerte enthalten. Sie sind keine repräsentative Umfrage und keine Prognose.
       </p>
     </div>
   </div>

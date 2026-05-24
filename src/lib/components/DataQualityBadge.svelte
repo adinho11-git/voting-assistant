@@ -4,8 +4,8 @@
 
   const labels: Record<DataQuality, string> = {
     official: 'Offiziell · admin.ch',
-    'official-pending': 'Offiziell · Vorbereitung',
-    demo: 'Demo-Inhalt'
+    'official-pending': 'Offizielle Quelle in Prüfung',
+    demo: 'Demo-/Seed-Daten'
   };
 
   const cls: Record<DataQuality, string> = {

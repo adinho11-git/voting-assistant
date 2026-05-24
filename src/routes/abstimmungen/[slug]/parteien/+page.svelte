@@ -67,7 +67,7 @@
       <div class="w-12 h-12 rounded-full bg-swiss-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0" aria-hidden="true">BR</div>
       <div class="flex-1">
         <p class="font-semibold text-base text-ink">Bundesrat</p>
-        <p class="text-sm text-ink-muted italic">Offizielle Empfehlung der Landesregierung</p>
+        <p class="text-sm text-ink-muted italic">Position der Landesregierung</p>
       </div>
       <Badge position={a.bundesratPosition} size="md" />
     </div>

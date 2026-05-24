@@ -1,0 +1,1016 @@
+diff --git a/README.md b/README.md
+index 750ed31..8da2428 100644
+--- a/README.md
++++ b/README.md
+@@ -153,8 +153,8 @@ Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
+ | Online zugängliche App | ✅ Netlify-Deployment |
+ | GitHub-Repository mit Code und Dokumentation | ✅ |
+ | Mehrere Pages und Workflows | ✅ 19+ Routen |
+-| Daten aus Datenquelle | ✅ MongoDB Atlas + strukturierte TypeScript-Datenquelle |
+-| Daten erstellen / aktualisieren | ✅ Admin-CRUD, persönliche Stimmen, Community-Votes |
++| Daten aus Datenquelle | ✅ MongoDB Atlas bei `MONGODB_URI` + `USE_MOCK_DATA=false`, mit Seed-/Fallback-Datenmodus |
++| Daten erstellen / aktualisieren | ✅ Admin-CRUD, Community-Votes, Interessen-Registrierungen und lokale persönliche Daten |
+ | Evaluation mit Auswertung | 🟡 Plan und Struktur stehen — echte Testergebnisse werden vor der Abgabe eingetragen |
+ | Rechtliche Rahmenbedingungen | ✅ Quellen verlinkt, Disclaimer, keine personenbezogene Server-Speicherung |
+ | KI-Einsatz transparent | ✅ Doku in [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), In-App-Transparenz auf Start- und Quellen-Seite |
+@@ -220,10 +220,27 @@ voting-assistant/
+ 
+ **Datenflüsse:**
+ 
+-- **Strukturierte Daten** (Abstimmungen, Argumente, Parteipositionen): in `realData.ts` typsicher gepflegt, über die `dataLayer`-Schicht entweder aus MongoDB Atlas oder dem In-Memory-Store geladen.
++- **MongoDB / Server-Daten** (Abstimmungen, Argumente, Parteipositionen, Community-Votes, Interessen-Registrierungen): über die `dataLayer`-Schicht aus MongoDB Atlas geladen, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt.
++- **Seed-/Fallback-Daten**: Wenn MongoDB nicht aktiv oder nicht erreichbar ist, nutzt die App strukturierte Seed-Daten aus `realData.ts` sowie In-Memory-Stores. Dadurch bleibt der Prototyp lokal und im Demo-Fall lauffähig.
++- **Statische strukturierte Daten**: Parteienprofile und Kompass-Fragen liegen in TypeScript-Dateien (`parteiData.ts`, `kompass.ts`), weil sie keine User- oder Admin-Daten sind.
+ - **Persönliche User-Daten** (Stimmen, Notizen, Sicherheit, Bookmarks, Kompass-Resultate, Argumentgewichtungen): ausschliesslich im `localStorage`.
+-- **Community-Votes**: anonymes Server-Aggregat (`/api/abstimmungen/[slug]/vote`).
+-- **Admin-CRUD**: persistiert bei aktiver MongoDB-Verbindung direkt in die Collection, sonst In-Memory.
++- **Admin-CRUD**: persistiert bei aktiver MongoDB-Verbindung direkt in die Collection `abstimmungen`, sonst im In-Memory-Fallback.
++
++**MongoDB-Collections:**
++
++| Collection | Zweck |
++|---|---|
++| `abstimmungen` | Vorlagen, Briefings, Pro-/Contra-Argumente und Parteipositionen |
++| `communityVotes` | Anonyme aggregierte JA/NEIN-Stimmen pro Vorlage |
++| `parteiInteressen` | Interessen-Registrierungen aus dem Parteienbereich |
++
++**CRUD-Erfüllung für das Bewertungsraster:**
++
++- Admin kann Abstimmungen erstellen, bearbeiten und löschen.
++- Admin kann Metadaten, Pro-/Contra-Argumente und Parteipositionen pflegen.
++- User können Community-Votes abgeben; bestehende Stimmen werden pro Browser-Cookie aktualisiert.
++- User können persönliche Positionen, Notizen, Argumentgewichtungen, Feedback und Kompass-Ergebnisse lokal speichern, ändern oder löschen.
++- Interessen-Registrierungen werden serverseitig erfasst und im Admin-Bereich als CSV exportierbar gemacht.
+ 
+ ---
+ 
+@@ -280,6 +297,7 @@ Aufruf unter `/admin/login`. Login mit dem in `.env` gesetzten `ADMIN_PASSWORD`.
+ - **Build-Auslöser:** jeder Push auf `main` löst automatisch ein Netlify-Build aus.
+ - **Aktuelle URL:** <https://friendly-llama-b738d4.netlify.app>
+ - **Custom Domain:** noch nicht konfiguriert.
++- **Produktiver Datenmodus:** Für MongoDB Atlas müssen in Netlify `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt sein. Die tatsächlichen Secret-Werte werden nicht im Repository dokumentiert.
+ 
+ > **TODO:** Falls noch eine andere Deployment-URL kommt oder eine Custom-Domain konfiguriert wird, hier eintragen.
+ 
+diff --git a/docs/04-prototype.md b/docs/04-prototype.md
+index 7f4e7ad..bb768fc 100644
+--- a/docs/04-prototype.md
++++ b/docs/04-prototype.md
+@@ -157,7 +157,7 @@ Strukturierte Schweizer Abstimmungsdaten sind in [`src/lib/realData.ts`](../src/
+ ### Server-Schicht
+ 
+ - [`db.ts`](../src/lib/server/db.ts) — MongoDB-Connection mit Timeout, Cache und Fallback.
+-- [`dataLayer.ts`](../src/lib/server/dataLayer.ts) — Unified Data Layer: nutzt MongoDB falls verfügbar, sonst In-Memory-Store. Routen importieren ausschliesslich aus dem Data Layer.
++- [`dataLayer.ts`](../src/lib/server/dataLayer.ts) — Unified Data Layer: nutzt MongoDB, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt; sonst In-Memory-Store mit Seed-Daten. Routen importieren ausschliesslich aus dem Data Layer.
+ - [`abstimmungenStore.ts`](../src/lib/server/abstimmungenStore.ts), [`communityStore.ts`](../src/lib/server/communityStore.ts), [`interesseStore.ts`](../src/lib/server/interesseStore.ts) — In-Memory-Implementierungen.
+ - [`hooks.server.ts`](../src/hooks.server.ts) — Admin-Auth-Guard: setzt `event.locals.adminAuthed`, redirected geschützte Routen zur Login-Seite, lässt Login-Seite nicht durch, wenn schon authentifiziert.
+ 
+@@ -189,6 +189,40 @@ Strukturierte Schweizer Abstimmungsdaten sind in [`src/lib/realData.ts`](../src/
+ - **Client-seitig:** `localStorage` (Keys `votes_v2`, `engagement_v1`, `theme_v1`, `kompass_v1`).
+ - **Cookies:** `admin_session` für die Admin-Auth, anonymes Client-Cookie für Vote-Idempotenz.
+ 
++### Datenbank- und CRUD-Erfüllung
++
++Die App erfüllt die Mindestanforderung **«Daten werden aus einer Datenbank geladen und angezeigt; Daten können erstellt und/oder aktualisiert werden»** über eine klare Server-Schicht:
++
++- MongoDB Atlas wird verwendet, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt.
++- Ohne diese Konfiguration nutzt die App einen Seed-/Fallback-Modus mit strukturierten Daten und In-Memory-Stores, damit der Prototyp lokal und für Demos weiterhin funktioniert.
++- Secret-Werte wie `MONGODB_URI` und `ADMIN_PASSWORD` werden nicht im Repository dokumentiert.
++
++| Bereich | Quelle / Persistenz | Zweck |
++|---|---|---|
++| Abstimmungen, Argumente, Parteipositionen | MongoDB Collection `abstimmungen` | Öffentliche Seiten laden Vorlagen, Briefings, Argumente und Parteipositionen über den Data Layer |
++| Community Votes | MongoDB Collection `communityVotes` | Anonyme JA/NEIN-Aggregation pro Vorlage |
++| Interessen-Registrierungen | MongoDB Collection `parteiInteressen` | Server-seitige Erfassung und Admin-/CSV-Auswertung |
++| Persönliche Positionen, Notizen, Journal | `localStorage` | Datenschutzfreundliche persönliche Daten ohne Konto |
++| Kompass-Ergebnis | `localStorage` | Persönliches Ergebnis bleibt im Browser |
++| Parteienprofile und Kompass-Fragen | Statische TypeScript-Daten | Strukturierte Referenzdaten, keine User- oder Admin-Daten |
++| Seed-/Fallback-Daten | `realData.ts` + In-Memory-Stores | Robuste Anzeige, wenn MongoDB nicht aktiv ist |
++
++CRUD-Funktionen:
++
++| Aktion | Ort | Persistenz bei aktivem MongoDB-Modus |
++|---|---|---|
++| Abstimmung erstellen | `/admin/abstimmungen/new` | Neuer Eintrag in `abstimmungen` |
++| Abstimmung löschen | `/admin/abstimmungen` | Löschen aus `abstimmungen` |
++| Metadaten bearbeiten | `/admin/abstimmungen/[slug]/edit` | Update in `abstimmungen` |
++| Argument hinzufügen / löschen | `/admin/abstimmungen/[slug]/edit` | Update der Pro-/Contra-Argumente in `abstimmungen` |
++| Parteipositionen bearbeiten | `/admin/abstimmungen/[slug]/edit` | Update des Parteien-Arrays in `abstimmungen` |
++| Community Vote abgeben | `/api/abstimmungen/[slug]/vote` | Upsert in `communityVotes` pro Browser-Cookie |
++| Interessen erfassen | `/api/parteien/interesse` | Neuer Eintrag in `parteiInteressen` |
++| Interessen exportieren | `/api/admin/interessen.csv` | CSV aus `parteiInteressen` |
++| Persönliche Position / Notiz ändern | Detailseite und Profil | Update im Browser-`localStorage` |
++
++Für die Bewertung sollte im Video explizit gezeigt werden: Admin-Login, Dashboard mit MongoDB-Status, Bearbeiten einer Vorlage oder eines Arguments, sichtbare Änderung auf der öffentlichen Seite sowie ein Community-Vote mit aggregierter Anzeige.
++
+ ## Interaktivität — Highlights
+ 
+ - **Argument-Gewichtung** mit Live-Tendenz, visualisiert in einem farbigen Score-Block (Brand / Pro / Contra je nach Tendenz).
+diff --git a/docs/07-projektorganisation.md b/docs/07-projektorganisation.md
+index 7ba59c8..c7120af 100644
+--- a/docs/07-projektorganisation.md
++++ b/docs/07-projektorganisation.md
+@@ -62,7 +62,7 @@ Beispiele bisheriger Commit-Stile aus der Historie:
+ 
+ Das vorbereitete Issue-Set liegt in [`issues.md`](issues.md). Es enthält 15 realistische Issues aus dem Projektverlauf mit Status, Priorität, Label-Vorschlägen, Akzeptanzkriterien, Bewertungsraster-Bezug und Umsetzungshinweisen.
+ 
+-Die Issues wurden bewusst zuerst als Dokumentation vorbereitet und **nicht automatisch auf GitHub erstellt**. Dadurch bleibt kontrollierbar, welche Einträge vor der Abgabe tatsächlich ins GitHub-Issue-Board übernommen werden.
++Die Issues wurden zuerst als Dokumentation vorbereitet und anschliessend mit GitHub CLI ins Repository übertragen. Bereits umgesetzte Punkte sind geschlossen, offene Abgabe-Aufgaben bleiben im Issue-Board sichtbar.
+ 
+ Empfohlene Nutzung:
+ 
+@@ -116,17 +116,36 @@ Sämtliche Artefakte sind im Repo selbst greifbar — kein Cloud-Ordner, kein Dr
+ - **Build-Befehle:** standard (`npm install` → `npm run build`).
+ - **Environment-Variablen in Netlify:**
+   - `MONGODB_URI` — Connection-String für MongoDB Atlas.
+-  - `USE_MOCK_DATA` — `false` für Produktion mit DB, `true` für Mock-Modus.
++  - `USE_MOCK_DATA` — muss für den produktiven MongoDB-Modus exakt auf `false` gesetzt sein; sonst nutzt die App den Seed-/Fallback-Modus.
+   - `ADMIN_PASSWORD` — Passwort für den Admin-Bereich.
+ - **Aktuelle URL:** <https://friendly-llama-b738d4.netlify.app>
+ - **Custom Domain:** noch nicht konfiguriert. **TODO:** Falls gewünscht, in Netlify hinterlegen und in der README ergänzen.
+ 
++Keine geheimen Werte werden im Repository dokumentiert. Für die Abgabe reicht die transparente Beschreibung der Variablen und der Nachweis im Admin-Dashboard, dass der produktive Datenmodus aktiv ist.
++
++### Datenbank- und CRUD-Nachweis
++
++Die Mindestanforderung «Daten werden aus einer Datenbank geladen und angezeigt; Daten können erstellt und/oder aktualisiert werden» wird organisatorisch wie folgt nachgewiesen:
++
++| Nachweis | Umsetzung |
++|---|---|
++| Datenbank-Anbindung | MongoDB Atlas über `src/lib/server/db.ts` und `src/lib/server/dataLayer.ts` |
++| Produktiver Modus | Aktiv, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt |
++| Fallback | Seed-/In-Memory-Modus für lokale Entwicklung und robuste Demo-Anzeige |
++| Collections | `abstimmungen`, `communityVotes`, `parteiInteressen` |
++| Daten laden und anzeigen | Öffentliche Seiten laden Abstimmungen, Argumente, Parteipositionen und Community-Aggregate über den Data Layer |
++| Daten erstellen / aktualisieren | Admin-CRUD für Abstimmungen, Argumente und Parteipositionen; Community-Votes; Interessen-Registrierungen |
++| Persönliche Daten | Stimmen, Notizen, Journal und Kompass-Ergebnis bleiben im Browser-`localStorage` |
++
++Für das Video und die Screenshots sollte mindestens eine Admin-Ansicht sichtbar sein, idealerweise das Dashboard mit Datenbankstatus sowie eine konkrete Bearbeitung einer Abstimmung oder eines Arguments.
++
+ ### Vorgehen beim Deployen
+ 
+ 1. Lokal `npm run check` und `npm run build` durchlaufen lassen.
+ 2. Commit + Push auf `main`.
+-3. Netlify-Dashboard prüfen (Build erfolgreich, Logs sauber).
++3. Netlify-Dashboard prüfen (Build erfolgreich, Logs sauber, `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt).
+ 4. Live-URL aufrufen, kritische Routen kurz prüfen (`/`, `/abstimmungen`, `/kompass`, `/profil`, `/admin/login`).
++5. Admin-Dashboard prüfen: Für die finale Abgabe sollte dort MongoDB Atlas beziehungsweise der produktive Datenmodus sichtbar sein.
+ 
+ ## Bekannte technische Schulden
+ 
+diff --git a/docs/video-script.md b/docs/video-script.md
+index adb9c10..c83c23b 100644
+--- a/docs/video-script.md
++++ b/docs/video-script.md
+@@ -35,6 +35,27 @@
+ 
+ ---
+ 
++## Datenbank und CRUD zeigen
++
++Dieser Abschnitt ist wichtig für das Bewertungsraster-Kriterium **«Daten werden aus einer Datenbank geladen und angezeigt; Daten können erstellt und/oder aktualisiert werden»**. Falls die Zeit knapp wird, lieber diesen Teil kurz, aber sichtbar zeigen, statt ihn nur zu erwähnen.
++
++Empfohlener Ablauf:
++
++1. **Admin Login:** `/admin/login` öffnen und sich mit dem gesetzten Admin-Passwort anmelden. Das Passwort selbst nicht im Video nennen oder sichtbar dokumentieren.
++2. **Dashboard prüfen:** Auf dem Admin-Dashboard zeigen, dass der produktive Datenmodus aktiv ist, also MongoDB Atlas beziehungsweise `USE_MOCK_DATA=false` angezeigt wird.
++3. **CRUD-Aktion zeigen:** Eine bestehende Abstimmung oder ein Argument im Admin-Bereich bearbeiten, zum Beispiel einen Argumenttext oder eine Quellenangabe kurz anpassen.
++4. **Öffentliche Seite prüfen:** Zur öffentlichen Abstimmungsdetailseite wechseln und zeigen, dass die Änderung sichtbar ist.
++5. **Community Vote abgeben:** Auf der Detailseite eine JA/NEIN-Stimme abgeben.
++6. **Aggregation zeigen:** Danach die Community-Anzeige auf der Detailseite oder im Admin-Bereich `/admin/community` zeigen.
++
++Technische Sprechzeile:
++
++> «Die App nutzt MongoDB Atlas, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt. Die wichtigsten Collections sind `abstimmungen`, `communityVotes` und `parteiInteressen`. Falls MongoDB nicht aktiv ist, fällt der Prototyp auf Seed- und In-Memory-Daten zurück, damit die Demo weiter funktioniert.»
++
++Keine Secret-Werte wie `MONGODB_URI` oder `ADMIN_PASSWORD` im Video zeigen.
++
++---
++
+ ## Sprechertext (Entwurf)
+ 
+ Der Text ist als Lesefassung gedacht und kann beim Aufnehmen frei angepasst werden. Die Zeiten sind Richtwerte.
+@@ -87,7 +108,9 @@ Der Text ist als Lesefassung gedacht und kann beim Aufnehmen frei angepasst werd
+ 
+ ### 9. Admin / Datenstruktur — 4:35 – 4:50
+ 
+-> «Kurz die technische Tiefe: Ein passwortgeschützter Admin-Bereich erlaubt CRUD auf Abstimmungen, Argumente und Parteipositionen. Im Hintergrund läuft eine MongoDB-Anbindung mit transparentem In-Memory-Fallback. Interessen-Registrierungen lassen sich als CSV exportieren.»
++> «Kurz die technische Tiefe: Ein passwortgeschützter Admin-Bereich erlaubt CRUD auf Abstimmungen, Argumente und Parteipositionen. Das Dashboard zeigt, ob die App im produktiven MongoDB-Atlas-Modus läuft oder im Fallback-Modus. Für die finale Abgabe müssen in Netlify `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt sein.
++>
++> Ich kann hier eine Vorlage oder ein Argument bearbeiten und die Änderung anschliessend auf der öffentlichen Detailseite sehen. Zusätzlich werden Community-Stimmen serverseitig aggregiert, und Interessen-Registrierungen lassen sich im Admin-Bereich als CSV exportieren.»
+ 
+ ### 10. KI-Einsatz und Evaluation — 4:50 – 5:00
+ 
+diff --git a/src/lib/components/ArgumentWeighting.svelte b/src/lib/components/ArgumentWeighting.svelte
+index 51d3850..11b8173 100644
+--- a/src/lib/components/ArgumentWeighting.svelte
++++ b/src/lib/components/ArgumentWeighting.svelte
+@@ -177,7 +177,7 @@
+       <p class="section-eyebrow">Abwägen und gewichten</p>
+       <h2 class="font-display text-2xl md:text-3xl text-ink">Welche Argumente tragen deine Entscheidung?</h2>
+       <p class="weighting-copy">
+-        Pro und Contra stehen direkt neben der 4-Stufen-Gewichtung. Wähle pro Argument, wie stark es dich überzeugt; die Zusammenfassung aktualisiert sich live.
++        Pro und Contra stehen direkt neben der 4-Stufen-Gewichtung. Wähle pro Argument, wie stark es dich überzeugt; die Zusammenfassung aktualisiert sich live und dient nur deiner persönlichen Reflexion.
+       </p>
+ 
+       <div class="weighting-guide-card" aria-label="So funktioniert die Gewichtung">
+@@ -186,8 +186,8 @@
+           <ol class="guide-steps">
+             <li><span>1</span>Pro und Contra lesen</li>
+             <li><span>2</span>Argumente nach Überzeugung bewerten</li>
+-            <li><span>3</span>Live-Tendenz beobachten</li>
+-            <li><span>4</span>Tendenz speichern</li>
++            <li><span>3</span>Reflexions-Tendenz beobachten</li>
++            <li><span>4</span>Reflexion speichern</li>
+           </ol>
+         </div>
+ 
+@@ -222,6 +222,9 @@
+       <span>{weightedCount} von {visibleArguments.length} Argumenten bewertet</span>
+       <strong>Deine aktuelle Tendenz: {tendencyLabel}</strong>
+       <p>{scoreDetail}</p>
++      <p class="score-disclaimer">
++        Keine Prognose, kein Parteienmatching und keine Abstimmungsempfehlung.
++      </p>
+ 
+       {#if topReasons.length > 0}
+         <div class="reason-list" aria-label="Stärkste gewichtete Gründe">
+@@ -467,6 +470,11 @@
+     line-height: 1.45;
+   }
+ 
++  .weighting-score .score-disclaimer {
++    color: rgba(255, 255, 255, 0.72);
++    font-size: 12px;
++  }
++
+   .reason-list {
+     display: grid;
+     gap: 8px;
+diff --git a/src/lib/components/DataQualityBadge.svelte b/src/lib/components/DataQualityBadge.svelte
+index 0b882f4..a5c840d 100644
+--- a/src/lib/components/DataQualityBadge.svelte
++++ b/src/lib/components/DataQualityBadge.svelte
+@@ -4,8 +4,8 @@
+ 
+   const labels: Record<DataQuality, string> = {
+     official: 'Offiziell · admin.ch',
+-    'official-pending': 'Offiziell · Vorbereitung',
+-    demo: 'Demo-Inhalt'
++    'official-pending': 'Offizielle Quelle in Prüfung',
++    demo: 'Demo-/Seed-Daten'
+   };
+ 
+   const cls: Record<DataQuality, string> = {
+diff --git a/src/lib/components/DisclaimerRibbon.svelte b/src/lib/components/DisclaimerRibbon.svelte
+index 3811156..15d917f 100644
+--- a/src/lib/components/DisclaimerRibbon.svelte
++++ b/src/lib/components/DisclaimerRibbon.svelte
+@@ -32,7 +32,7 @@
+       <strong>Studentischer Prototyp</strong>
+       <span>
+         Diese App ist eine im Modul Prototyping (ZHAW FS 2026) entwickelte Demo —
+-        <strong style="color: var(--brand);">keine offizielle Abstimmungshilfe.</strong>
++        <strong style="color: var(--brand);">keine offizielle Abstimmungshilfe und keine Wahlempfehlung.</strong>
+         Reale Vorlagen, Argumente und Ergebnisse stammen von admin.ch /
+         bk.admin.ch (Stand 23. Mai 2026); die Übersicht fokussiert auf eidgenössische Vorlagen.
+         <a href="/quellen" class="source-link" style="font-size: 12px;">Quellen &amp; Medienberichte</a>
+diff --git a/src/lib/components/ThemeToggle.svelte b/src/lib/components/ThemeToggle.svelte
+index a4f95d6..4d7d11a 100644
+--- a/src/lib/components/ThemeToggle.svelte
++++ b/src/lib/components/ThemeToggle.svelte
+@@ -11,9 +11,9 @@
+ >
+   {#if $theme === 'dark'}
+     <!-- Sun icon -->
+-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+-      <circle cx="12" cy="12" r="4" />
+-      <path stroke-linecap="round" d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m12.73 0l-1.41-1.41M6.34 6.34L4.93 4.93" />
++    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
++      <circle cx="12" cy="12" r="4.2" />
++      <path stroke-linecap="round" d="M12 2.2v2.2m0 15.2v2.2M4.8 4.8l1.6 1.6m11.2 11.2 1.6 1.6M2.2 12h2.2m15.2 0h2.2M4.8 19.2l1.6-1.6m11.2-11.2 1.6-1.6" />
+     </svg>
+   {:else}
+     <!-- Moon icon -->
+diff --git a/src/lib/components/VoteSection.svelte b/src/lib/components/VoteSection.svelte
+index 38928d5..4c6d791 100644
+--- a/src/lib/components/VoteSection.svelte
++++ b/src/lib/components/VoteSection.svelte
+@@ -231,11 +231,10 @@
+         </div>
+       {:else if userVote}
+         <h3 class="font-display text-xl text-ink mb-3">
+-          Du würdest aktuell mit
++          Deine gespeicherte Position:
+           <span class="{userVote === 'JA' ? 'text-pro' : userVote === 'NEIN' ? 'text-contra' : 'text-ink-muted'}">
+             {formatPosition(userVote)}
+-          </span>
+-          stimmen.
++          </span>.
+         </h3>
+         <div class="saved-decision {pulse ? 'badge-pulse' : ''}">
+           <span class="{positionClass(userVote)} text-sm px-4 py-1.5" style="font-size:13px;">
+@@ -286,7 +285,7 @@
+           </div>
+         {/if}
+         <div class="flex items-center justify-between gap-3 py-1.5">
+-          <span class="text-sm text-ink">Community-Stimmung</span>
++          <span class="text-sm text-ink">Prototyp-Community</span>
+           <span class="font-mono-data text-xs text-ink-muted">{community.total} Stimme{community.total === 1 ? '' : 'n'}</span>
+         </div>
+       </div>
+@@ -302,7 +301,7 @@
+       </div>
+ 
+       <p class="text-xs text-ink-subtle mt-3">
+-        Anonyme Aggregation aller Nutzer-Stimmen. Quelle: dieser Prototyp.
++        Community-Werte stammen aus diesem Prototyp und können im Demo-/Seed-Modus Beispielwerte enthalten. Sie sind keine repräsentative Umfrage und keine Prognose.
+       </p>
+     </div>
+   </div>
+diff --git a/src/lib/components/VotingAssistant.svelte b/src/lib/components/VotingAssistant.svelte
+index bae3f75..e7ac257 100644
+--- a/src/lib/components/VotingAssistant.svelte
++++ b/src/lib/components/VotingAssistant.svelte
+@@ -36,7 +36,7 @@
+   $: tendencyDetail =
+     totalScore === 0
+       ? 'Gewichte weiter unten Argumente, dann erscheint hier deine aktuelle Tendenz.'
+-      : `Pro ${proScore} zu Contra ${contraScore}. Die Tendenz entsteht nur aus deinen Gewichtungen.`;
++      : `Pro ${proScore} zu Contra ${contraScore}. Die Tendenz entsteht nur aus deinen Gewichtungen und ist keine Empfehlung.`;
+ 
+   function sumWeights(
+     weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
+@@ -101,6 +101,9 @@
+         Verstehen → Abwägen → Gewichten → Einordnen → Entscheiden → Speichern
+       </h2>
+       <p class="assistant-summary">{abstimmung.aiSummary}</p>
++      <p class="assistant-transparency">
++        KI-gestützte Zusammenfassungen dienen als verständliche Einstiegshilfe und wurden im Projektkontext manuell geprüft.
++      </p>
+ 
+       <div class="assistant-facts" aria-label="Kurzfakten">
+         <span>{abstimmung.readTime} Min Lesezeit</span>
+@@ -115,9 +118,10 @@
+     </div>
+ 
+     <aside class="assistant-result" class:is-pro={tendencyPosition === 'JA'} class:is-contra={tendencyPosition === 'NEIN'} aria-live="polite">
+-      <span class="result-kicker">Live aus deiner Gewichtung</span>
++      <span class="result-kicker">Reflexion aus deiner Gewichtung</span>
+       <strong>Deine aktuelle Tendenz: {tendencyLabel}</strong>
+       <p>{tendencyDetail}</p>
++      <p class="assistant-result-note">Keine Prognose und keine Abstimmungsempfehlung.</p>
+       {#if topReasons.length > 0}
+         <ul>
+           {#each topReasons as reason}
+@@ -175,6 +179,13 @@
+     line-height: 1.58;
+   }
+ 
++  .assistant-transparency {
++    max-width: 780px;
++    color: var(--text-muted);
++    font-size: 13px;
++    line-height: 1.5;
++  }
++
+   .assistant-facts,
+   .assistant-actions {
+     display: flex;
+@@ -229,6 +240,11 @@
+     line-height: 1.45;
+   }
+ 
++  .assistant-result .assistant-result-note {
++    color: rgba(255, 255, 255, 0.7);
++    font-size: 12px;
++  }
++
+   .assistant-result ul {
+     display: grid;
+     gap: 8px;
+diff --git a/src/routes/+page.svelte b/src/routes/+page.svelte
+index 17d7c72..165427f 100644
+--- a/src/routes/+page.svelte
++++ b/src/routes/+page.svelte
+@@ -85,8 +85,8 @@
+     <div class="grid md:grid-cols-4 gap-5">
+       {#each [
+         { n: '1', t: 'Verstehen', d: 'Lies das KI-Briefing der Vorlage in drei Minuten — neutral aufbereitet, jede Aussage mit Originalquelle hinterlegt.' },
+-        { n: '2', t: 'Abwägen', d: 'Pro &amp; Contra mit Quellen-Datum direkt nebeneinander. Sieh, was Bundesrat, Parlament und Parteien empfehlen.' },
+-        { n: '3', t: 'Gewichten &amp; Einordnen', d: 'Markiere, welche Argumente für dich wirklich zählen — und schau, welche Parteien deiner Linie am nächsten kommen.' },
++        { n: '2', t: 'Abwägen', d: 'Pro &amp; Contra mit Quellen-Datum direkt nebeneinander. Sieh, welche Positionen Bundesrat, Parlament und Parteien vertreten.' },
++        { n: '3', t: 'Gewichten &amp; Einordnen', d: 'Markiere, welche Argumente für dich wirklich zählen — und schau, welche Parteipositionen deiner aktuellen Linie nahe liegen.' },
+         { n: '4', t: 'Entscheiden &amp; Speichern', d: 'Halte JA, NEIN oder UNENTSCHIEDEN mit Notiz im Voting-Journal fest — alles lokal in deinem Browser.' }
+       ] as step}
+         <div class="card p-5 md:p-6">
+@@ -107,7 +107,7 @@
+         <p class="section-eyebrow mb-3">Quellen-basiert</p>
+         <h3 class="font-display text-xl text-ink mb-2">admin.ch first</h3>
+         <p class="text-sm text-ink-muted leading-relaxed">
+-          Bundesrat-Empfehlungen, Initiativtexte und Abstimmungsbüchlein stammen direkt von admin.ch und bk.admin.ch. Jede Aussage ist mit Originallink und Datum versehen.
++          Bundesrat-Positionen, Initiativtexte und Abstimmungsbüchlein stammen direkt von admin.ch und bk.admin.ch. Jede Aussage ist mit Originallink und Datum versehen.
+         </p>
+       </div>
+       <div>
+@@ -121,7 +121,7 @@
+         <p class="section-eyebrow mb-3">Interaktiv</p>
+         <h3 class="font-display text-xl text-ink mb-2">Deine Meinung zählt</h3>
+         <p class="text-sm text-ink-muted leading-relaxed">
+-          Stimme ab, schreib eine Notiz, vergleiche dich mit der Community, finde im Kompass-Quiz heraus, welche Partei dir am nächsten steht.
++          Speichere deine Position, schreib eine Notiz, vergleiche dich mit der Prototyp-Community und prüfe im Kompass-Quiz deine politische Nähe.
+         </p>
+       </div>
+     </div>
+diff --git a/src/routes/abstimmungen/[slug]/+page.svelte b/src/routes/abstimmungen/[slug]/+page.svelte
+index 750a2c6..c7865e7 100644
+--- a/src/routes/abstimmungen/[slug]/+page.svelte
++++ b/src/routes/abstimmungen/[slug]/+page.svelte
+@@ -17,9 +17,10 @@
+ 
+   interface SourceItem {
+     label: string;
+-    url: string;
++    url?: string;
+     context: string;
+     date?: string;
++    verified: boolean;
+   }
+ 
+   const sectionLinks = [
+@@ -52,11 +53,13 @@
+     const items: SourceItem[] = [];
+ 
+     function add(label: string | undefined, url: string | undefined, context: string, date?: string): void {
+-      if (!label || !url) return;
+-      const key = `${label}-${url}`;
++      if (!label) return;
++      const cleanUrl = url?.trim();
++      const verified = !!cleanUrl && cleanUrl !== '#';
++      const key = `${label}-${cleanUrl ?? 'pending'}-${context}`;
+       if (seen.has(key)) return;
+       seen.add(key);
+-      items.push({ label, url, context, date });
++      items.push({ label, url: verified ? cleanUrl : undefined, context, date, verified });
+     }
+ 
+     add(vote.summarySource, vote.summarySourceUrl, 'Neutraler Überblick', vote.summaryLastChecked);
+@@ -280,7 +283,7 @@
+       <h2 class="font-display text-2xl md:text-3xl text-ink">Argumente mit Wirkung auf deine Tendenz</h2>
+     </div>
+     <p>
+-      Die Gewichtung ist keine Prognose und kein Parteien-Matching, sondern nur deine eigene Priorisierung der Argumente.
++      Die Argumentgewichtung unterstützt die persönliche Reflexion. Sie ist keine Prognose, kein Parteienmatching und keine Abstimmungsempfehlung.
+     </p>
+   </div>
+   <ArgumentWeighting abstimmung={a} />
+@@ -367,10 +370,18 @@
+ 
+     <div class="source-grid">
+       {#each sourceItems as source}
+-        <a href={source.url} target="_blank" rel="noopener" class="source-item">
+-          <span>{source.context}{#if source.date} · {source.date}{/if}</span>
+-          <strong>{source.label}</strong>
+-        </a>
++        {#if source.verified && source.url}
++          <a href={source.url} target="_blank" rel="noopener" class="source-item">
++            <span>{source.context}{#if source.date} · {source.date}{/if}</span>
++            <strong>{source.label}</strong>
++          </a>
++        {:else}
++          <div class="source-item source-item-muted">
++            <span>{source.context}{#if source.date} · {source.date}{/if}</span>
++            <strong>{source.label}</strong>
++            <small>Quelle wird final geprüft</small>
++          </div>
++        {/if}
+       {/each}
+     </div>
+   </div>
+@@ -399,7 +410,7 @@
+       </div>
+     {:else}
+       <a href="https://www.ch.ch/de/abstimmungen/" target="_blank" rel="noopener" class="btn-primary">
+-        Jetzt informiert abstimmen
++        Offizielle Abstimmungsinfos öffnen
+         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+         </svg>
+@@ -568,6 +579,12 @@
+     background: var(--surface);
+   }
+ 
++  .source-item-muted:hover {
++    transform: none;
++    border-color: var(--border-light);
++    background: color-mix(in srgb, var(--surface-alt) 30%, var(--surface));
++  }
++
+   .source-item span {
+     color: var(--text-muted);
+     font-family: 'IBM Plex Mono', monospace;
+@@ -582,6 +599,11 @@
+     line-height: 1.35;
+   }
+ 
++  .source-item small {
++    color: var(--text-subtle);
++    font-size: 12px;
++  }
++
+   @media (max-width: 820px) {
+     .workflow-anchor {
+       scroll-margin-top: 124px;
+diff --git a/src/routes/abstimmungen/[slug]/parteien/+page.svelte b/src/routes/abstimmungen/[slug]/parteien/+page.svelte
+index dd30251..0b78c09 100644
+--- a/src/routes/abstimmungen/[slug]/parteien/+page.svelte
++++ b/src/routes/abstimmungen/[slug]/parteien/+page.svelte
+@@ -67,7 +67,7 @@
+       <div class="w-12 h-12 rounded-full bg-swiss-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0" aria-hidden="true">BR</div>
+       <div class="flex-1">
+         <p class="font-semibold text-base text-ink">Bundesrat</p>
+-        <p class="text-sm text-ink-muted italic">Offizielle Empfehlung der Landesregierung</p>
++        <p class="text-sm text-ink-muted italic">Position der Landesregierung</p>
+       </div>
+       <Badge position={a.bundesratPosition} size="md" />
+     </div>
+diff --git a/src/routes/kompass/+page.svelte b/src/routes/kompass/+page.svelte
+index 618ee78..053b12e 100644
+--- a/src/routes/kompass/+page.svelte
++++ b/src/routes/kompass/+page.svelte
+@@ -89,10 +89,10 @@
+     <div in:fade={{ duration: 250 }}>
+       <p class="section-eyebrow mb-3">Partei-Kompass · {totalQuestions} Fragen</p>
+       <h1 class="font-display text-4xl md:text-5xl text-ink leading-tight mb-4">
+-        Welche Partei passt zu dir?
++        Wo liegt deine politische Nähe?
+       </h1>
+       <p class="text-base md:text-lg text-ink-muted leading-relaxed mb-8 max-w-2xl">
+-        Beantworte {totalQuestions} realistische Schweizer Szenario-Fragen aus 10 Themenbereichen — von Migration und Klima bis Wohnen und EU-Politik. Wir berechnen, welche der sechs grossen Parteien deinen Positionen am nächsten kommt, und zeigen pro Themenbereich, wo es Übereinstimmungen gibt.
++        Beantworte {totalQuestions} realistische Schweizer Szenario-Fragen aus 10 Themenbereichen — von Migration und Klima bis Wohnen und EU-Politik. Wir berechnen, welchen Parteipositionen deine Antworten inhaltlich näher liegen, und zeigen pro Themenbereich, wo Nähe oder Distanz entsteht.
+       </p>
+ 
+       <div class="card p-6 mb-8" style="background: var(--brand-light); border-color: rgba(200,16,46,0.2);">
+@@ -102,7 +102,7 @@
+         <ul class="text-sm text-ink leading-relaxed space-y-1.5 list-disc ml-5">
+           <li>Pro Frage wählst du auf einer 5-Stufen-Skala (1 = stimme gar nicht zu, 5 = stimme voll zu)</li>
+           <li>Du kannst Fragen überspringen — sie zählen dann nicht für deinen Match</li>
+-          <li>Am Ende siehst du ein Ranking + die Themenbereiche, in denen du mit jeder Partei am stärksten übereinstimmst</li>
++          <li>Am Ende siehst du ein Nähe-Ranking + Themenbereiche, in denen deine Antworten den Parteipositionen näher liegen</li>
+           <li>Du kannst deine Antworten anpassen oder als persönliche Positionen speichern</li>
+         </ul>
+       </div>
+@@ -212,7 +212,7 @@
+         Deine stärkste politische Nähe: <span style="color: {top?.color};">{top?.kuerzel}</span>
+       </h1>
+       <p class="text-sm text-ink-muted mb-3 max-w-2xl">
+-        Orientierung basierend auf deinen beantworteten Fragen – keine Wahlempfehlung.
++        Der Partei-Kompass zeigt politische Nähe auf Basis der beantworteten Fragen. Das Ergebnis ist eine Orientierung, keine Wahl- oder Abstimmungsempfehlung und keine Prognose.
+       </p>
+       <p class="text-ink-muted mb-6">
+         Nähe-Wert: <span class="font-mono-data text-2xl font-medium text-ink">{top?.match}%</span>
+@@ -331,7 +331,7 @@
+           Deine Antworten sind auf einer 1–5-Skala kodiert (1 = volle Ablehnung der Aussage, 5 = volle Zustimmung). Für den Vergleich werden sie mit den Parteipositionen auf dieselbe Richtung gebracht. Pro Frage wird die absolute Differenz berechnet — 0 ergibt 100% Nähe, 4 ergibt 0% Nähe. Übersprungene Fragen werden nicht gewichtet. Der Endwert ist der Durchschnitt über alle beantworteten Fragen. Die Themen-Aufstellung zeigt denselben Durchschnitt pro Themenbereich.
+         </p>
+         <p class="text-xs text-ink-muted mt-3">
+-          Die Parteipositionen basieren auf publizierten Wahlempfehlungen, Parteiprogrammen und Abstimmungsverhalten im Nationalrat. Sie wurden für diesen Prototyp manuell kalibriert und sind eine vereinfachte Modellierung – keine offizielle Parteiposition.
++          Die Parteipositionen basieren auf publizierten Parolen, Parteiprogrammen und Abstimmungsverhalten im Nationalrat. Sie wurden für diesen Prototyp manuell kalibriert und sind eine vereinfachte Modellierung – keine offizielle Parteiposition.
+         </p>
+       </details>
+ 
+@@ -361,7 +361,7 @@
+       </div>
+ 
+       <p class="text-sm text-ink-muted text-center mt-8 max-w-2xl mx-auto leading-relaxed">
+-        Der Kompass dient der politischen Orientierung und ersetzt keine persönliche Prüfung der Parteipositionen.
++        Der Kompass dient der politischen Orientierung und ersetzt keine persönliche Prüfung der Parteipositionen. Er ist keine Wahlempfehlung und keine Prognose.
+       </p>
+       <p class="text-xs text-ink-subtle text-center mt-3">
+         Ergebnis wird lokal in deinem Browser gespeichert und im Profil angezeigt. Keine Übermittlung an einen Server.
+diff --git a/src/routes/parteien/+page.svelte b/src/routes/parteien/+page.svelte
+index ad2243d..bcec832 100644
+--- a/src/routes/parteien/+page.svelte
++++ b/src/routes/parteien/+page.svelte
+@@ -102,7 +102,7 @@
+             </div>
+           </div>
+ 
+-          <p class="text-sm text-ink-muted leading-relaxed mb-4 line-clamp-3 flex-1">
++          <p class="text-sm text-ink-muted leading-relaxed mb-4">
+             {partei.kurzprofil}
+           </p>
+ 
+diff --git a/src/routes/profil/+page.svelte b/src/routes/profil/+page.svelte
+index 7ad345c..1493cde 100644
+--- a/src/routes/profil/+page.svelte
++++ b/src/routes/profil/+page.svelte
+@@ -269,14 +269,14 @@
+ 
+ <svelte:head>
+   <title>Mein politisches Profil – Voting Assistant</title>
+-  <meta name="description" content="Dein persönlicher Reflexionsraum: gespeicherte Positionen, Kompass-Ergebnis und Übereinstimmung mit Parteien. Alles bleibt lokal in deinem Browser." />
++  <meta name="description" content="Dein persönlicher Reflexionsraum: gespeicherte Positionen, Kompass-Ergebnis und Vergleich mit Parteipositionen. Alles bleibt lokal in deinem Browser." />
+ </svelte:head>
+ 
+ <section class="container-app pt-8 md:pt-12 pb-6">
+   <p class="section-eyebrow mb-2">Persönlicher Reflexionsraum</p>
+   <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Mein politisches Profil</h1>
+   <p class="text-ink-muted text-sm md:text-base max-w-2xl">
+-    Hier findest du deine gespeicherten Positionen, das Kompass-Ergebnis und deine Übereinstimmung mit den Parteien — als Grundlage für deine eigene politische Orientierung.
++    Hier findest du deine gespeicherten Positionen, das Kompass-Ergebnis und einen Vergleich mit Parteipositionen — als Grundlage für deine eigene politische Orientierung.
+   </p>
+ </section>
+ 
+@@ -350,7 +350,7 @@
+         </li>
+         <li>
+           <span class="empty-point-marker" aria-hidden="true">3</span>
+-          <span>Sieh hier, wo deine Stimmen mit den Parteien übereinstimmen.</span>
++          <span>Sieh hier, wo deine Positionen im Vergleich mit Parteipositionen liegen.</span>
+         </li>
+       </ul>
+ 
+@@ -411,7 +411,7 @@
+         </div>
+ 
+         <p class="text-xs text-ink-subtle mt-4">
+-          Gespeichert am {new Date($kompassStore.savedAt).toLocaleString('de-CH')}. Werte zeigen Orientierung, kein politisches Urteil.
++          Gespeichert am {new Date($kompassStore.savedAt).toLocaleString('de-CH')}. Werte zeigen Orientierung, keine Wahlempfehlung und kein politisches Urteil.
+         </p>
+       </div>
+     </section>
+@@ -510,7 +510,7 @@
+         <div class="flex items-end justify-between mb-3 border-b border-border-light pb-3 flex-wrap gap-3">
+           <div>
+             <p class="section-eyebrow mb-1">Aus deinen Ja/Nein-Positionen</p>
+-            <h2 class="font-display text-2xl text-ink">Momentane Übereinstimmung mit Parteipositionen</h2>
++            <h2 class="font-display text-2xl text-ink">Momentaner Vergleich mit Parteipositionen</h2>
+           </div>
+           <span class="text-xs font-mono-data text-ink-muted">Basis: {decidedCount} {decidedCount === 1 ? 'Position' : 'Positionen'}</span>
+         </div>
+@@ -549,7 +549,7 @@
+         </div>
+ 
+         <p class="text-xs text-ink-subtle mt-5">
+-          Diese Werte basieren nur auf deinen gespeicherten Ja/Nein-Positionen zu Abstimmungen, nicht auf dem Partei-Kompass. Berechnung: Übereinstimmung deiner Position mit der offiziellen Parteiposition pro Vorlage (Unsicher zählt nicht). Werte ändern sich, sobald du weitere Abstimmungen speicherst.
++          Diese Werte basieren nur auf deinen gespeicherten Ja/Nein-Positionen zu Abstimmungen, nicht auf dem Partei-Kompass. Berechnung: Vergleich deiner Position mit der ausgewiesenen Parteiposition pro Vorlage (Unsicher zählt nicht). Das ist eine Orientierung, kein Parteienmatching und keine Wahlempfehlung.
+         </p>
+       </div>
+     </section>
+diff --git a/src/routes/quellen/+page.svelte b/src/routes/quellen/+page.svelte
+index a270549..49c3e74 100644
+--- a/src/routes/quellen/+page.svelte
++++ b/src/routes/quellen/+page.svelte
+@@ -14,11 +14,12 @@
+     description: string;
+     href: string;
+     tag: string;
++    cta?: string;
+   }
+ 
+   interface MediaArticle {
+     title: string;
+-    medium: 'SRF' | 'NZZ' | 'Watson' | '20 Minuten';
++    medium: 'SRF' | 'Swissinfo' | 'Watson';
+     date: string;
+     abstimmung: string;
+     category: MediaCategory;
+@@ -56,118 +57,140 @@
+   const partySources: LinkSource[] = [
+     {
+       title: 'Parteiparolen der Bundesparteien',
+-      description: 'Empfehlungen, Kampagnenargumente und Positionspapiere von SP, Grünen, GLP, Mitte, FDP und SVP.',
++      description: 'Parolen, Kampagnenargumente und Positionspapiere von SP, Grünen, GLP, Mitte, FDP und SVP.',
+       href: '/parteien',
+-      tag: 'Parteiquelle'
++      tag: 'Parteiquelle',
++      cta: 'Zu den Parteipositionen →'
+     },
+     {
+       title: 'Argumentarien von Komitees',
+       description: 'Pro- und Contra-Komitees werden getrennt von neutralen Quellen ausgewiesen.',
+       href: '/abstimmungen',
+-      tag: 'Interessenposition'
++      tag: 'Interessenposition',
++      cta: 'Zu den Abstimmungsargumenten →'
+     }
+   ];
+ 
+   const mediaArticles: MediaArticle[] = [
+     {
+-      title: 'Worum es bei der Nachhaltigkeitsinitiative politisch geht',
++      title: 'Initiative «Keine 10-Mio-Schweiz» in Kürze',
+       medium: 'SRF',
+-      date: '2026-05-18',
++      date: '2026-05-08',
+       abstimmung: 'Nachhaltigkeitsinitiative',
+       category: 'Überblick',
+       description:
+-        'Ein kompakter Einstieg in Ziel, Mechanik und politische Streitpunkte der Initiative zur Bevölkerungsbegrenzung.',
+-      href: 'https://www.srf.ch/news/schweiz'
++        'SRF fasst Vorlage, zentrale Argumente und Positionen von Bundesrat und Parlament zusammen.',
++      href: 'https://www.srf.ch/news/schweiz/auf-einen-blick-initiative-keine-10-mio-schweiz-in-kuerze'
+     },
+     {
+-      title: 'Die wirtschaftlichen Folgen einer starren Bevölkerungsgrenze',
+-      medium: 'NZZ',
+-      date: '2026-05-14',
++      title: 'Initiative «Keine 10-Mio-Schweiz»: Sechs Argumente im Faktencheck',
++      medium: 'SRF',
++      date: '2026-05-20',
+       abstimmung: 'Nachhaltigkeitsinitiative',
+-      category: 'Hintergrund',
++      category: 'Faktencheck',
+       description:
+-        'Einordnung zu Arbeitsmarkt, Zuwanderung, Bilateralen und möglichen Zielkonflikten mit dem EU-Weg.',
+-      href: 'https://www.nzz.ch/schweiz'
++        'SRF prüft je drei Argumente der Ja- und Nein-Seite anhand verfügbarer Daten und Einordnungen.',
++      href: 'https://www.srf.ch/news/schweiz/abstimmung-vom-14-juni-initiative-keine-10-mio-schweiz-sechs-argumente-im-faktencheck'
+     },
+     {
+-      title: 'Warum Befürworter eine Begrenzung als Nachhaltigkeitspolitik sehen',
++      title: 'So gross sind 10-Millionen-Schweiz-Budgets – und dieser SVPler investierte besonders viel',
+       medium: 'Watson',
+-      date: '2026-05-11',
++      date: '2026-05-15',
+       abstimmung: 'Nachhaltigkeitsinitiative',
+-      category: 'Pro-Argumente',
++      category: 'Hintergrund',
+       description:
+-        'Zusammenfassung zentraler Argumente aus dem Ja-Lager, mit Fokus auf Infrastruktur, Wohnen und Ressourcen.',
+-      href: 'https://www.watson.ch/schweiz'
++        'watson berichtet über deklarierte Kampagnenbudgets zur Nachhaltigkeitsinitiative und zum Zivildienstgesetz.',
++      href: 'https://www.watson.ch/schweiz/abstimmungen-2026/261475698-10-millionen-schweiz-initiative-so-viel-geld-wird-investiert'
+     },
+     {
+-      title: 'Was Gegner an der 10-Millionen-Grenze kritisieren',
+-      medium: '20 Minuten',
+-      date: '2026-05-09',
++      title: '«Keine 10-Millionen-Schweiz»: Der Schlagabtausch zur SVP-Initiative',
++      medium: 'Swissinfo',
++      date: '2026-05-13',
+       abstimmung: 'Nachhaltigkeitsinitiative',
+-      category: 'Contra-Argumente',
++      category: 'Parteienreaktionen',
+       description:
+-        'Überblick über Einwände zu Umsetzbarkeit, Fachkräften, internationalen Abkommen und Sicherheit.',
+-      href: 'https://www.20min.ch/schweiz'
++        'Swissinfo zeigt eine Debatte zwischen Befürwortung und Gegnerschaft mit Blick auf Schweiz und Auslandschweizer:innen.',
++      href: 'https://www.swissinfo.ch/ger/schweizer-politik/keine-10-millionen-schweiz-der-schlagabtausch-zur-svp-initiative/91403035'
+     },
+     {
+-      title: 'Zivildienstgesetz: Die Reform in sechs Punkten',
++      title: 'Die Änderungen des Zivildienstgesetzes in Kürze',
+       medium: 'SRF',
+-      date: '2026-05-16',
++      date: '2026-05-08',
+       abstimmung: 'Zivildienstgesetz',
+       category: 'Überblick',
+       description:
+-        'Erklärt die geplanten Zulassungshürden und weshalb Bundesrat und Parlament die Anpassung unterstützen.',
+-      href: 'https://www.srf.ch/news/schweiz'
++        'SRF erklärt die sechs vorgesehenen Änderungen und stellt Argumente beider Seiten gegenüber.',
++      href: 'https://www.srf.ch/news/schweiz/auf-einen-blick-die-aenderungen-des-zivildienstgesetzes-in-kuerze'
+     },
+     {
+-      title: 'Armeebestand, Gewissensentscheid und Zivildienst im Konflikt',
+-      medium: 'NZZ',
+-      date: '2026-05-12',
++      title: 'Diese Massnahmen sollen den Zivildienst unattraktiver machen',
++      medium: 'SRF',
++      date: '2026-04-21',
+       abstimmung: 'Zivildienstgesetz',
+       category: 'Hintergrund',
+       description:
+-        'Analyse der institutionellen Spannung zwischen Wehrpflicht, Armeebestand und zivilem Ersatzdienst.',
+-      href: 'https://www.nzz.ch/schweiz'
++        'SRF beschreibt, welche Wechsel in den Zivildienst erschwert werden sollen und welche Folgen diskutiert werden.',
++      href: 'https://www.srf.ch/news/schweiz/abstimmung-zivildienstgesetz-diese-massnahmen-sollen-den-zivildienst-unattraktiver-machen'
+     },
+     {
+-      title: 'Welche Parteien beim Zivildienstgesetz wie argumentieren',
+-      medium: 'Watson',
+-      date: '2026-05-10',
++      title: 'Abstimmung vom 14. Juni: Soll der Zugang zum Zivildienst eingeschränkt werden?',
++      medium: 'Swissinfo',
++      date: '2026-04-07',
+       abstimmung: 'Zivildienstgesetz',
+-      category: 'Parteienreaktionen',
++      category: 'Hintergrund',
+       description:
+-        'Vergleich der Parolen und Begründungen wichtiger Bundesparteien zur Vorlage.',
+-      href: 'https://www.watson.ch/schweiz'
++        'Swissinfo ordnet Reform, Referendum und Argumente von Befürwortenden und Gegnerschaft ein.',
++      href: 'https://www.swissinfo.ch/ger/schweizer-politik/abstimmung-vom-14-juni-soll-der-zugang-zum-zivildienst-eingeschr%C3%A4nkt-werden/91149058'
+     },
+     {
+-      title: 'Faktencheck: Wie stark belasten Wechsel in den Zivildienst die Armee?',
+-      medium: '20 Minuten',
+-      date: '2026-05-07',
++      title: 'Das Ringen um den Zivildienst geht in die heisse Phase',
++      medium: 'SRF',
++      date: '2026-03-26',
+       abstimmung: 'Zivildienstgesetz',
+-      category: 'Faktencheck',
++      category: 'Parteienreaktionen',
+       description:
+-        'Ordnet häufig genannte Zahlen zu Wechseln, Diensttagen und Armeebestand ein.',
+-      href: 'https://www.20min.ch/schweiz'
++        'SRF fasst den Start des Abstimmungskampfs und die wichtigsten Argumentationslinien zusammen.',
++      href: 'https://www.srf.ch/news/schweiz/abstimmungskampf-lanciert-das-ringen-um-den-zivildienst-geht-in-die-heisse-phase'
+     },
+     {
+-      title: 'E-ID nach der Abstimmung: Was sich für Bürgerinnen und Bürger ändert',
++      title: 'Nach Abstimmungskrimi: E-ID-Vorlage in trockenen Tüchern',
+       medium: 'SRF',
+-      date: '2025-09-29',
++      date: '2025-09-28',
++      abstimmung: 'E-ID-Gesetz',
++      category: 'Überblick',
++      description:
++        'SRF berichtet über das knappe Ja zum E-ID-Gesetz und die Resultate des Abstimmungssonntags.',
++      href: 'https://www.srf.ch/news/schweiz/abstimmung-28-september-srg-trendrechnung-ausgang-der-e-id-abstimmung-voellig-offen'
++    },
++    {
++      title: 'E-ID: Ein sehr knappes Ja zur elektronischen Identität',
++      medium: 'Swissinfo',
++      date: '2025-09-28',
+       abstimmung: 'E-ID-Gesetz',
+       category: 'Hintergrund',
+       description:
+-        'Einordnung zu Datenschutz, staatlicher Infrastruktur und praktischen Folgen der angenommenen Vorlage.',
+-      href: 'https://www.srf.ch/news/schweiz'
++        'Swissinfo analysiert das knappe Ergebnis und zentrale Streitpunkte wie Datenschutz und Vertrauen.',
++      href: 'https://www.swissinfo.ch/ger/schweizer-politik/e-id-abstimmung-28-september-2025/90057788'
+     },
+     {
+-      title: 'Klimafonds-Initiative: Warum das Nein so deutlich ausfiel',
+-      medium: 'NZZ',
+-      date: '2026-03-09',
++      title: 'Klimafonds-Initiative erhält deutliche Abfuhr',
++      medium: 'SRF',
++      date: '2026-03-08',
+       abstimmung: 'Klimafonds-Initiative',
+       category: 'Überblick',
+       description:
+-        'Analyse des Resultats, der Kostenargumente und der politischen Nachwirkungen.',
+-      href: 'https://www.nzz.ch/schweiz'
++        'SRF berichtet über das klare Nein zur Klimafonds-Initiative und ordnet das Resultat ein.',
++      href: 'https://www.srf.ch/news/schweiz/abstimmungen-8-3-2026/abstimmungen-vom-8-maerz-klimafonds-initiative-erhaelt-deutliche-abfuhr'
++    },
++    {
++      title: 'Abstimmungen 8. März: Kein Klimafonds für die Schweiz',
++      medium: 'Swissinfo',
++      date: '2026-03-08',
++      abstimmung: 'Klimafonds-Initiative',
++      category: 'Hintergrund',
++      description:
++        'Swissinfo analysiert, warum die Klimafonds-Initiative deutlich scheiterte und welche Argumente dominierten.',
++      href: 'https://www.swissinfo.ch/ger/schweizer-politik/kein-klimafonds-f%C3%BCr-die-schweiz/91008900'
+     }
+   ];
+ 
+@@ -202,7 +225,8 @@
+     'Offizielle Quellen werden für neutrale Zusammenfassungen priorisiert.',
+     'Parteiquellen zeigen politische Positionen und werden klar als Interessenpositionen markiert.',
+     'Medienberichte dienen als ergänzende Perspektive, nicht als amtliche Grundlage.',
+-    'Die aktuellen Medienkarten sind manuelle Seed-Daten für den Prototypen, keine Live-News-API.'
++    'KI-gestützte Zusammenfassungen dienen als verständliche Einstiegshilfe und wurden im Projektkontext manuell geprüft.',
++    'Medienlinks werden nur angezeigt, wenn Medium, Veröffentlichungsdatum, Titel und URL eindeutig geprüft werden konnten.'
+   ];
+ 
+   function formatArticleDate(date: string): string {
+@@ -227,7 +251,7 @@
+     <p class="section-eyebrow mb-2">Transparenz & Einordnung</p>
+     <h1 class="font-display text-3xl md:text-5xl text-ink mb-4">Quellen &amp; Medienberichte</h1>
+     <p class="text-ink-muted text-base md:text-lg leading-relaxed max-w-3xl">
+-      Offizielle Quellen bilden die Grundlage unserer neutralen Zusammenfassungen. Medienberichte bieten ergänzende Perspektiven zu aktuellen Abstimmungen.
++      Diese Seite trennt offizielle Quellen, Parteipositionen, Medienberichte und KI-gestützte Hilfstexte bewusst voneinander.
+     </p>
+   </div>
+ 
+@@ -258,7 +282,7 @@
+         <p class="section-eyebrow mb-1">2. Interessenpositionen</p>
+         <h2 class="source-section-title">Parteipositionen</h2>
+       </div>
+-      <span class="source-pill source-pill-muted">Nicht neutral, aber relevant</span>
++      <span class="source-pill source-pill-muted">Interessenpositionen · nicht amtlich</span>
+     </div>
+ 
+     <div class="party-source-panel">
+@@ -267,6 +291,9 @@
+           <span>{source.tag}</span>
+           <strong>{source.title}</strong>
+           <p>{source.description}</p>
++          {#if source.cta}
++            <small class="party-source-cta">{source.cta}</small>
++          {/if}
+         </a>
+       {/each}
+     </div>
+@@ -276,17 +303,17 @@
+     <div class="source-section-head media-head">
+       <div>
+         <p class="section-eyebrow mb-1">3. Ergänzende Perspektiven</p>
+-        <h2 class="source-section-title">Medienberichte nach Abstimmung</h2>
++        <h2 class="source-section-title">Medien / Einordnung nach Abstimmung</h2>
+       </div>
+       <p class="media-disclaimer">
+-        Medienberichte sind redaktionelle Einordnungen und keine offiziellen Quellen.
++        Medienberichte dienen der öffentlichen Einordnung und ersetzen keine offiziellen Abstimmungsunterlagen.
+       </p>
+     </div>
+ 
+-    <div class="prototype-notice">
+-      <strong>Prototyp-Hinweis:</strong>
++    <div class="media-notice">
++      <strong>Medienhinweis:</strong>
+       <span>
+-        Die Medienkarten sind aktuell manuelle Seed-Daten zur Darstellung des Workflows. Für die Finalabgabe sollten sie durch verifizierte echte Artikel mit Originaltitel, Originaldatum und direktem Link ersetzt werden.
++        Die verlinkten Medienberichte sind ergänzende redaktionelle Perspektiven. Sie ersetzen keine offiziellen Abstimmungsunterlagen und werden getrennt von amtlichen Quellen und Parteipositionen ausgewiesen.
+       </span>
+     </div>
+ 
+@@ -308,7 +335,7 @@
+           <section class="media-group">
+             <div class="media-group-title">
+               <h3>{vote}</h3>
+-              <span>{articles.length} Beiträge</span>
++              <span>{articles.length} Perspektiven</span>
+             </div>
+             <div class="media-grid">
+               {#each articles as article}
+@@ -323,7 +350,7 @@
+                     <span>{formatArticleDate(article.date)}</span>
+                     <span>{article.abstimmung}</span>
+                   </div>
+-                  <a href={article.href} target="_blank" rel="noopener" class="media-link">Medienseite öffnen →</a>
++                  <a href={article.href} target="_blank" rel="noopener noreferrer" class="media-link">Artikel öffnen →</a>
+                 </article>
+               {/each}
+             </div>
+@@ -344,7 +371,7 @@
+               <span>{formatArticleDate(article.date)}</span>
+               <span>{article.abstimmung}</span>
+             </div>
+-            <a href={article.href} target="_blank" rel="noopener" class="media-link">Medienseite öffnen →</a>
++            <a href={article.href} target="_blank" rel="noopener noreferrer" class="media-link">Artikel öffnen →</a>
+           </article>
+         {/each}
+       </div>
+@@ -372,7 +399,7 @@
+     <div class="transparency-note">
+       <h3>KI-Einsatz transparent gemacht</h3>
+       <p>
+-        Diese App nutzt KI-unterstützte Verdichtung für verständliche Briefings. Offizielle Quellen bleiben die Grundlage; Parteiquellen und Medienberichte werden separat ausgewiesen, damit politische Interessen und journalistische Einordnung nicht vermischt werden.
++        KI-gestützte Zusammenfassungen dienen als verständliche Einstiegshilfe und wurden im Projektkontext manuell geprüft. Offizielle Quellen bleiben die Grundlage; Parteiquellen und Medienberichte werden separat ausgewiesen, damit politische Interessen und journalistische Einordnung nicht vermischt werden.
+       </p>
+     </div>
+   </section>
+@@ -525,6 +552,15 @@
+     gap: 0.45rem;
+     border-left: 4px solid var(--brand);
+     padding: 1rem;
++    text-decoration: none;
++    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
++  }
++
++  .party-source-card:hover {
++    border-color: color-mix(in srgb, var(--brand) 28%, var(--border));
++    background: color-mix(in srgb, var(--brand-soft) 34%, var(--surface));
++    box-shadow: var(--shadow-md);
++    transform: translateY(-2px);
+   }
+ 
+   .party-source-card span {
+@@ -541,6 +577,12 @@
+     font-size: 1rem;
+   }
+ 
++  .party-source-cta {
++    color: var(--brand);
++    font-size: 0.9rem;
++    font-weight: 800;
++  }
++
+   .media-head {
+     align-items: flex-start;
+   }
+@@ -558,7 +600,7 @@
+     margin: 1rem 0 1.25rem;
+   }
+ 
+-  .prototype-notice {
++  .media-notice {
+     display: flex;
+     gap: 0.65rem;
+     align-items: flex-start;
+@@ -573,7 +615,7 @@
+     padding: 0.85rem 1rem;
+   }
+ 
+-  .prototype-notice strong {
++  .media-notice strong {
+     color: var(--brand);
+     white-space: nowrap;
+   }

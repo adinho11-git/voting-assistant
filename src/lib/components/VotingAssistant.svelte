@@ -36,7 +36,7 @@
   $: tendencyDetail =
     totalScore === 0
       ? 'Gewichte weiter unten Argumente, dann erscheint hier deine aktuelle Tendenz.'
-      : `Pro ${proScore} zu Contra ${contraScore}. Die Tendenz entsteht nur aus deinen Gewichtungen.`;
+      : `Pro ${proScore} zu Contra ${contraScore}. Die Tendenz entsteht nur aus deinen Gewichtungen und ist keine Empfehlung.`;
 
   function sumWeights(
     weights: Record<string, { side: ArgumentSide; weight: ArgumentWeight; updatedAt: string }>,
@@ -101,6 +101,9 @@
         Verstehen → Abwägen → Gewichten → Einordnen → Entscheiden → Speichern
       </h2>
       <p class="assistant-summary">{abstimmung.aiSummary}</p>
+      <p class="assistant-transparency">
+        KI-gestützte Zusammenfassungen dienen als verständliche Einstiegshilfe und wurden im Projektkontext manuell geprüft.
+      </p>
 
       <div class="assistant-facts" aria-label="Kurzfakten">
         <span>{abstimmung.readTime} Min Lesezeit</span>
@@ -115,9 +118,10 @@
     </div>
 
     <aside class="assistant-result" class:is-pro={tendencyPosition === 'JA'} class:is-contra={tendencyPosition === 'NEIN'} aria-live="polite">
-      <span class="result-kicker">Live aus deiner Gewichtung</span>
+      <span class="result-kicker">Reflexion aus deiner Gewichtung</span>
       <strong>Deine aktuelle Tendenz: {tendencyLabel}</strong>
       <p>{tendencyDetail}</p>
+      <p class="assistant-result-note">Keine Prognose und keine Abstimmungsempfehlung.</p>
       {#if topReasons.length > 0}
         <ul>
           {#each topReasons as reason}
@@ -175,6 +179,13 @@
     line-height: 1.58;
   }
 
+  .assistant-transparency {
+    max-width: 780px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
   .assistant-facts,
   .assistant-actions {
     display: flex;
@@ -227,6 +238,11 @@
   .assistant-result li {
     color: rgba(255, 255, 255, 0.82);
     line-height: 1.45;
+  }
+
+  .assistant-result .assistant-result-note {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
   }
 
   .assistant-result ul {

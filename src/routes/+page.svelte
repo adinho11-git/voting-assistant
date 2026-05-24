@@ -85,8 +85,8 @@
     <div class="grid md:grid-cols-4 gap-5">
       {#each [
         { n: '1', t: 'Verstehen', d: 'Lies das KI-Briefing der Vorlage in drei Minuten — neutral aufbereitet, jede Aussage mit Originalquelle hinterlegt.' },
-        { n: '2', t: 'Abwägen', d: 'Pro &amp; Contra mit Quellen-Datum direkt nebeneinander. Sieh, was Bundesrat, Parlament und Parteien empfehlen.' },
-        { n: '3', t: 'Gewichten &amp; Einordnen', d: 'Markiere, welche Argumente für dich wirklich zählen — und schau, welche Parteien deiner Linie am nächsten kommen.' },
+        { n: '2', t: 'Abwägen', d: 'Pro &amp; Contra mit Quellen-Datum direkt nebeneinander. Sieh, welche Positionen Bundesrat, Parlament und Parteien vertreten.' },
+        { n: '3', t: 'Gewichten &amp; Einordnen', d: 'Markiere, welche Argumente für dich wirklich zählen — und schau, welche Parteipositionen deiner aktuellen Linie nahe liegen.' },
         { n: '4', t: 'Entscheiden &amp; Speichern', d: 'Halte JA, NEIN oder UNENTSCHIEDEN mit Notiz im Voting-Journal fest — alles lokal in deinem Browser.' }
       ] as step}
         <div class="card p-5 md:p-6">
@@ -107,7 +107,7 @@
         <p class="section-eyebrow mb-3">Quellen-basiert</p>
         <h3 class="font-display text-xl text-ink mb-2">admin.ch first</h3>
         <p class="text-sm text-ink-muted leading-relaxed">
-          Bundesrat-Empfehlungen, Initiativtexte und Abstimmungsbüchlein stammen direkt von admin.ch und bk.admin.ch. Jede Aussage ist mit Originallink und Datum versehen.
+          Bundesrat-Positionen, Initiativtexte und Abstimmungsbüchlein stammen direkt von admin.ch und bk.admin.ch. Jede Aussage ist mit Originallink und Datum versehen.
         </p>
       </div>
       <div>
@@ -121,7 +121,7 @@
         <p class="section-eyebrow mb-3">Interaktiv</p>
         <h3 class="font-display text-xl text-ink mb-2">Deine Meinung zählt</h3>
         <p class="text-sm text-ink-muted leading-relaxed">
-          Stimme ab, schreib eine Notiz, vergleiche dich mit der Community, finde im Kompass-Quiz heraus, welche Partei dir am nächsten steht.
+          Speichere deine Position, schreib eine Notiz, vergleiche dich mit der Prototyp-Community und prüfe im Kompass-Quiz deine politische Nähe.
         </p>
       </div>
     </div>

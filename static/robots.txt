@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Private or technical routes should not be indexed.
+Disallow: /admin
+Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /api/*
+
+Sitemap: https://friendly-llama-b738d4.netlify.app/sitemap.xml

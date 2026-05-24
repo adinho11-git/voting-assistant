@@ -177,7 +177,7 @@
       <p class="section-eyebrow">Abwägen und gewichten</p>
       <h2 class="font-display text-2xl md:text-3xl text-ink">Welche Argumente tragen deine Entscheidung?</h2>
       <p class="weighting-copy">
-        Pro und Contra stehen direkt neben der 4-Stufen-Gewichtung. Wähle pro Argument, wie stark es dich überzeugt; die Zusammenfassung aktualisiert sich live.
+        Pro und Contra stehen direkt neben der 4-Stufen-Gewichtung. Wähle pro Argument, wie stark es dich überzeugt; die Zusammenfassung aktualisiert sich live und dient nur deiner persönlichen Reflexion.
       </p>
 
       <div class="weighting-guide-card" aria-label="So funktioniert die Gewichtung">
@@ -186,8 +186,8 @@
           <ol class="guide-steps">
             <li><span>1</span>Pro und Contra lesen</li>
             <li><span>2</span>Argumente nach Überzeugung bewerten</li>
-            <li><span>3</span>Live-Tendenz beobachten</li>
-            <li><span>4</span>Tendenz speichern</li>
+            <li><span>3</span>Reflexions-Tendenz beobachten</li>
+            <li><span>4</span>Reflexion speichern</li>
           </ol>
         </div>
 
@@ -222,6 +222,9 @@
       <span>{weightedCount} von {visibleArguments.length} Argumenten bewertet</span>
       <strong>Deine aktuelle Tendenz: {tendencyLabel}</strong>
       <p>{scoreDetail}</p>
+      <p class="score-disclaimer">
+        Keine Prognose, kein Parteienmatching und keine Abstimmungsempfehlung.
+      </p>
 
       {#if topReasons.length > 0}
         <div class="reason-list" aria-label="Stärkste gewichtete Gründe">
@@ -465,6 +468,11 @@
   .weighting-score p {
     color: rgba(255, 255, 255, 0.82);
     line-height: 1.45;
+  }
+
+  .weighting-score .score-disclaimer {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 12px;
   }
 
   .reason-list {

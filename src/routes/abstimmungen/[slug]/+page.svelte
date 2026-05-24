@@ -17,9 +17,10 @@
 
   interface SourceItem {
     label: string;
-    url: string;
+    url?: string;
     context: string;
     date?: string;
+    verified: boolean;
   }
 
   const sectionLinks = [
@@ -52,11 +53,13 @@
     const items: SourceItem[] = [];
 
     function add(label: string | undefined, url: string | undefined, context: string, date?: string): void {
-      if (!label || !url) return;
-      const key = `${label}-${url}`;
+      if (!label) return;
+      const cleanUrl = url?.trim();
+      const verified = !!cleanUrl && cleanUrl !== '#';
+      const key = `${label}-${cleanUrl ?? 'pending'}-${context}`;
       if (seen.has(key)) return;
       seen.add(key);
-      items.push({ label, url, context, date });
+      items.push({ label, url: verified ? cleanUrl : undefined, context, date, verified });
     }
 
     add(vote.summarySource, vote.summarySourceUrl, 'Neutraler Überblick', vote.summaryLastChecked);
@@ -280,7 +283,7 @@
       <h2 class="font-display text-2xl md:text-3xl text-ink">Argumente mit Wirkung auf deine Tendenz</h2>
     </div>
     <p>
-      Die Gewichtung ist keine Prognose und kein Parteien-Matching, sondern nur deine eigene Priorisierung der Argumente.
+      Die Argumentgewichtung unterstützt die persönliche Reflexion. Sie ist keine Prognose, kein Parteienmatching und keine Abstimmungsempfehlung.
     </p>
   </div>
   <ArgumentWeighting abstimmung={a} />
@@ -367,10 +370,18 @@
 
     <div class="source-grid">
       {#each sourceItems as source}
-        <a href={source.url} target="_blank" rel="noopener" class="source-item">
-          <span>{source.context}{#if source.date} · {source.date}{/if}</span>
-          <strong>{source.label}</strong>
-        </a>
+        {#if source.verified && source.url}
+          <a href={source.url} target="_blank" rel="noopener" class="source-item">
+            <span>{source.context}{#if source.date} · {source.date}{/if}</span>
+            <strong>{source.label}</strong>
+          </a>
+        {:else}
+          <div class="source-item source-item-muted">
+            <span>{source.context}{#if source.date} · {source.date}{/if}</span>
+            <strong>{source.label}</strong>
+            <small>Quelle wird final geprüft</small>
+          </div>
+        {/if}
       {/each}
     </div>
   </div>
@@ -399,7 +410,7 @@
       </div>
     {:else}
       <a href="https://www.ch.ch/de/abstimmungen/" target="_blank" rel="noopener" class="btn-primary">
-        Jetzt informiert abstimmen
+        Offizielle Abstimmungsinfos öffnen
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
@@ -568,6 +579,12 @@
     background: var(--surface);
   }
 
+  .source-item-muted:hover {
+    transform: none;
+    border-color: var(--border-light);
+    background: color-mix(in srgb, var(--surface-alt) 30%, var(--surface));
+  }
+
   .source-item span {
     color: var(--text-muted);
     font-family: 'IBM Plex Mono', monospace;
@@ -580,6 +597,11 @@
     color: var(--brand);
     font-size: 14px;
     line-height: 1.35;
+  }
+
+  .source-item small {
+    color: var(--text-subtle);
+    font-size: 12px;
   }
 
   @media (max-width: 820px) {

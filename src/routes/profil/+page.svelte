@@ -19,6 +19,7 @@
   let favoriteCountUp = 0;
   let editingSlug: string | null = null;
   let noteDraft = '';
+  let exportStatus = '';
   const voteOptions: UserPosition[] = ['JA', 'NEIN', 'UNENTSCHIEDEN'];
 
   $: votes = $votesStore;
@@ -191,6 +192,141 @@
     showToast('Stimme aktualisiert.', 'success');
   }
 
+  function publicVoteMeta(slug: string) {
+    const abstimmung = data.abstimmungen.find((a) => a.slug === slug);
+    if (!abstimmung) return { slug };
+    return {
+      slug,
+      title: abstimmung.shortTitle,
+      category: abstimmung.category,
+      date: abstimmung.date,
+      status: abstimmung.status
+    };
+  }
+
+  function buildProfileExport() {
+    const exportedAt = new Date().toISOString();
+    const journalEntries = Object.entries(engagement.journal ?? {}).map(([slug, entry]) => ({
+      abstimmung: publicVoteMeta(slug),
+      position: entry.position,
+      confidence: entry.confidence,
+      note: entry.note,
+      updatedAt: entry.updatedAt,
+      timeline: entry.timeline ?? []
+    }));
+    const savedVotes = Object.entries(votes).map(([slug, entry]) => ({
+      abstimmung: publicVoteMeta(slug),
+      position: entry.position,
+      note: entry.note,
+      updatedAt: entry.updatedAt
+    }));
+    const savedNotes = [
+      ...Object.entries(votes)
+        .filter(([, entry]) => !!entry.note)
+        .map(([slug, entry]) => ({
+          source: 'position',
+          abstimmung: publicVoteMeta(slug),
+          note: entry.note,
+          updatedAt: entry.updatedAt
+        })),
+      ...Object.entries(engagement.journal ?? {})
+        .filter(([, entry]) => !!entry.note)
+        .map(([slug, entry]) => ({
+          source: 'journal',
+          abstimmung: publicVoteMeta(slug),
+          note: entry.note,
+          updatedAt: entry.updatedAt
+        }))
+    ];
+    const confidenceValues = Object.entries(engagement.journal ?? {})
+      .filter(([, entry]) => entry.confidence !== undefined)
+      .map(([slug, entry]) => ({
+        abstimmung: publicVoteMeta(slug),
+        confidence: entry.confidence,
+        updatedAt: entry.updatedAt
+      }));
+    const timeline = Object.entries(engagement.journal ?? {}).flatMap(([slug, entry]) =>
+      (entry.timeline ?? []).map((event) => ({
+        abstimmung: publicVoteMeta(slug),
+        type: event.type,
+        title: event.title,
+        detail: event.detail,
+        createdAt: event.createdAt
+      }))
+    );
+    const favorites = Object.entries(engagement.favorites ?? {})
+      .filter(([, isFavorite]) => isFavorite)
+      .map(([slug]) => publicVoteMeta(slug));
+
+    return {
+      meta: {
+        appName: 'Voting Assistant',
+        exportVersion: '1.0',
+        exportedAt,
+        source: 'Lokaler Browser-Export',
+        privacyNote:
+          'Diese Datei wurde direkt im Browser aus lokal gespeicherten Profildaten erstellt. Es wurden keine Daten an einen Server gesendet.',
+        contentsNote: 'Der Export dient deiner persönlichen Reflexion und ist keine Wahlempfehlung.'
+      },
+      summary: {
+        savedPositions: savedVotes.length,
+        journalEntries: journalEntries.length,
+        notes: savedNotes.length,
+        confidenceValues: confidenceValues.length,
+        bookmarks: favorites.length,
+        hasKompassResult: !!$kompassStore
+      },
+      votingJournal: journalEntries,
+      savedPositions: savedVotes,
+      savedNotes,
+      confidenceValues,
+      kompass: $kompassStore
+        ? {
+            savedAt: $kompassStore.savedAt,
+            topResult: $kompassStore.results?.[0] ?? null,
+            results: $kompassStore.results ?? [],
+            answers: $kompassStore.answers ?? {}
+          }
+        : null,
+      activities: {
+        timeline,
+        latestVisibleInProfile: recentActivities
+      },
+      bookmarks: favorites
+    };
+  }
+
+  function exportProfileJson(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const exportData = buildProfileExport();
+      const date = new Date().toISOString().slice(0, 10);
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json;charset=utf-8'
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `voting-assistant-profil-export-${date}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      exportStatus = 'JSON-Export wurde lokal erstellt.';
+      showToast('Profil als JSON exportiert.', 'success');
+    } catch {
+      exportStatus = 'Export konnte nicht erstellt werden. Bitte versuche es erneut.';
+      showToast('Export fehlgeschlagen.', 'error');
+    }
+  }
+
+  function printProfile(): void {
+    if (typeof window === 'undefined') return;
+    exportStatus = 'Druckdialog geöffnet. Wähle im Browser „Als PDF speichern“, falls gewünscht.';
+    window.print();
+  }
+
   const activeIntervals = new Set<ReturnType<typeof setInterval>>();
 
   function animateCountTo(target: number, current: number, set: (v: number) => void): void {
@@ -269,15 +405,55 @@
 
 <svelte:head>
   <title>Mein politisches Profil – Voting Assistant</title>
-  <meta name="description" content="Dein persönlicher Reflexionsraum: gespeicherte Positionen, Kompass-Ergebnis und Übereinstimmung mit Parteien. Alles bleibt lokal in deinem Browser." />
+  <meta name="description" content="Dein persönlicher Reflexionsraum: gespeicherte Positionen, Kompass-Ergebnis und Vergleich mit Parteipositionen. Alles bleibt lokal in deinem Browser." />
 </svelte:head>
 
 <section class="container-app pt-8 md:pt-12 pb-6">
-  <p class="section-eyebrow mb-2">Persönlicher Reflexionsraum</p>
-  <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Mein politisches Profil</h1>
-  <p class="text-ink-muted text-sm md:text-base max-w-2xl">
-    Hier findest du deine gespeicherten Positionen, das Kompass-Ergebnis und deine Übereinstimmung mit den Parteien — als Grundlage für deine eigene politische Orientierung.
-  </p>
+  <div class="profile-hero">
+    <div>
+      <p class="section-eyebrow mb-2">Persönlicher Reflexionsraum</p>
+      <h1 class="font-display text-3xl md:text-4xl text-ink mb-2">Mein politisches Profil</h1>
+      <p class="text-ink-muted text-sm md:text-base max-w-2xl">
+        Hier findest du deine gespeicherten Positionen, das Kompass-Ergebnis und einen Vergleich mit Parteipositionen — als Grundlage für deine eigene politische Orientierung.
+      </p>
+    </div>
+
+    <div class="profile-export-mini" aria-label="Meine Daten exportieren">
+      <p class="profile-export-mini-label">Meine Daten</p>
+      <div class="profile-export-mini-actions">
+        <button
+          type="button"
+          class="export-icon-box"
+          on:click={exportProfileJson}
+          aria-label="Profil als JSON exportieren"
+          title="Profil als JSON exportieren"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v11m0 0 4-4m-4 4-4-4" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" />
+          </svg>
+          <span>JSON</span>
+        </button>
+        <button
+          type="button"
+          class="export-icon-box"
+          on:click={printProfile}
+          aria-label="Druckansicht öffnen oder als PDF speichern"
+          title="Druckansicht / PDF speichern"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 8V3h10v5" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17H5a2 2 0 0 1-2-2v-3a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v3a2 2 0 0 1-2 2h-2" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 14h10v7H7z" />
+          </svg>
+          <span>PDF</span>
+        </button>
+      </div>
+      {#if exportStatus}
+        <p class="export-status" role="status">{exportStatus}</p>
+      {/if}
+    </div>
+  </div>
 </section>
 
 <!-- IDENTITY + STATS -->
@@ -350,7 +526,7 @@
         </li>
         <li>
           <span class="empty-point-marker" aria-hidden="true">3</span>
-          <span>Sieh hier, wo deine Stimmen mit den Parteien übereinstimmen.</span>
+          <span>Sieh hier, wo deine Positionen im Vergleich mit Parteipositionen liegen.</span>
         </li>
       </ul>
 
@@ -411,7 +587,7 @@
         </div>
 
         <p class="text-xs text-ink-subtle mt-4">
-          Gespeichert am {new Date($kompassStore.savedAt).toLocaleString('de-CH')}. Werte zeigen Orientierung, kein politisches Urteil.
+          Gespeichert am {new Date($kompassStore.savedAt).toLocaleString('de-CH')}. Werte zeigen Orientierung, keine Wahlempfehlung und kein politisches Urteil.
         </p>
       </div>
     </section>
@@ -510,7 +686,7 @@
         <div class="flex items-end justify-between mb-3 border-b border-border-light pb-3 flex-wrap gap-3">
           <div>
             <p class="section-eyebrow mb-1">Aus deinen Ja/Nein-Positionen</p>
-            <h2 class="font-display text-2xl text-ink">Momentane Übereinstimmung mit Parteipositionen</h2>
+            <h2 class="font-display text-2xl text-ink">Momentaner Vergleich mit Parteipositionen</h2>
           </div>
           <span class="text-xs font-mono-data text-ink-muted">Basis: {decidedCount} {decidedCount === 1 ? 'Position' : 'Positionen'}</span>
         </div>
@@ -549,7 +725,7 @@
         </div>
 
         <p class="text-xs text-ink-subtle mt-5">
-          Diese Werte basieren nur auf deinen gespeicherten Ja/Nein-Positionen zu Abstimmungen, nicht auf dem Partei-Kompass. Berechnung: Übereinstimmung deiner Position mit der offiziellen Parteiposition pro Vorlage (Unsicher zählt nicht). Werte ändern sich, sobald du weitere Abstimmungen speicherst.
+          Diese Werte basieren nur auf deinen gespeicherten Ja/Nein-Positionen zu Abstimmungen, nicht auf dem Partei-Kompass. Berechnung: Vergleich deiner Position mit der ausgewiesenen Parteiposition pro Vorlage (Unsicher zählt nicht). Das ist eine Orientierung, kein Parteienmatching und keine Wahlempfehlung.
         </p>
       </div>
     </section>
@@ -753,6 +929,82 @@
     font-size: 0.95rem;
     line-height: 1;
     margin-top: 0.1rem;
+  }
+
+  .export-status {
+    margin: 0;
+    max-width: 13rem;
+    text-align: right;
+    color: var(--brand);
+    font-weight: 700;
+  }
+
+  .profile-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .profile-export-mini {
+    display: grid;
+    justify-items: end;
+    gap: 0.45rem;
+    padding-top: 1.55rem;
+  }
+
+  .profile-export-mini-label {
+    color: var(--brand);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .profile-export-mini-actions {
+    display: flex;
+    gap: 0.55rem;
+  }
+
+  .export-icon-box {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    align-items: center;
+    gap: 0.25rem;
+    width: 74px;
+    min-height: 66px;
+    padding: 0.65rem 0.55rem 0.55rem;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .export-icon-box:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--brand) 45%, var(--border-light));
+    color: var(--brand);
+    box-shadow: var(--shadow-md);
+  }
+
+  .export-icon-box span {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .export-icon-box svg {
+    align-self: end;
   }
 
   .data-notice {
@@ -1216,6 +1468,31 @@
   }
 
   @media (max-width: 640px) {
+    .profile-hero {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .profile-export-mini {
+      justify-items: stretch;
+      padding-top: 0;
+    }
+
+    .profile-export-mini-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .export-icon-box {
+      width: 100%;
+      min-height: 60px;
+    }
+
+    .export-status {
+      max-width: none;
+      text-align: left;
+    }
+
     .journal-head,
     .journal-position-topline,
     .journal-fact {

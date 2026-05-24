@@ -11,9 +11,9 @@
 >
   {#if $theme === 'dark'}
     <!-- Sun icon -->
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" />
-      <path stroke-linecap="round" d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.41 1.41M6.34 17.66l-1.41 1.41m12.73 0l-1.41-1.41M6.34 6.34L4.93 4.93" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2" />
+      <path stroke-linecap="round" d="M12 2.2v2.2m0 15.2v2.2M4.8 4.8l1.6 1.6m11.2 11.2 1.6 1.6M2.2 12h2.2m15.2 0h2.2M4.8 19.2l1.6-1.6m11.2-11.2 1.6-1.6" />
     </svg>
   {:else}
     <!-- Moon icon -->

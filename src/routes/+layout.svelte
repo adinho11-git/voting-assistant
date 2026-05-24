@@ -14,6 +14,8 @@
   $: isAdmin = $page.url.pathname.startsWith('/admin');
   $: hideNav = hideNavOnDetail || $page.url.pathname.startsWith('/admin/login');
   $: canonical = `https://friendly-llama-b738d4.netlify.app${$page.url.pathname}`;
+  const siteTitle = 'Voting Assistant';
+  const siteDescription = 'Interaktiver politischer Orientierungsassistent für Schweizer Abstimmungen und Parteipositionen.';
 
   onMount(() => {
     loadVotesFromStorage();
@@ -24,8 +26,12 @@
 
 <svelte:head>
   <link rel="canonical" href={canonical} />
+  <meta property="og:title" content={siteTitle} />
+  <meta property="og:description" content={siteDescription} />
   <meta property="og:site_name" content="AI Swiss Voting Assistant" />
   <meta property="og:locale" content="de_CH" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
   <meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 

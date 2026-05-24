@@ -35,6 +35,27 @@
 
 ---
 
+## Datenbank und CRUD zeigen
+
+Dieser Abschnitt ist wichtig für das Bewertungsraster-Kriterium **«Daten werden aus einer Datenbank geladen und angezeigt; Daten können erstellt und/oder aktualisiert werden»**. Falls die Zeit knapp wird, lieber diesen Teil kurz, aber sichtbar zeigen, statt ihn nur zu erwähnen.
+
+Empfohlener Ablauf:
+
+1. **Admin Login:** `/admin/login` öffnen und sich mit dem gesetzten Admin-Passwort anmelden. Das Passwort selbst nicht im Video nennen oder sichtbar dokumentieren.
+2. **Dashboard prüfen:** Auf dem Admin-Dashboard zeigen, dass der produktive Datenmodus aktiv ist, also MongoDB Atlas beziehungsweise `USE_MOCK_DATA=false` angezeigt wird.
+3. **CRUD-Aktion zeigen:** Eine bestehende Abstimmung oder ein Argument im Admin-Bereich bearbeiten, zum Beispiel einen Argumenttext oder eine Quellenangabe kurz anpassen.
+4. **Öffentliche Seite prüfen:** Zur öffentlichen Abstimmungsdetailseite wechseln und zeigen, dass die Änderung sichtbar ist.
+5. **Community Vote abgeben:** Auf der Detailseite eine JA/NEIN-Stimme abgeben.
+6. **Aggregation zeigen:** Danach die Community-Anzeige auf der Detailseite oder im Admin-Bereich `/admin/community` zeigen.
+
+Technische Sprechzeile:
+
+> «Die App nutzt MongoDB Atlas, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt. Die wichtigsten Collections sind `abstimmungen`, `communityVotes` und `parteiInteressen`. Falls MongoDB nicht aktiv ist, fällt der Prototyp auf Seed- und In-Memory-Daten zurück, damit die Demo weiter funktioniert.»
+
+Keine Secret-Werte wie `MONGODB_URI` oder `ADMIN_PASSWORD` im Video zeigen.
+
+---
+
 ## Sprechertext (Entwurf)
 
 Der Text ist als Lesefassung gedacht und kann beim Aufnehmen frei angepasst werden. Die Zeiten sind Richtwerte.
@@ -87,7 +108,9 @@ Der Text ist als Lesefassung gedacht und kann beim Aufnehmen frei angepasst werd
 
 ### 9. Admin / Datenstruktur — 4:35 – 4:50
 
-> «Kurz die technische Tiefe: Ein passwortgeschützter Admin-Bereich erlaubt CRUD auf Abstimmungen, Argumente und Parteipositionen. Im Hintergrund läuft eine MongoDB-Anbindung mit transparentem In-Memory-Fallback. Interessen-Registrierungen lassen sich als CSV exportieren.»
+> «Kurz die technische Tiefe: Ein passwortgeschützter Admin-Bereich erlaubt CRUD auf Abstimmungen, Argumente und Parteipositionen. Das Dashboard zeigt, ob die App im produktiven MongoDB-Atlas-Modus läuft oder im Fallback-Modus. Für die finale Abgabe müssen in Netlify `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt sein.
+>
+> Ich kann hier eine Vorlage oder ein Argument bearbeiten und die Änderung anschliessend auf der öffentlichen Detailseite sehen. Zusätzlich werden Community-Stimmen serverseitig aggregiert, und Interessen-Registrierungen lassen sich im Admin-Bereich als CSV exportieren.»
 
 ### 10. KI-Einsatz und Evaluation — 4:50 – 5:00
 

@@ -102,7 +102,7 @@
             </div>
           </div>
 
-          <p class="text-sm text-ink-muted leading-relaxed mb-4 line-clamp-3 flex-1">
+          <p class="text-sm text-ink-muted leading-relaxed mb-4">
             {partei.kurzprofil}
           </p>
 
