@@ -888,7 +888,7 @@
     line-height: 1.72;
     max-width: 74ch;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     word-break: normal;
   }
 
@@ -1044,7 +1044,7 @@
     font-weight: 760;
     hyphens: manual;
     line-height: 1.22;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     word-break: normal;
   }
 
@@ -1289,13 +1289,13 @@
       font-size: clamp(1.85rem, 7.4vw, 2.2rem);
       line-height: 1.08;
       max-width: 100%;
-      overflow-wrap: anywhere;
-      hyphens: auto;
+      overflow-wrap: break-word;
+      hyphens: manual;
     }
 
     .party-hero-subtitle {
       max-width: 100%;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
       line-height: 1.45;
     }
 
@@ -1303,7 +1303,7 @@
       max-width: 100%;
       line-height: 1.35;
       letter-spacing: 0.055em;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
       white-space: normal;
     }
 

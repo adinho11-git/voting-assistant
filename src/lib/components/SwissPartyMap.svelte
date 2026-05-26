@@ -227,6 +227,10 @@
   function formatPercent(value: number) {
     return `${value.toFixed(1).replace('.', ',')}%`;
   }
+
+  function selectCanton(event: Event) {
+    activeId = Number((event.currentTarget as HTMLSelectElement).value);
+  }
 </script>
 
 {#if variant === 'hero'}
@@ -280,6 +284,15 @@
           </button>
         {/each}
       </div>
+
+      <label class="canton-picker">
+        <span>Kanton auswählen</span>
+        <select value={activeId} on:change={selectCanton}>
+          {#each cantons as canton}
+            <option value={canton.id}>{canton.name}</option>
+          {/each}
+        </select>
+      </label>
 
       <svg class="canton-map-svg" viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`} role="img">
         <title>Parteistärken nach Schweizer Kantonen</title>
@@ -371,6 +384,7 @@
     width: min(76%, 680px);
     max-width: 100%;
     margin: 36px auto 0;
+    touch-action: manipulation;
   }
 
   .swiss-party-map.hero {
@@ -477,6 +491,30 @@
     border-radius: 999px;
   }
 
+  .canton-picker {
+    display: none;
+  }
+
+  .canton-picker span {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .canton-picker select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font: 700 15px/1.2 'Source Sans 3', system-ui, sans-serif;
+  }
+
   .canton-map-stage {
     position: relative;
     overflow: hidden;
@@ -545,6 +583,7 @@
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
     cursor: pointer;
+    touch-action: manipulation;
     opacity: 0;
     transform-box: fill-box;
     transform-origin: center;
@@ -694,37 +733,49 @@
   @media (max-width: 720px) {
     .party-map-toolbar {
       position: static;
-      overflow-x: visible;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       margin-bottom: 12px;
       padding-bottom: 0;
     }
 
     .party-map-toolbar button {
-      flex: 1 1 calc(33.333% - 8px);
       justify-content: center;
       min-width: 0;
-      padding-inline: 9px;
+      min-height: 42px;
+      padding: 8px 9px;
     }
 
     .canton-map-stage {
       min-height: auto;
       padding: 14px;
+      touch-action: pan-y;
+    }
+
+    .canton-picker {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .canton-map-svg {
+      width: 100%;
+      margin-top: 4px;
     }
 
     .canton-tooltip {
-      position: absolute;
+      position: static;
       left: 50% !important;
       top: auto !important;
-      bottom: 20px;
-      width: min(270px, calc(100% - 20px));
-      transform: translateX(-50%);
+      width: 100%;
+      margin-top: 12px;
+      transform: none;
     }
   }
 
   @media (max-width: 380px) {
-    .party-map-toolbar button {
-      flex-basis: calc(50% - 8px);
+    .party-map-toolbar {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 

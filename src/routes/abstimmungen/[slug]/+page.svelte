@@ -667,10 +667,10 @@
     .vote-detail-title {
       font-size: clamp(1.7rem, 7vw, 2.05rem);
       line-height: 1.08;
-      hyphens: auto;
+      hyphens: manual;
       max-width: 100%;
       min-width: 0;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
       word-break: normal;
     }
 

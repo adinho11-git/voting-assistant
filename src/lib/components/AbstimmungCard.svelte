@@ -224,9 +224,9 @@
     span {
       min-width: 0;
       max-width: 100%;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
       word-break: normal;
-      hyphens: auto;
+      hyphens: manual;
     }
 
     .line-clamp-2,

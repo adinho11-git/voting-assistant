@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import ThemeToggle from './ThemeToggle.svelte';
 
   $: path = $page.url.pathname;
 
@@ -38,6 +39,10 @@
 </script>
 
 <nav class="bottom-nav md:hidden" aria-label="Mobile Navigation">
+  <div class="bottom-nav-theme" aria-label="Darstellung">
+    <ThemeToggle />
+  </div>
+
   <div class="bottom-nav-inner">
     {#each tabs as tab}
       <a

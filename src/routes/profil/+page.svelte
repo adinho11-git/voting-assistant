@@ -950,7 +950,7 @@
   .profile-lead {
     max-width: 100%;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     word-break: normal;
   }
 
@@ -1484,7 +1484,7 @@
     .profile-title {
       font-size: clamp(1.85rem, 7.4vw, 2.2rem);
       line-height: 1.08;
-      hyphens: auto;
+      hyphens: manual;
     }
 
     .profile-lead {

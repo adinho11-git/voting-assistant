@@ -423,7 +423,7 @@
   .sources-lead {
     max-width: 100%;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     word-break: normal;
   }
 
@@ -786,7 +786,7 @@
     .sources-title {
       font-size: clamp(1.85rem, 7.4vw, 2.2rem);
       line-height: 1.08;
-      hyphens: auto;
+      hyphens: manual;
     }
 
     .sources-lead {
@@ -805,7 +805,7 @@
     .method-item,
     .transparency-note {
       min-width: 0;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     .source-card-tag,
@@ -814,7 +814,7 @@
     .media-meta {
       max-width: 100%;
       white-space: normal;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     .media-notice {
