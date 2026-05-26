@@ -13,7 +13,7 @@
   $: path = $page.url.pathname;
 </script>
 
-<header class="top-nav hidden md:block">
+<header class="top-nav hidden md:block" data-sveltekit-preload-code="viewport">
   <div class="container-app top-nav-inner">
     <a href="/" class="flex items-center gap-2.5 group min-w-0" aria-label="Voting Assistant Home">
       <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" class="flex-shrink-0">
