@@ -157,6 +157,12 @@ Für das Video und die Screenshots sollte mindestens eine Admin-Ansicht sichtbar
 4. Live-URL aufrufen, kritische Routen kurz prüfen (`/`, `/abstimmungen`, `/kompass`, `/profil`, `/admin/login`).
 5. Admin-Dashboard prüfen: Für die finale Abgabe sollte dort MongoDB Atlas beziehungsweise der produktive Datenmodus sichtbar sein.
 
+### Build-Toolchain-Pinning
+
+Die App bleibt bewusst auf Svelte 4. Die Svelte-/Vite-Toolchain ist deshalb in `package.json` ohne Caret gepinnt: `@sveltejs/kit@2.5.28`, `@sveltejs/vite-plugin-svelte@3.1.2`, `svelte@4.2.20`, `svelte-check@3.8.6` und `vite@5.4.21`.
+
+Grund: Neuere SvelteKit-2-Minor-Versionen wie `2.59.x` importieren Runtime-Exports wie `hydratable`, `untrack`, `fork` und `settled`, die in Svelte 4 nicht verfuegbar sind. Das fuehrte beim Produktionsbuild zu Export-Warnungen, obwohl die App selbst auf Svelte 4 korrekt laeuft. Der Pin haelt lokale Builds und Netlify-Deploys auf einer stabilen Svelte-4-kompatiblen Kombination.
+
 ## Bekannte technische Schulden
 
 | Schuld | Wo | Auswirkung | Empfohlene Massnahme |

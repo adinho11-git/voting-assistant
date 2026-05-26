@@ -593,14 +593,17 @@
     position: absolute;
     z-index: 3;
     display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
-    gap: 10px;
-    width: min(330px, calc(100% - 28px));
-    padding: 12px;
-    background: #fff;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 8px;
+    width: min(270px, calc(100% - 28px));
+    padding: 9px;
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.62);
     color: #171717;
     border-radius: 8px;
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(13px) saturate(145%);
     transform: var(--tooltip-transform, translate(-50%, -115%));
     transition:
       left 260ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -610,14 +613,14 @@
   .canton-badge {
     display: grid;
     place-items: center;
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     border-radius: 7px;
     background:
       linear-gradient(135deg, #fff 0 48%, #2b96d3 49% 100%);
     border: 1px solid #c8c8c8;
     color: #111;
-    font: 800 12px 'IBM Plex Mono', monospace;
+    font: 800 11px 'IBM Plex Mono', monospace;
   }
 
   .canton-tooltip-title {
@@ -627,11 +630,12 @@
     align-items: baseline;
     font-weight: 800;
     line-height: 1.15;
+    font-size: 14px;
   }
 
   .canton-tooltip-title strong {
     color: #9b9b9b;
-    font-size: 12px;
+    font-size: 10px;
     white-space: nowrap;
   }
 
@@ -639,15 +643,15 @@
     margin-top: 2px;
     color: #9a9a9a;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .party-share-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 10px;
-    margin-top: 8px;
-    font-size: 12px;
+    gap: 5px 8px;
+    margin-top: 6px;
+    font-size: 10px;
     font-weight: 700;
     color: #9b9b9b;
   }
@@ -660,8 +664,8 @@
   }
 
   .party-share-list i {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 999px;
   }
 
@@ -725,8 +729,8 @@
       position: absolute;
       left: 50% !important;
       top: auto !important;
-      bottom: 34px;
-      width: 100%;
+      bottom: 20px;
+      width: min(270px, calc(100% - 20px));
       transform: translateX(-50%);
     }
   }
