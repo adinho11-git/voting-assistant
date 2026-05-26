@@ -224,7 +224,7 @@
       <p class="section-eyebrow mb-3">Transparenz</p>
       <h3 class="font-display text-xl text-ink mb-4">KI-Einsatz in dieser App</h3>
       <ul class="space-y-3 text-sm text-ink leading-relaxed">
-        <li class="flex gap-2"><span aria-hidden="true">·</span><span><strong>Code-Assistenten:</strong> Entwickelt mit Claude Opus 4.7; Code-Anpassungen und UI-Iterationen wurden zusätzlich mit OpenAI Codex unterstützt. Alle Architektur-Entscheidungen, Datenmodelle und Inhalte wurden manuell verifiziert.</span></li>
+        <li class="flex gap-2"><span aria-hidden="true">·</span><span><strong>Code-Assistenten:</strong> Entwickelt mit Claude Code und OpenAI Codex. Alle Architektur-Entscheidungen, Datenmodelle und Inhalte wurden manuell verifiziert.</span></li>
         <li class="flex gap-2"><span aria-hidden="true">·</span><span><strong>Inhalte:</strong> Zusammenfassungen basieren auf admin.ch / bk.admin.ch (Stand 21. Mai 2026). KI strukturiert, ein Mensch prüft.</span></li>
         <li class="flex gap-2"><span aria-hidden="true">·</span><span><strong>Was die KI <em>nicht</em> macht:</strong> Wertet politische Positionen nicht, erfindet keine Quellen, generiert keine Resultate. Bei demo-Inhalten ist das klar gelabelt.</span></li>
       </ul>
