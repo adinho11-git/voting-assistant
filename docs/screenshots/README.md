@@ -6,7 +6,7 @@
 
 ## Wozu dieser Ordner
 
-Die Bewertungsrubrik «Dokumentation & Video» verlangt explizit «Screenshots inkl. Beschreibungen der fertigen App». Dieser Ordner ist die zentrale Ablage dafür.
+Die Bewertungsrubrik «Dokumentation & Video» verlangt explizit «Screenshots inkl. Beschreibungen der fertigen App». Dieser Ordner ist die zentrale Ablage dafür. Alle Pflichtscreenshots liegen direkt in diesem Ordner und werden in der Root-README sowie in [`../04-prototype.md`](../04-prototype.md) referenziert.
 
 ## Datei-Namensschema
 
@@ -32,19 +32,19 @@ Format: **PNG** (verlustfrei), bei Bedarf auf < 500 KB komprimieren (z. B. mit T
 
 ## Screenshot-Checkliste
 
-- [ ] **01-startseite.png** — Komplette Startseite mit Hero, Countdown, anstehenden Vorlagen, Workflow-Erklärung.
-- [ ] **02-abstimmungen.png** — Abstimmungsübersicht mit Tab-Navigation, Suche, mindestens zwei Vorlagen-Karten.
-- [ ] **03-detail-briefing.png** — Abstimmungsdetailseite mit Briefing, Bundesrat- und Parlament-Position, Quellen-Eintrag, sichtbaren Sektionen «Überblick» und «Argumente».
-- [ ] **04-gewichtung.png** — Argumentgewichtungs-Komponente mit aktiven Bewertungen, sichtbarer Live-Tendenz, Score-Bar und «Stärkste gewichtete Gründe».
-- [ ] **05-kompass-frage.png** — Partei-Kompass Frage mit 5-Stufen-Skala, Themen-Eyebrow, Kontext-Szenario und Fortschritts-Balken.
-- [ ] **06-kompass-ergebnis.png** — Partei-Kompass Ergebnis mit Top-Match, Ranking aller sechs Parteien, Themen-Breakdown und ausklappbarer Erklärung der Berechnung.
-- [ ] **07-profil.png** — Profil / Voting-Journal mit Statistik-Header, mindestens einer Journal-Karte und «Übereinstimmung mit Parteipositionen».
-- [ ] **08-parteien.png** — Parteienübersicht mit den sechs Bundesparteien, idealerweise mit sichtbarem Filter und/oder Parteien-Vergleichs-Block.
-- [ ] **09-parteidetail.png** — Parteidetailseite mit Profil, Kernthemen, Spektrum 2D und Positionen zu aktuellen Vorlagen.
-- [ ] **10-quellen.png** — Quellen & Medienberichte mit der getrennten Auflistung «amtlich / Partei / Medien» und sichtbarem Filter.
-- [ ] **11-darkmode.png** — Beliebige Seite (Empfehlung: Startseite oder Detail) im Dark Mode.
-- [ ] **12-mobile.png** — Mobile Ansicht einer zentralen Seite (z. B. Detail oder Übersicht) mit sichtbarer Bottom-Nav.
-- [ ] **13-admin.png** — Admin-Dashboard mit System-Status und mindestens einer CRUD-Tabelle.
+- [x] **01-startseite.png** — Startseite mit Hero, Countdown, anstehenden Vorlagen und Workflow-Einstieg.
+- [x] **02-abstimmungen.png** — Abstimmungsübersicht mit Tab-Navigation, Suche und Vorlagen-Karten.
+- [x] **03-detail-briefing.png** — Abstimmungsdetailseite mit Briefing, Bundesrat- und Parlament-Position sowie Quellen-Eintrag.
+- [x] **04-gewichtung.png** — Argumentgewichtungs-Komponente mit aktiven Bewertungen, sichtbarer Live-Tendenz, Score-Bar und gewichteten Gründen.
+- [x] **05-kompass-frage.png** — Partei-Kompass-Frage mit 5-Stufen-Skala, Themen-Eyebrow, Kontext-Szenario und Fortschritts-Balken.
+- [x] **06-kompass-ergebnis.png** — Partei-Kompass-Ergebnis mit Top-Match, Ranking und Themen-Breakdown.
+- [x] **07-profil.png** — Profil / Voting-Journal mit Statistik-Header, Journal-Bezug und gespeicherten Orientierungsdaten.
+- [x] **08-parteien.png** — Parteienübersicht mit sechs Bundesparteien und politischer Einordnung.
+- [x] **09-parteidetail.png** — Parteidetailseite mit Profil, Kernthemen, Spektrum und Positionen zu aktuellen Vorlagen.
+- [x] **10-quellen.png** — Quellen & Medienberichte mit getrennter Auflistung amtlicher Quellen, Parteiquellen und Medien.
+- [x] **11-darkmode.png** — Zentrale Ansicht im Dark Mode.
+- [x] **12-mobile.png** — Mobile Ansicht mit sichtbarer Bottom-Nav und Smartphone-Layout.
+- [x] **13-admin.png** — Admin-Dashboard mit System-Status, Kennzahlen und produktivem MongoDB-Atlas-Modus.
 
 Optional und sinnvoll als Ergänzung:
 
@@ -74,4 +74,4 @@ Da es sich um politische Inhalte handelt, gilt:
 - **Live-URL** ist OK auf Screenshots; Admin-Passwörter natürlich nicht.
 - **Persönliche Browser-Bookmarks** ausblenden (Browser-Lesezeichenleiste schliessen vor der Aufnahme).
 
-> **TODO:** Screenshots aufnehmen, hier ablegen, in der README im Repo-Root einbinden, in `docs/04-prototype.md` referenzieren.
+Status: Die Pflichtscreenshots wurden aufgenommen, unter dem festgelegten Namensschema abgelegt und in der Dokumentation referenziert.

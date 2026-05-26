@@ -155,7 +155,7 @@ Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
 | Mehrere Pages und Workflows | ✅ 19+ Routen |
 | Daten aus Datenquelle | ✅ MongoDB Atlas bei `MONGODB_URI` + `USE_MOCK_DATA=false`, mit Seed-/Fallback-Datenmodus |
 | Daten erstellen / aktualisieren | ✅ Admin-CRUD, Community-Votes, Interessen-Registrierungen und lokale persönliche Daten |
-| Evaluation mit Auswertung | 🟡 Plan und Struktur stehen — echte Testergebnisse werden vor der Abgabe eingetragen |
+| Evaluation mit Auswertung | ✅ Qualitative Evaluation mit P1–P5, Feedback Grid, Schweregrad-Skala, Auswertung und abgeleiteten Verbesserungen in [`docs/05-validate.md`](docs/05-validate.md) |
 | Rechtliche Rahmenbedingungen | ✅ Quellen verlinkt, Disclaimer, keine personenbezogene Server-Speicherung |
 | KI-Einsatz transparent | ✅ Doku in [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), In-App-Transparenz auf Start- und Quellen-Seite |
 
@@ -177,12 +177,12 @@ Der finale Prototyp entstand damit nachvollziehbar aus **Crazy-8s → Dot-Voting
 
 | Bereich | Technologie |
 |---|---|
-| Framework | SvelteKit 2 (`@sveltejs/kit ^2.5.0`) |
-| UI-Bibliothek | Svelte 4 (`^4.2.15`) |
+| Framework | SvelteKit 2 (`@sveltejs/kit 2.5.28`) |
+| UI-Bibliothek | Svelte 4 (`4.2.20`) |
 | Sprache | TypeScript 5.4 (strict) |
 | Styling | Tailwind CSS 3.4 + eigenes CSS-Variablen-Token-System in [`src/app.css`](src/app.css) |
 | Datenbank | MongoDB 6.6 (Atlas) mit In-Memory-Fallback |
-| Hosting | Netlify (`@sveltejs/adapter-netlify ^4.0.0`) |
+| Hosting | Netlify (`@sveltejs/adapter-netlify 4.4.2`) |
 | Auth | Cookie-basiert in [`src/hooks.server.ts`](src/hooks.server.ts) |
 | Entwicklung | Vite, `svelte-check`, VS Code |
 
@@ -296,32 +296,88 @@ Aufruf unter `/admin/login`. Login mit dem in `.env` gesetzten `ADMIN_PASSWORD`.
 - **Plattform:** Netlify, Adapter `@sveltejs/adapter-netlify`.
 - **Build-Auslöser:** jeder Push auf `main` löst automatisch ein Netlify-Build aus.
 - **Aktuelle URL:** <https://friendly-llama-b738d4.netlify.app>
-- **Custom Domain:** noch nicht konfiguriert.
+- **Custom Domain:** keine Custom Domain geplant; die finale Abgabe verweist auf die Netlify-URL.
 - **Produktiver Datenmodus:** Für MongoDB Atlas müssen in Netlify `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt sein. Die tatsächlichen Secret-Werte werden nicht im Repository dokumentiert.
-
-> **TODO:** Falls noch eine andere Deployment-URL kommt oder eine Custom-Domain konfiguriert wird, hier eintragen.
 
 ---
 
 ## Screenshots
 
-Finale Screenshots werden unter [`docs/screenshots/`](docs/screenshots/README.md) abgelegt. Die vollständige Checkliste mit allen abzudeckenden Ansichten findet sich in [`docs/screenshots/README.md`](docs/screenshots/README.md).
+Die finalen Screenshots liegen unter [`docs/screenshots/`](docs/screenshots/README.md). Sie zeigen den abgaberelevanten Stand der wichtigsten Ansichten und Workflows.
 
-> **TODO Screenshots einbinden** (sobald in `docs/screenshots/` abgelegt):
+### Startseite
 
-- ![Startseite](docs/screenshots/01-startseite.png) <!-- TODO -->
-- ![Abstimmungsübersicht](docs/screenshots/02-abstimmungen.png) <!-- TODO -->
-- ![Detailseite mit Briefing](docs/screenshots/03-detail-briefing.png) <!-- TODO -->
-- ![Argumentgewichtung](docs/screenshots/04-gewichtung.png) <!-- TODO -->
-- ![Partei-Kompass Frage](docs/screenshots/05-kompass-frage.png) <!-- TODO -->
-- ![Partei-Kompass Ergebnis](docs/screenshots/06-kompass-ergebnis.png) <!-- TODO -->
-- ![Voting-Journal](docs/screenshots/07-profil.png) <!-- TODO -->
-- ![Parteienübersicht](docs/screenshots/08-parteien.png) <!-- TODO -->
-- ![Parteidetailseite](docs/screenshots/09-parteidetail.png) <!-- TODO -->
-- ![Quellen & Medienberichte](docs/screenshots/10-quellen.png) <!-- TODO -->
-- ![Dark Mode](docs/screenshots/11-darkmode.png) <!-- TODO -->
-- ![Mobile Ansicht](docs/screenshots/12-mobile.png) <!-- TODO -->
-- ![Admin Dashboard](docs/screenshots/13-admin.png) <!-- TODO -->
+![Startseite](docs/screenshots/01-startseite.png)
+
+Die Startseite zeigt Hauptnutzen, Navigation, Countdown zur nächsten Abstimmung, primäre CTAs und den Einstieg in aktuelle Vorlagen.
+
+### Abstimmungsübersicht
+
+![Abstimmungsübersicht](docs/screenshots/02-abstimmungen.png)
+
+Die Übersicht bündelt anstehende und vergangene Vorlagen mit Tabs, Suche, Filterung und Kartenlayout.
+
+### Abstimmungsdetail und Briefing
+
+![Detailseite mit Briefing](docs/screenshots/03-detail-briefing.png)
+
+Die Detailseite führt in eine Vorlage ein und zeigt Briefing, Metadaten, Quellenstand und Workflow-Struktur.
+
+### Argumentgewichtung
+
+![Argumentgewichtung](docs/screenshots/04-gewichtung.png)
+
+Die Argumentgewichtung macht den Entscheidungsprozess interaktiv: Nutzer:innen gewichten Pro- und Contra-Argumente und sehen daraus eine Live-Tendenz.
+
+### Partei-Kompass
+
+![Partei-Kompass Frage](docs/screenshots/05-kompass-frage.png)
+
+Der Partei-Kompass nutzt Szenario-Fragen mit 5-Stufen-Skala als zweiten Orientierungsworkflow.
+
+![Partei-Kompass Ergebnis](docs/screenshots/06-kompass-ergebnis.png)
+
+Das Ergebnis zeigt Parteiennähe, Ranking und Themen-Breakdown transparent und ohne Wahlempfehlung.
+
+### Profil und Voting-Journal
+
+![Profil und Voting-Journal](docs/screenshots/07-profil.png)
+
+Das Profil zeigt gespeicherte Positionen, Kompass-Ergebnis und persönliche Reflexion im Voting-Journal.
+
+### Parteien
+
+![Parteienübersicht](docs/screenshots/08-parteien.png)
+
+Die Parteienübersicht zeigt die sechs Bundesparteien mit Filter, Vergleich und politischer Einordnung.
+
+![Parteidetailseite](docs/screenshots/09-parteidetail.png)
+
+Die Parteidetailseite zeigt Profil, Kernthemen, Spektrum und Positionen zu aktuellen Vorlagen.
+
+### Quellen
+
+![Quellen und Medienberichte](docs/screenshots/10-quellen.png)
+
+Die Quellen-Seite trennt amtliche Quellen, Parteiquellen, Medienberichte und Methodik transparent.
+
+### Dark Mode
+
+![Dark Mode](docs/screenshots/11-darkmode.png)
+
+Der Dark Mode zeigt, dass zentrale Workflows auch im dunklen Theme lesbar und konsistent bleiben.
+
+### Mobile Ansicht
+
+![Mobile Ansicht](docs/screenshots/12-mobile.png)
+
+Die mobile Ansicht zeigt Bottom-Navigation, responsive Layouts und die Nutzbarkeit auf Smartphone-Grösse.
+
+### Admin
+
+![Admin Dashboard](docs/screenshots/13-admin.png)
+
+Das Admin-Dashboard dokumentiert Datenpflege, Systemstatus und die technische Grundlage für CRUD-Funktionen. Der Screenshot zeigt den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
 
 ---
 
@@ -336,7 +392,8 @@ Die methodische Dokumentation zu Vorgehen, Evaluation und KI-Einsatz liegt volls
 | [`docs/03-decide.md`](docs/03-decide.md) | Phase 3 — Gewählte Lösung, MoSCoW-Priorisierung, Abgrenzungen |
 | [`docs/04-prototype.md`](docs/04-prototype.md) | Phase 4 — Finale Seitenstruktur, Workflows, technische Umsetzung |
 | [`docs/05-validate.md`](docs/05-validate.md) | Phase 5 — Evaluationsplan, Testaufgaben, Beobachtungstabelle, Schweregrad-Skala |
-| [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md) | KI-Tools (Claude Code, Codex, ChatGPT/GPT-5.5), Anwendungsbereiche, manuelle Qualitätssicherung |
+| [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md) | KI-Tools (Claude Code, Codex, ChatGPT), Anwendungsbereiche, manuelle Qualitätssicherung |
+| [`docs/prompts.md`](docs/prompts.md) | Promptvorgehen, typische Prompt-Muster und Qualitätssicherungsregeln |
 | [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) | Repository, Branches, Commits, Issues, Deployment, technische Schulden |
 | [`docs/video-script.md`](docs/video-script.md) | Drehbuch und Sprechertext für den 5-Minuten-Walkthrough |
 | [`docs/mockups/`](docs/mockups/README.md) | Ablage und Checkliste für Skizzen und Mockups |
@@ -371,7 +428,7 @@ Eine qualitative Usability-Evaluation wurde mit **fünf anonymisierten Testperso
 
 **Vollständige Dokumentation** mit Fragestellungen, Testaufgaben, Feedback Grid, konsolidierter Issue-Liste (Nielsen-Schweregrad 0–4), Bewertungstabelle, abgeleiteten Verbesserungen und ehrlicher Reflexion zu Limitationen: [`docs/05-validate.md`](docs/05-validate.md).
 
-> **Offene Punkte:** Tooltip für Parteikürzel, finaler Design-Konsistenz-Pass, Screenshots der evaluierten Version. Siehe ausführlich in Abschnitt 11 und 12 von [`docs/05-validate.md`](docs/05-validate.md).
+> **Verbleibende Punkte:** Tooltip für Parteikürzel und ein letzter Design-Konsistenz-Pass bleiben als bewusst abgegrenzte Restpunkte dokumentiert. Die finalen Screenshots des Abgabestands liegen unter [`docs/screenshots/`](docs/screenshots/README.md).
 
 In der App selbst sammelt zusätzlich das [`FeedbackForm`](src/lib/components/FeedbackForm.svelte) am Ende jeder Detailseite niederschwellig Werte zu Clarity, Neutrality und Usefulness — als sekundäre Datenquelle.
 
@@ -385,9 +442,9 @@ Kurzüberblick:
 
 | Tool | Hauptzweck |
 |---|---|
-| **Claude Code / Claude Opus 4.7** (Anthropic) | Code-Analyse, Refactoring, Dokumentationsstruktur, UX-Verbesserungen, technische Reviews |
+| **Claude Code** (Anthropic) | Code-Analyse, Refactoring, Dokumentationsstruktur, UX-Verbesserungen, technische Reviews |
 | **Codex** (OpenAI) | Fokussierte Coding-Tasks, UI- und Workflow-Verbesserungen, Code-Audits, einzelne Features und Fixes |
-| **ChatGPT / GPT-5.5** (OpenAI) | Projektstrategie, Bewertungsraster-Interpretation, Prompt-Erstellung, UX-Kritik, Priorisierung, Reflexion |
+| **ChatGPT** (OpenAI) | Projektstrategie, Bewertungsraster-Interpretation, Prompt-Erstellung, UX-Kritik, Priorisierung, Reflexion |
 
 **Wichtig:** Politische Inhalte, Quellen, Neutralität, Funktionalität und finale Entscheidungen wurden manuell überprüft. Die KI hat keine politische Meinung vorgegeben und keine Wahlempfehlung erstellt. Die App ist auf Startseite und Quellen-Seite zusätzlich in-app transparent dazu.
 
@@ -413,7 +470,7 @@ Kurzüberblick:
 - **Tests:** Aktuell keine automatisierten Tests. Ein E2E-Smoke-Test für den Kern-Workflow ist als Future-Work-Punkt dokumentiert.
 - **Datenpflege:** Die Datenquelle `realData.ts` wird manuell gehalten. Mittelfristig wäre ein Sync gegen die Bundeskanzlei-API denkbar.
 - **Kompass-Visualisierung:** Eine 2D-Spektrum-Anzeige (Links↔Rechts / Wirtschaft↔Umwelt) ist als sinnvolle Erweiterung dokumentiert, die Datenbasis dafür existiert bereits.
-- **Echte Nutzer-Evaluation:** Plan und Struktur stehen, echte Beobachtungen werden vor der Abgabe ergänzt (siehe [`docs/05-validate.md`](docs/05-validate.md)).
+- **Evaluation:** Die qualitative Evaluation ist abgeschlossen und in [`docs/05-validate.md`](docs/05-validate.md) dokumentiert. Für ein Produktivsystem wären zusätzliche Tests mit breiterer Stichprobe sinnvoll.
 
 Vollständige Liste von Schulden und Future Work in [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md).
 
@@ -421,12 +478,12 @@ Vollständige Liste von Schulden und Future Work in [`docs/07-projektorganisatio
 
 ## Video-Walkthrough
 
-Ein kommentierter, ca. fünfminütiger Walkthrough wird zum Schluss der Projektarbeit aufgenommen. Drehbuch, Sprechertext-Entwurf und Aufnahme-Checkliste stehen in [`docs/video-script.md`](docs/video-script.md).
+Ein kommentierter, ca. fünfminütiger Walkthrough wird als finaler Abgabeschritt aufgenommen. Drehbuch, Sprechertext-Entwurf und Aufnahme-Checkliste stehen in [`docs/video-script.md`](docs/video-script.md).
 
-> **TODO:** Video aufnehmen und URL hier ergänzen (Moodle-Upload oder YouTube unlisted).
+> **Finaler Abgabeschritt:** Video aufnehmen und URL hier ergänzen (Moodle-Upload oder YouTube unlisted).
 
 ```
-Video-URL: <noch nicht aufgenommen>
+Video-URL: <wird nach Upload ergänzt>
 ```
 
 ---

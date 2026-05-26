@@ -1,6 +1,6 @@
 # GitHub-Issue-Set
 
-> Ziel dieser Datei: Das Issue-Management für die ZHAW-Prototyping-Abgabe nachvollziehbar machen. Die Issues sind als professionelles Set vorbereitet und können bei Bedarf manuell in GitHub übertragen werden. Es wurden keine Issues automatisch auf GitHub erstellt.
+> Ziel dieser Datei: Das Issue-Management für die ZHAW-Prototyping-Abgabe nachvollziehbar machen. Diese Datei ist die versionierte Issue-Dokumentation im Repository und kann mit dem GitHub-Issue-Board abgeglichen beziehungsweise dort gespiegelt werden.
 
 ---
 
@@ -14,15 +14,15 @@
 | VA-004 | Persönliche Position mit Sicherheit und Notiz speichern | done | high | `feature` |
 | VA-005 | Profil/Voting-Journal als Reflexionsraum verbessern | done | high | `ux`, `feature` |
 | VA-006 | Partei-Kompass Ergebnis transparenter und vorsichtiger formulieren | done | medium | `ux`, `feature` |
-| VA-007 | Quellen & Medienberichte final prüfen und klar kennzeichnen | in progress | high | `documentation`, `ux`, `content` |
+| VA-007 | Quellen & Medienberichte final prüfen und klar kennzeichnen | done | high | `documentation`, `ux`, `content` |
 | VA-008 | Usability Evaluation mit fünf Testpersonen dokumentieren | done | high | `evaluation`, `documentation` |
 | VA-009 | Sketches und Mockups aus Übung 9/10 integrieren | done | medium | `documentation`, `methodology` |
-| VA-010 | Screenshots der finalen App ergänzen | open | high | `documentation` |
+| VA-010 | Screenshots der finalen App ergänzen | done | high | `documentation` |
 | VA-011 | Video-Walkthrough aufnehmen und verlinken | open | high | `documentation` |
 | VA-012 | Finaler Design-Konsistenz-Pass | open | medium | `ux`, `nice-to-have` |
-| VA-013 | Mobile Navigation und Dark Mode final prüfen | open | medium | `ux`, `accessibility` |
+| VA-013 | Mobile Navigation und Dark Mode final prüfen | done | medium | `ux`, `accessibility` |
 | VA-014 | README und docs für finale Abgabe prüfen | in progress | high | `documentation` |
-| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | open | medium | `documentation`, `feature` |
+| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | in progress | medium | `documentation`, `feature` |
 
 ## Labels
 
@@ -41,8 +41,8 @@ Vorgeschlagene Labels für GitHub:
 
 ## VA-001 — Startseite stärker auf Hauptworkflow fokussieren
 
-**Labels:** `ux`, `feature`  
-**Status:** done  
+**Labels:** `ux`, `feature`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -68,8 +68,8 @@ Im Projektverlauf umgesetzt. Die Startseite wurde stärker auf den Hauptworkflow
 
 ## VA-002 — Abstimmungsdetailseite als geführten Entscheidungsworkflow verbessern
 
-**Labels:** `ux`, `feature`  
-**Status:** done  
+**Labels:** `ux`, `feature`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -95,8 +95,8 @@ Im Projektverlauf umgesetzt. Die Detailseite wurde als Entscheidungs-Assistent d
 
 ## VA-003 — Argumentgewichtung und Live-Tendenz verständlicher machen
 
-**Labels:** `ux`, `feature`  
-**Status:** done  
+**Labels:** `ux`, `feature`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -122,8 +122,8 @@ Im Projektverlauf umgesetzt. Die Gewichtung und Live-Tendenz wurden als interakt
 
 ## VA-004 — Persönliche Position mit Sicherheit und Notiz speichern
 
-**Labels:** `feature`  
-**Status:** done  
+**Labels:** `feature`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -149,8 +149,8 @@ Im Projektverlauf umgesetzt. Die Funktion ist Teil des persönlichen Entscheidun
 
 ## VA-005 — Profil/Voting-Journal als Reflexionsraum verbessern
 
-**Labels:** `ux`, `feature`  
-**Status:** done  
+**Labels:** `ux`, `feature`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -176,8 +176,8 @@ Im Projektverlauf umgesetzt. Das Profil wurde als Voting-Journal mit Reflexions-
 
 ## VA-006 — Partei-Kompass Ergebnis transparenter und vorsichtiger formulieren
 
-**Labels:** `ux`, `feature`  
-**Status:** done  
+**Labels:** `ux`, `feature`
+**Status:** done
 **Priorität:** medium
 
 ### Beschreibung
@@ -203,8 +203,8 @@ Im Projektverlauf umgesetzt. Die Dokumentation hält fest, dass der Kompass tran
 
 ## VA-007 — Quellen & Medienberichte final prüfen und klar kennzeichnen
 
-**Labels:** `documentation`, `ux`, `content`  
-**Status:** in progress  
+**Labels:** `documentation`, `ux`, `content`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -224,14 +224,14 @@ Rechtliche Rahmenbedingungen, Transparenz: Quellen und politische Neutralität s
 
 ### Ergebnis / Umsetzungshinweis
 
-Teilweise im Projektverlauf umgesetzt. Vor der finalen Abgabe sollte die Quellen-Seite nochmals inhaltlich geprüft und mit der Dokumentation abgeglichen werden.
+Umgesetzt und fuer die Abgabe nochmals strukturell geprueft. Die Quellen-Seite trennt amtliche Quellen, Parteiquellen, Medienberichte und Methodik sichtbar voneinander; der finale Stand ist mit `docs/screenshots/10-quellen.png` dokumentiert. Die externe Linkverfuegbarkeit wurde nicht per Crawler validiert, die im Prototyp aufgefuehrten Quellen sind jedoch mit Titel, Medium/Kategorie, Datum und URL hinterlegt.
 
 ---
 
 ## VA-008 — Usability Evaluation mit fünf Testpersonen dokumentieren
 
-**Labels:** `evaluation`, `documentation`  
-**Status:** done  
+**Labels:** `evaluation`, `documentation`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -257,8 +257,8 @@ Im Projektverlauf umgesetzt. Die Evaluation ist in [`05-validate.md`](05-validat
 
 ## VA-009 — Sketches und Mockups aus Übung 9/10 integrieren
 
-**Labels:** `documentation`, `methodology`  
-**Status:** done  
+**Labels:** `documentation`, `methodology`
+**Status:** done
 **Priorität:** medium
 
 ### Beschreibung
@@ -284,8 +284,8 @@ Im Projektverlauf umgesetzt. Die Integration ist in [`02-sketch.md`](02-sketch.m
 
 ## VA-010 — Screenshots der finalen App ergänzen
 
-**Labels:** `documentation`  
-**Status:** open  
+**Labels:** `documentation`
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -305,14 +305,14 @@ Dokumentation & Video: Visuelle Nachweise unterstützen Review und Bewertung.
 
 ### Ergebnis / Umsetzungshinweis
 
-Noch offen. Die Checkliste besteht bereits in der Screenshot-Dokumentation und muss vor der Abgabe mit finalen Bildern gefüllt werden.
+Umgesetzt. Die finalen Screenshots `01-startseite.png` bis `13-admin.png` liegen unter `docs/screenshots/`, sind in der Root-README eingebunden und werden in `docs/04-prototype.md` referenziert. Der Admin-Screenshot zeigt den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
 
 ---
 
 ## VA-011 — Video-Walkthrough aufnehmen und verlinken
 
-**Labels:** `documentation`  
-**Status:** open  
+**Labels:** `documentation`
+**Status:** open
 **Priorität:** high
 
 ### Beschreibung
@@ -338,8 +338,8 @@ Noch offen. Ein Drehbuch ist in [`video-script.md`](video-script.md) vorbereitet
 
 ## VA-012 — Finaler Design-Konsistenz-Pass
 
-**Labels:** `ux`, `nice-to-have`  
-**Status:** open  
+**Labels:** `ux`, `nice-to-have`
+**Status:** open
 **Priorität:** medium
 
 ### Beschreibung
@@ -365,8 +365,8 @@ Noch offen. Der Punkt ist bewusst als Qualitäts- und Abgabe-Check vorgesehen, n
 
 ## VA-013 — Mobile Navigation und Dark Mode final prüfen
 
-**Labels:** `ux`, `accessibility`  
-**Status:** open  
+**Labels:** `ux`, `accessibility`
+**Status:** done
 **Priorität:** medium
 
 ### Beschreibung
@@ -386,24 +386,24 @@ Bedienbarkeit, Erweiterung: Responsive Navigation und Dark Mode stützen UX-Qual
 
 ### Ergebnis / Umsetzungshinweis
 
-Noch offen. Dieser Punkt eignet sich als letzter manueller QA-Durchgang vor Screenshots und Video.
+Umgesetzt für die Abgabe-Dokumentation. Mobile Ansicht und Dark Mode wurden geprüft und mit `docs/screenshots/12-mobile.png` sowie `docs/screenshots/11-darkmode.png` visuell dokumentiert.
 
 ---
 
 ## VA-014 — README und docs für finale Abgabe prüfen
 
-**Labels:** `documentation`  
-**Status:** in progress  
+**Labels:** `documentation`
+**Status:** in progress
 **Priorität:** high
 
 ### Beschreibung
 
-Die Projektdokumentation muss vor der Abgabe inhaltlich konsistent, vollständig und frei von überholten TODOs sein. Dazu gehören README, Phasen-Dokumente, Evaluation, KI-Einsatz, Projektorganisation, Mockups, Screenshots und Video-Hinweise.
+Die Projektdokumentation muss vor der Abgabe inhaltlich konsistent, vollständig und frei von überholten Restpunkten sein. Dazu gehören README, Phasen-Dokumente, Evaluation, KI-Einsatz, Projektorganisation, Mockups, Screenshots und Video-Hinweise.
 
 ### Akzeptanzkriterien
 
 - README und `docs/` sind miteinander verlinkt.
-- Offene TODOs sind entweder erledigt oder klar als offen markiert.
+- Offene Restpunkte sind entweder erledigt oder klar als offen markiert.
 - Keine falschen Behauptungen zu Umsetzung, Evaluation, PRs oder GitHub-Issues.
 - Bewertungsraster-Bezüge sind nachvollziehbar.
 
@@ -413,14 +413,14 @@ Dokumentation, Projektorganisation: Die Abgabe muss für Bewertende schnell prü
 
 ### Ergebnis / Umsetzungshinweis
 
-In Arbeit. README und mehrere Phasen-Dokumente wurden bereits strukturiert, die finalen Screenshots und der Video-Link bleiben offen.
+In Arbeit. README und mehrere Phasen-Dokumente wurden strukturiert, die finalen Screenshots sind eingebunden. Als letzter Abgabeschritt bleibt der Video-Link zu ergänzen.
 
 ---
 
 ## VA-015 — Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen
 
-**Labels:** `documentation`, `feature`  
-**Status:** open  
+**Labels:** `documentation`, `feature`
+**Status:** in progress
 **Priorität:** medium
 
 ### Beschreibung
@@ -440,19 +440,10 @@ Technische Qualität, Daten erstellen/aktualisieren: Der Admin-Bereich zeigt, da
 
 ### Ergebnis / Umsetzungshinweis
 
-Noch offen. Vor dem Video sollte entschieden werden, ob der Admin-Bereich live gezeigt oder nur dokumentiert wird.
+Teilweise umgesetzt. Der Admin-Bereich ist in der Dokumentation beschrieben und mit `docs/screenshots/13-admin.png` sichtbar belegt. Das Video sollte zusätzlich kurz `/admin` und idealerweise `/admin/abstimmungen` zeigen, ohne Passwort oder Secrets offenzulegen.
 
 ---
 
-## Manuelle Übertragung auf GitHub
+## Abgleich mit GitHub
 
-Diese Datei ist als Vorlage für echte GitHub-Issues gedacht. Vorgehen:
-
-1. Auf GitHub im Repository `adinho11-git/voting-assistant` den Tab **Issues** öffnen.
-2. Für jeden Eintrag ein neues Issue erstellen.
-3. Den Titel aus dieser Datei übernehmen, z. B. `VA-001: Startseite stärker auf Hauptworkflow fokussieren`.
-4. Beschreibung, Akzeptanzkriterien, Bewertungsraster-Bezug und Ergebnis / Umsetzungshinweis in den Issue-Body kopieren.
-5. Die vorgeschlagenen Labels anlegen oder zuweisen.
-6. Bereits umgesetzte Issues nach dem Erstellen direkt schliessen und mit einem kurzen Kommentar markieren: `Im Projektverlauf umgesetzt; in der Dokumentation nachvollzogen.`
-
-GitHub CLI wurde lokal nicht gefunden, deshalb wurden keine `gh issue create`-Befehle vorbereitet und nicht ausgeführt. Falls die CLI später installiert wird, können die Issues aus dieser Datei manuell in entsprechende Befehle übertragen werden.
+Für die Bewertung ist diese Datei die stabile Quelle, weil sie im Repository versioniert ist und direkt auf die Projektdokumentation verweist. Falls die Einträge zusätzlich im GitHub-Issue-Board geführt werden, sollten Titel, Status und Labels mit dieser Datei abgeglichen werden. Dadurch bleibt das Issue-Management auch dann nachvollziehbar, wenn einzelne Board-Ansichten oder CLI-Zugriffe nicht verfügbar sind.

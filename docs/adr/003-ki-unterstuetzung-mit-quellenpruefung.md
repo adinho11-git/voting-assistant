@@ -9,11 +9,11 @@ Der Voting Assistant verarbeitet politisch sensible Inhalte. Zusammenfassungen, 
 ## Entscheidung
 KI wird als unterstützendes Werkzeug für Strukturierung, Zusammenfassungen, UX-Verbesserungen, Code-Unterstützung und Dokumentationsarbeit eingesetzt. Grundlage für politische Inhalte bleiben offizielle oder überprüfbare Quellen. Politische Neutralität, Formulierungen und Quellenbezug werden manuell geprüft. Die App und die KI-gestützten Artefakte formulieren keine Wahlempfehlung.
 
-Im Projektkontext wurden insbesondere folgende Werkzeuge genutzt beziehungsweise vorgesehen:
+Im Projektkontext wurden insbesondere folgende Werkzeuge genutzt:
 
-- Claude Code / Claude Opus 4.7
+- Claude Code
 - Codex
-- ChatGPT / GPT-5.5
+- ChatGPT
 
 ## Begründung
 KI beschleunigt Exploration, Prototyping und Qualitätsverbesserung. Gleichzeitig erfordert politische Orientierung besondere Sorgfalt. Die Kombination aus KI-Unterstützung und manueller Quellenprüfung erlaubt produktives Arbeiten, ohne die Verantwortung für Inhalte an ein Modell abzugeben.

@@ -236,28 +236,73 @@ Für die Bewertung sollte im Video explizit gezeigt werden: Admin-Login, Dashboa
 
 ## Screenshots der App
 
-> **TODO:** Finale Screenshots unter `docs/screenshots/` ablegen und hier referenzieren. Vollständige Checkliste in [`screenshots/README.md`](screenshots/README.md).
+Die finalen Screenshots liegen unter [`screenshots/`](screenshots/README.md). Sie dokumentieren den sichtbaren Abgabestand der wichtigsten Ansichten und Workflows.
 
-Vorgesehene Bilder:
+### Startseite
 
-- `screenshots/01-startseite.png`
-- `screenshots/02-abstimmungen.png`
-- `screenshots/03-detail-briefing.png`
-- `screenshots/04-gewichtung.png`
-- `screenshots/05-kompass-frage.png`
-- `screenshots/06-kompass-ergebnis.png`
-- `screenshots/07-profil.png`
-- `screenshots/08-parteien.png`
-- `screenshots/09-quellen.png`
-- `screenshots/10-darkmode.png`
-- `screenshots/11-mobile.png`
-- `screenshots/12-admin.png`
-
-Sobald die PNGs vorhanden sind, hier referenzieren:
-
-```markdown
 ![Startseite](screenshots/01-startseite.png)
-```
+
+Hero, Navigation, Countdown, primäre CTAs und Einstieg in die aktuellen Abstimmungen.
+
+### Abstimmungsübersicht
+
+![Abstimmungsübersicht](screenshots/02-abstimmungen.png)
+
+Übersicht mit Tabs, Suche, Filterlogik und Vorlagen-Karten.
+
+### Abstimmungsdetail und Briefing
+
+![Detailseite mit Briefing](screenshots/03-detail-briefing.png)
+
+Detailseite mit neutralem Briefing, Metadaten, Quellenstand und Workflow-Struktur.
+
+### Argumentgewichtung
+
+![Argumentgewichtung](screenshots/04-gewichtung.png)
+
+Interaktive Gewichtung von Pro- und Contra-Argumenten mit Live-Tendenz.
+
+### Partei-Kompass
+
+![Partei-Kompass Frage](screenshots/05-kompass-frage.png)
+
+Kompass-Frage mit Themenkontext, 5-Stufen-Skala und Fortschritt.
+
+![Partei-Kompass Ergebnis](screenshots/06-kompass-ergebnis.png)
+
+Ergebnisansicht mit Ranking, Top-Match und transparenter Einordnung.
+
+### Profil und Parteien
+
+![Profil und Voting-Journal](screenshots/07-profil.png)
+
+Profil mit gespeicherten Positionen, Kompass-Bezug und Voting-Journal.
+
+![Parteienübersicht](screenshots/08-parteien.png)
+
+Parteienübersicht mit Filter, Vergleich und Positionen-Matrix.
+
+![Parteidetailseite](screenshots/09-parteidetail.png)
+
+Parteidetailseite mit Profil, Kernthemen, Spektrum und aktuellen Positionen.
+
+### Quellen, Mobile und Admin
+
+![Quellen und Medienberichte](screenshots/10-quellen.png)
+
+Quellen-Seite mit Trennung von amtlichen Quellen, Parteiquellen, Medien und Methodik.
+
+![Dark Mode](screenshots/11-darkmode.png)
+
+Dark-Mode-Ansicht als Nachweis für konsistente Lesbarkeit im alternativen Theme.
+
+![Mobile Ansicht](screenshots/12-mobile.png)
+
+Mobile Ansicht mit Bottom-Navigation und responsive optimiertem Layout.
+
+![Admin Dashboard](screenshots/13-admin.png)
+
+Admin-Dashboard mit Datenpflege-Einstiegen, Kennzahlen und transparentem Systemstatus. Der Screenshot zeigt den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
 
 ---
 

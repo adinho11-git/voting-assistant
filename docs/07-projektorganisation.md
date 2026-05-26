@@ -48,27 +48,32 @@ Da das Projekt als **Einzelarbeit** umgesetzt wurde, ist die Branch-Strategie be
 - **Feature-Arbeit** direkt auf `main` oder in kurzen, lokal-temporären Branches, die nach Merge gelöscht werden.
 - **Commit-Stil:** sprechende Imperativ-Commit-Messages auf Deutsch oder Englisch, in der Regel kurz, mit klarem Subjekt.
 
-Beispiele bisheriger Commit-Stile aus der Historie:
+Auszug aus der tatsächlichen Commit-Historie (`git log --oneline`):
 
-- `feat: Argument-Gewichtung mit Live-Tendenz`
-- `fix: dark mode FOUC eliminieren`
-- `chore: realData für Juni-2026-Vorlagen aktualisieren`
-- `docs: README + docs/ vollständig`
-- `refactor: dataLayer trennt Mock und Mongo sauber`
+- `adf6335 Improve mobile layout responsiveness`
+- `7b00a0d Add deployment and SEO polish`
+- `2e28a6d Add architecture decision records`
+- `82f3139 Replace media placeholders with verified article links`
+- `41cc09f Add GitHub issue tracking documentation`
+- `5dffe8a Document sketch and mockup artifacts`
+- `c5ea577 Complete private evaluation participant details`
+- `9e2234d feat: Admin-Panel mit CRUD und Interessen-Export`
+- `e563518 feat: Profil-Seite mit History und Partei-Übereinstimmung`
+- `ff6ea08 feat: Partei-Kompass Quiz mit Match-Algorithmus`
 
-> **TODO:** Falls am Ende einzelne Commits noch fehlen oder zusammengefasst werden sollen, vor der Abgabe einmal `git log --oneline` durchsehen und ggf. ergänzen.
+Die Historie zeigt sowohl Feature-Arbeit als auch Dokumentations-, Deployment- und Qualitätsverbesserungen. Einzelne späte Abschluss-Commits sind breiter formuliert, weil mehrere Abgabeartefakte gemeinsam finalisiert wurden.
 
 ## Issue-Management
 
-Das vorbereitete Issue-Set liegt in [`issues.md`](issues.md). Es enthält 15 realistische Issues aus dem Projektverlauf mit Status, Priorität, Label-Vorschlägen, Akzeptanzkriterien, Bewertungsraster-Bezug und Umsetzungshinweisen.
+Das Issue-Set liegt in [`issues.md`](issues.md). Es enthält 15 realistische Issues aus dem Projektverlauf mit Status, Priorität, Label-Vorschlägen, Akzeptanzkriterien, Bewertungsraster-Bezug und Umsetzungshinweisen.
 
-Die Issues wurden zuerst als Dokumentation vorbereitet und anschliessend mit GitHub CLI ins Repository übertragen. Bereits umgesetzte Punkte sind geschlossen, offene Abgabe-Aufgaben bleiben im Issue-Board sichtbar.
+Für die Abgabe ist diese Datei die verlässliche, versionierte Issue-Dokumentation im Repository. Die Einträge können zusätzlich im GitHub-Issue-Board gespiegelt werden; massgebend für die Projektdokumentation bleibt jedoch der Stand in [`issues.md`](issues.md), weil er direkt mit README, Phasen-Dokumentation, Screenshots und Video verlinkt ist.
 
-Empfohlene Nutzung:
+Statuslogik:
 
-- **Done-Issues** auf GitHub anlegen und anschliessend schliessen, um den Projektverlauf sichtbar zu machen.
-- **Open-Issues** als tatsächliche Restaufgaben offen lassen, insbesondere Screenshots, Video, finaler Design-Check und Quellenprüfung.
-- **Labels** gemäss [`issues.md`](issues.md) anlegen oder zuweisen.
+- **Done**: im Prototyp umgesetzt und/oder in der Dokumentation nachweisbar.
+- **In progress**: Abschluss- oder Qualitätsaufgabe, die vor Abgabe nochmals geprüft wird.
+- **Open**: bewusst verbleibende Restaufgabe oder Future-Work-Punkt.
 
 Zusätzlich sind einfache GitHub-Issue-Templates unter `.github/ISSUE_TEMPLATE/` vorbereitet:
 
@@ -100,8 +105,6 @@ Zentrale Architektur- und Produktentscheidungen sind als ADRs dokumentiert. Sie 
 | **Validate-Phase** | Moderierte Usability-Tests mit ersten Testpersonen, Iteration |
 | **Doku & Abgabe** | README + `docs/`-Struktur, Screenshots, Video-Walkthrough |
 
-> **TODO:** Falls weitere Sprints durchlaufen wurden, hier ergänzen.
-
 ## Ablage der Artefakte
 
 Sämtliche Artefakte sind im Repo selbst greifbar — kein Cloud-Ordner, kein Drive:
@@ -112,11 +115,10 @@ Sämtliche Artefakte sind im Repo selbst greifbar — kein Cloud-Ordner, kein Dr
 | Mockups / Skizzen | `docs/mockups/` (siehe [`mockups/README.md`](mockups/README.md)) |
 | Screenshots | `docs/screenshots/` (siehe [`screenshots/README.md`](screenshots/README.md)) |
 | Video-Drehbuch | `docs/video-script.md` |
+| Promptvorgehen / KI-Workflows | `docs/prompts.md` |
 | Datenquelle | `src/lib/realData.ts`, `src/lib/parteiData.ts`, `src/lib/kompass.ts` |
 | Code | `src/` |
 | Deployment-Konfiguration | `svelte.config.js`, `netlify` via Adapter |
-
-> **TODO:** Falls die ZHAW-Übungs-PDFs (Übung 8, 9, 10) ebenfalls Teil der Abgabe sein sollen, im Repo unter `docs/uebungen/` ablegen und hier verlinken.
 
 ## Deployment-Prozess
 
@@ -129,9 +131,9 @@ Sämtliche Artefakte sind im Repo selbst greifbar — kein Cloud-Ordner, kein Dr
   - `USE_MOCK_DATA` — muss für den produktiven MongoDB-Modus exakt auf `false` gesetzt sein; sonst nutzt die App den Seed-/Fallback-Modus.
   - `ADMIN_PASSWORD` — Passwort für den Admin-Bereich.
 - **Aktuelle URL:** <https://friendly-llama-b738d4.netlify.app>
-- **Custom Domain:** noch nicht konfiguriert. **TODO:** Falls gewünscht, in Netlify hinterlegen und in der README ergänzen.
+- **Custom Domain:** keine Custom Domain geplant; die Abgabe verweist auf die Netlify-URL.
 
-Keine geheimen Werte werden im Repository dokumentiert. Für die Abgabe reicht die transparente Beschreibung der Variablen und der Nachweis im Admin-Dashboard, dass der produktive Datenmodus aktiv ist.
+Keine geheimen Werte werden im Repository dokumentiert. Der Admin-Screenshot [`screenshots/13-admin.png`](screenshots/13-admin.png) zeigt den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
 
 ### Datenbank- und CRUD-Nachweis
 
@@ -147,7 +149,7 @@ Die Mindestanforderung «Daten werden aus einer Datenbank geladen und angezeigt;
 | Daten erstellen / aktualisieren | Admin-CRUD für Abstimmungen, Argumente und Parteipositionen; Community-Votes; Interessen-Registrierungen |
 | Persönliche Daten | Stimmen, Notizen, Journal und Kompass-Ergebnis bleiben im Browser-`localStorage` |
 
-Für das Video und die Screenshots sollte mindestens eine Admin-Ansicht sichtbar sein, idealerweise das Dashboard mit Datenbankstatus sowie eine konkrete Bearbeitung einer Abstimmung oder eines Arguments.
+Für Screenshots und Video ist mindestens eine Admin-Ansicht sichtbar: Das Dashboard zeigt Datenbankstatus, verwaltete Abstimmungen, Interessen-Registrierungen und Community-Stimmen. Im Video sollte zusätzlich kurz der Bereich `/admin/abstimmungen` gezeigt werden, um die CRUD-Funktionalität noch direkter sichtbar zu machen.
 
 ### Vorgehen beim Deployen
 
@@ -155,7 +157,7 @@ Für das Video und die Screenshots sollte mindestens eine Admin-Ansicht sichtbar
 2. Commit + Push auf `main`.
 3. Netlify-Dashboard prüfen (Build erfolgreich, Logs sauber, `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt).
 4. Live-URL aufrufen, kritische Routen kurz prüfen (`/`, `/abstimmungen`, `/kompass`, `/profil`, `/admin/login`).
-5. Admin-Dashboard prüfen: Für die finale Abgabe sollte dort MongoDB Atlas beziehungsweise der produktive Datenmodus sichtbar sein.
+5. Admin-Dashboard prüfen: Für die finale Abgabe muss dort MongoDB Atlas beziehungsweise `USE_MOCK_DATA=false` sichtbar sein.
 
 ### Build-Toolchain-Pinning
 

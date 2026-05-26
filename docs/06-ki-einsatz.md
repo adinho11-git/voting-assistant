@@ -8,9 +8,9 @@
 
 | Tool | Anbieter | Hauptzweck im Projekt |
 |---|---|---|
-| **Claude Code / Claude Opus 4.7** | Anthropic | Code-Analyse, Refactoring, Dokumentationsstruktur, UX-Verbesserungen, technische Reviews |
+| **Claude Code** | Anthropic | Code-Analyse, Refactoring, Dokumentationsstruktur, UX-Verbesserungen, technische Reviews |
 | **Codex** | OpenAI | Fokussierte Coding-Tasks, UI- und Workflow-Verbesserungen, Code-Audits, Umsetzung einzelner Features und Fixes |
-| **ChatGPT / GPT-5.5** | OpenAI | Projektstrategie, Bewertungsraster-Interpretation, Prompt-Erstellung, UX-Kritik, Priorisierung und Reflexion |
+| **ChatGPT** | OpenAI | Projektstrategie, Bewertungsraster-Interpretation, Prompt-Erstellung, UX-Kritik, Priorisierung und Reflexion |
 
 Die Werkzeuge wurden jeweils dort eingesetzt, wo sie ihre spezifischen Stärken am besten ausspielen. Die Entscheidung, welches Werkzeug welche Aufgabe übernimmt, lag durchgehend beim Entwickler.
 
@@ -18,7 +18,7 @@ Die Werkzeuge wurden jeweils dort eingesetzt, wo sie ihre spezifischen Stärken 
 
 ## Detaillierter Einsatz pro Tool
 
-### Claude Code / Claude Opus 4.7
+### Claude Code
 
 Eingesetzt für Aufgaben, die ein längeres, zusammenhängendes Verstehen der Codebasis erfordern.
 
@@ -39,7 +39,7 @@ Eingesetzt für klar abgegrenzte Coding-Tasks, bei denen ein schneller, fokussie
 - **Einzelne Features**: Umsetzung von Detail-Funktionalitäten, kleinere Refactorings, Bug-Fixes.
 - **Validierungs-Logik** für Formulare im Admin-Bereich.
 
-### ChatGPT / GPT-5.5
+### ChatGPT
 
 Eingesetzt für strategische und reflexive Aufgaben, ausserhalb der Code-Detailtiefe.
 
@@ -103,11 +103,13 @@ Sämtliche KI-Outputs wurden vor der Übernahme manuell geprüft. Insbesondere:
 
 ---
 
-## Beispiel-Prompts
+## Promptvorgehen
+
+Das Promptvorgehen ist zusätzlich in [`prompts.md`](prompts.md) dokumentiert. Dort sind typische Prompt-Muster, Qualitätsregeln und Beispiele für Claude Code, Codex und ChatGPT zusammengefasst.
 
 Die nachfolgenden Prompts illustrieren den Stil, in dem die Werkzeuge eingesetzt wurden. Sie sind verkürzt wiedergegeben.
 
-### Beispiel 1 — Claude Code / Claude Opus 4.7 (Code-Analyse + Refactoring)
+### Beispiel 1 — Claude Code (Code-Analyse + Refactoring)
 
 > «Analysiere [`src/lib/stores/votes.ts`] und [`src/lib/stores/engagement.ts`]. Beide speichern eine `position`. Wer ist Single Source of Truth? Gibt es eine Stelle, an der diese inkonsistent werden können? Schlage einen Refactoring-Pfad vor, der die App-Logik unverändert lässt.»
 
@@ -115,11 +117,11 @@ Die nachfolgenden Prompts illustrieren den Stil, in dem die Werkzeuge eingesetzt
 
 > «Erstelle eine Svelte-Komponente `ArgumentWeighting.svelte` mit zwei Spalten Pro/Contra. Pro Argument vier Buttons (0–3) für die Gewichtung. Live berechnen: Pro-Score, Contra-Score, Tendenz JA/NEIN/Unsicher. Nutze den Engagement-Store. Setze beim Klick auf «Tendenz speichern» einen Timeline-Eintrag vom Typ `weights`.»
 
-### Beispiel 3 — ChatGPT / GPT-5.5 (Strategie und Priorisierung)
+### Beispiel 3 — ChatGPT (Strategie und Priorisierung)
 
 > «Hier ist das ZHAW-Bewertungsraster [PDF] und der aktuelle Projektstand [Code-Übersicht]. Schätze die aktuelle Punktzahl pro Kriterium und priorisiere die drei wichtigsten Verbesserungen für die bessere Note. Konzentriere dich auf Massnahmen mit hoher Wirkung pro Aufwand.»
 
-### Beispiel 4 — ChatGPT / GPT-5.5 (UX-Kritik)
+### Beispiel 4 — ChatGPT (UX-Kritik)
 
 > «Hier ist die aktuelle Startseite [Quellcode]. Beurteile aus UX-Sicht: Ist der Hero zu lang? Wo verliere ich Erst-Nutzende? Welche Sektion ist redundant zu welcher? Konkrete Vorschläge in priorisierter Reihenfolge.»
 
@@ -127,7 +129,7 @@ Die nachfolgenden Prompts illustrieren den Stil, in dem die Werkzeuge eingesetzt
 
 > «Erstelle eine Doku-Struktur in `docs/` mit Phasen-Dateien `01-understand.md` bis `07-projektorganisation.md`. Pro Datei: klarer Titel, Einleitungssatz, danach strukturierter Inhalt nach dem ZHAW-Bewertungsraster. Verwende deutsche Sprache, keine erfundenen Testergebnisse.»
 
-> **TODO:** Falls eine ausführliche Promptliste gewünscht ist, kann sie in einer eigenen Datei `docs/prompts.md` als tagebuchartiger Auszug der wichtigsten Sessions ergänzt werden.
+Die Beispiele sind bewusst als repräsentative Arbeitsmuster formuliert, nicht als vollständiger Chatverlauf. Entscheidend für die Bewertung ist, dass Einsatzbereiche, Verantwortung, manuelle Prüfung und Grenzen der KI-Nutzung nachvollziehbar dokumentiert sind.
 
 ---
 

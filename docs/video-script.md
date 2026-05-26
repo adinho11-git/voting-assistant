@@ -30,7 +30,7 @@
 | 6 | Partei-Kompass | 3:00 – 3:45 | Zwei bis drei Fragen demonstrieren, Ergebnis öffnen, Themen-Breakdown erklären |
 | 7 | Profil / Voting-Journal | 3:45 – 4:15 | Statistik-Header, Journal-Karten, Übereinstimmung mit Parteien |
 | 8 | Quellen & Medienberichte | 4:15 – 4:35 | Trennung amtlich / Partei / Medien, Filter zeigen |
-| 9 | Admin / Datenstruktur | 4:35 – 4:50 | Login kurz, Dashboard, eine Bearbeitung erwähnen, CSV-Export anteasern |
+| 9 | Admin / Datenstruktur | 4:35 – 4:50 | Dashboard mit MongoDB-Status, CRUD-Bereich und CSV-Export kurz zeigen |
 | 10 | KI-Einsatz und Evaluation | 4:50 – 5:00 | Disclaimer-Ribbon, KI-Transparenz auf Startseite, Verweis auf Doku und Evaluation |
 
 ---
@@ -108,7 +108,7 @@ Der Text ist als Lesefassung gedacht und kann beim Aufnehmen frei angepasst werd
 
 ### 9. Admin / Datenstruktur — 4:35 – 4:50
 
-> «Kurz die technische Tiefe: Ein passwortgeschützter Admin-Bereich erlaubt CRUD auf Abstimmungen, Argumente und Parteipositionen. Das Dashboard zeigt, ob die App im produktiven MongoDB-Atlas-Modus läuft oder im Fallback-Modus. Für die finale Abgabe müssen in Netlify `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt sein.
+> «Kurz die technische Tiefe: Ein passwortgeschützter Admin-Bereich erlaubt CRUD auf Abstimmungen, Argumente und Parteipositionen. Das Dashboard zeigt hier den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
 >
 > Ich kann hier eine Vorlage oder ein Argument bearbeiten und die Änderung anschliessend auf der öffentlichen Detailseite sehen. Zusätzlich werden Community-Stimmen serverseitig aggregiert, und Interessen-Registrierungen lassen sich im Admin-Bereich als CSV exportieren.»
 
@@ -116,7 +116,7 @@ Der Text ist als Lesefassung gedacht und kann beim Aufnehmen frei angepasst werd
 
 > «Der KI-Einsatz ist deklariert: Briefings und Code-Boilerplate sind mit KI-Werkzeugen entstanden, alle Inhalte manuell auf Genauigkeit geprüft. Das ist auf der Startseite und auf der Quellen-Seite sichtbar.
 >
-> Die Usability-Evaluation ist mit anonymisierten Testpersonen geplant. Das vollständige Vorgehen steht im `docs/`-Ordner des Repos. Danke!»
+> Die Usability-Evaluation wurde mit anonymisierten Testpersonen durchgeführt. Fragestellungen, Aufgaben, Beobachtungen, Schweregrade und abgeleitete Verbesserungen sind im `docs/`-Ordner dokumentiert. Danke!»
 
 ---
 
@@ -149,16 +149,16 @@ Der Text ist als Lesefassung gedacht und kann beim Aufnehmen frei angepasst werd
 
 ---
 
-## TODOs
+## Finale Abgabeschritte
 
-- [ ] Drehbuch auf finale App-Stand abgleichen, bevor aufgenommen wird.
+- [x] Drehbuch auf finalen App-Stand abgleichen.
 - [ ] Probelauf machen, Zeit messen, ggf. Sprechertext kürzen.
 - [ ] Aufnahme durchführen.
 - [ ] Schnitt und Export.
 - [ ] Upload und URL ergänzen.
 
 ```
-Video-URL: <noch nicht aufgenommen — wird nach Upload ergänzt>
+Video-URL: <wird nach Upload ergänzt>
 ```
 
 ---
