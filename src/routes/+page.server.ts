@@ -2,7 +2,11 @@ import type { PageServerLoad } from './$types';
 import { getDaysUntil } from '$lib/mockData';
 import { listAbstimmungen } from '$lib/server/dataLayer';
 
-export const load: PageServerLoad = async () => {
+const PUBLIC_CACHE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300';
+
+export const load: PageServerLoad = async ({ setHeaders }) => {
+  setHeaders({ 'cache-control': PUBLIC_CACHE });
+
   const all = await listAbstimmungen();
   const upcoming = all
     .filter((a) => a.status === 'anstehend' && a.type === 'eidgenössisch')
