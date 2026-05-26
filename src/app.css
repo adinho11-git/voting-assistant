@@ -533,6 +533,24 @@ span {
   }
 }
 
+@media (max-width: 767px) {
+  .route-reveal {
+    animation: route-reveal-mobile 140ms ease-out both;
+    will-change: auto;
+  }
+}
+
+@keyframes route-reveal-mobile {
+  from {
+    opacity: 0.96;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .route-reveal {
     animation: none;
@@ -806,6 +824,8 @@ span {
   min-width: 0;
   min-height: 64px;
   overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bottom-nav span {

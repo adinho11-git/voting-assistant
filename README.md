@@ -379,6 +379,40 @@ Die mobile Ansicht zeigt Bottom-Navigation, responsive Layouts und die Nutzbarke
 
 Das Admin-Dashboard dokumentiert Datenpflege, Systemstatus und die technische Grundlage für CRUD-Funktionen. Der Screenshot zeigt den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
 
+### Admin-CRUD: Vorlage bearbeiten
+
+![Admin-Edit Grunddaten](docs/screenshots/14-admin-edit_1.png)
+
+Die Edit-Ansicht im Admin-Bereich zeigt die Grunddaten einer Vorlage — Titel, Kurztitel, Slug, Datum, Kategorie und Lesezeit — und belegt damit den Update-Teil der CRUD-Funktionalität auf der `abstimmungen`-Collection.
+
+![Admin-Edit Argumente](docs/screenshots/14-admin-edit_2.png)
+
+Die Argument-Sektion derselben Edit-Seite ermöglicht das Anlegen, Bearbeiten und Entfernen einzelner Pro- und Contra-Argumente mit Quelle. Damit wird das Erstellen und Aktualisieren von Inhalten in der Datenbank direkt sichtbar.
+
+### Argumentgewichtung mit Bulk-Aktionen
+
+![Argumentgewichtung mit Schnellaktionen](docs/screenshots/15-argument-detail.png)
+
+Detailansicht der Argumentgewichtung mit Schnellaktionen pro Spalte («Pro wichtig setzen», «Pro zurücksetzen» und analog für Contra). Sie ergänzt die einzelne 0–3-Bewertung um eine effiziente Bulk-Bedienung des Gewichtungs-Workflows.
+
+### Parteivergleich
+
+![Parteivergleich](docs/screenshots/16-parteivergleich.png)
+
+Der direkte Parteivergleich stellt zwei Parteien — hier SVP und SP — mit Gründungsdatum, Mitgliederzahl, Links-Rechts-Verortung und Kernthemen gegenüber.
+
+### Positionen-Matrix
+
+![Positionen-Matrix](docs/screenshots/17-matrix.png)
+
+Die Positionen-Matrix bündelt die JA/NEIN-Parolen aller sechs Bundesparteien zu ausgewählten Vorlagen und bietet eine kompakte parteipolitische Orientierung ergänzend zum geführten Workflow.
+
+### Disclaimer-Ribbon
+
+![Disclaimer-Ribbon](docs/screenshots/18-disclaimer.png)
+
+Der dismissbare Disclaimer-Ribbon ist global im Layout eingebunden und kennzeichnet die App auf allen Routen als studentischen Prototyp mit Verweis auf die offiziellen Quellen.
+
 ---
 
 ## Projektdokumentation (`docs/`)

@@ -21,8 +21,9 @@
 | VA-011 | Video-Walkthrough aufnehmen und verlinken | open | high | `documentation` |
 | VA-012 | Finaler Design-Konsistenz-Pass | open | medium | `ux`, `nice-to-have` |
 | VA-013 | Mobile Navigation und Dark Mode final prüfen | done | medium | `ux`, `accessibility` |
-| VA-014 | README und docs für finale Abgabe prüfen | in progress | high | `documentation` |
-| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | in progress | medium | `documentation`, `feature` |
+| VA-014 | README und docs für finale Abgabe prüfen | done | high | `documentation` |
+| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | done | medium | `documentation`, `feature` |
+| VA-016 | Zusatz-Screenshots (CRUD-Edit, Gewichtung, Parteivergleich, Matrix, Disclaimer) ergänzen | done | medium | `documentation` |
 
 ## Labels
 
@@ -393,7 +394,7 @@ Umgesetzt für die Abgabe-Dokumentation. Mobile Ansicht und Dark Mode wurden gep
 ## VA-014 — README und docs für finale Abgabe prüfen
 
 **Labels:** `documentation`
-**Status:** in progress
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -413,14 +414,14 @@ Dokumentation, Projektorganisation: Die Abgabe muss für Bewertende schnell prü
 
 ### Ergebnis / Umsetzungshinweis
 
-In Arbeit. README und mehrere Phasen-Dokumente wurden strukturiert, die finalen Screenshots sind eingebunden. Als letzter Abgabeschritt bleibt der Video-Link zu ergänzen.
+Abgeschlossen. README, Phasen-Dokumente, Issue-Liste und Screenshot-Dokumentation wurden in einem finalen Doku-Audit durchgegangen. Verbleibender Restpunkt ist ausschliesslich der Video-Link, der bewusst erst nach der Aufnahme ergänzt wird (siehe VA-011).
 
 ---
 
 ## VA-015 — Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen
 
 **Labels:** `documentation`, `feature`
-**Status:** in progress
+**Status:** done
 **Priorität:** medium
 
 ### Beschreibung
@@ -440,7 +441,34 @@ Technische Qualität, Daten erstellen/aktualisieren: Der Admin-Bereich zeigt, da
 
 ### Ergebnis / Umsetzungshinweis
 
-Teilweise umgesetzt. Der Admin-Bereich ist in der Dokumentation beschrieben und mit `docs/screenshots/13-admin.png` sichtbar belegt. Das Video sollte zusätzlich kurz `/admin` und idealerweise `/admin/abstimmungen` zeigen, ohne Passwort oder Secrets offenzulegen.
+Abgeschlossen. Der Admin-Bereich ist in [`04-prototype.md`](04-prototype.md) und [`07-projektorganisation.md`](07-projektorganisation.md) beschrieben. Visuell belegen drei Screenshots den CRUD-Stand: das Dashboard mit produktivem MongoDB-Atlas-Modus (`docs/screenshots/13-admin.png`) sowie die Edit-Ansicht einer Vorlage in zwei Teilen — Grunddaten (`docs/screenshots/14-admin-edit_1.png`) und Argument-Sektion mit Hinzufügen/Entfernen (`docs/screenshots/14-admin-edit_2.png`). Das Drehbuch in [`video-script.md`](video-script.md) sieht zusätzlich eine Live-Demo des CRUD-Vorgangs im Video vor; das Video selbst ist bewusst als finaler Abgabeschritt offen (siehe VA-011).
+
+---
+
+## VA-016 — Zusatz-Screenshots ergänzen
+
+**Labels:** `documentation`
+**Status:** done
+**Priorität:** medium
+
+### Beschreibung
+
+Über die 13 Pflicht-Screenshots hinaus sollten weitere Ansichten visuell belegt werden, um den Funktionsumfang vollständiger nachzuweisen: Admin-Edit, erweiterte Argumentgewichtung, Parteivergleich, Positionen-Matrix und der dismissbare Disclaimer-Ribbon.
+
+### Akzeptanzkriterien
+
+- Zusatzscreenshots liegen unter `docs/screenshots/` mit konsistentem Namensschema.
+- Sie zeigen reale App-Zustände, keine Mockup- oder Test-Daten.
+- README, `04-prototype.md` und `docs/screenshots/README.md` referenzieren die neuen Dateien mit Beschreibungen.
+- Keine Secrets oder Passwörter sichtbar.
+
+### Bezug zum Bewertungsraster
+
+Dokumentation & Video, Hohe Qualität im Mindestumfang: Erweiterte Belege stützen die Bewertung in „Vorgehen", „Produkt-Erweiterungen" und „rechtliche Rahmenbedingungen" (Disclaimer).
+
+### Ergebnis / Umsetzungshinweis
+
+Abgeschlossen. Sechs Zusatzscreenshots wurden ergänzt: `14-admin-edit_1.png`, `14-admin-edit_2.png`, `15-argument-detail.png`, `16-parteivergleich.png`, `17-matrix.png`, `18-disclaimer.png`. Sie sind in [`../README.md`](../README.md), [`04-prototype.md`](04-prototype.md) und [`screenshots/README.md`](screenshots/README.md) referenziert.
 
 ---
 

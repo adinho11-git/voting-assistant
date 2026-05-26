@@ -26,7 +26,7 @@
       </span>
     </a>
 
-    <nav class="flex items-center gap-4 lg:gap-7" aria-label="Hauptnavigation">
+    <nav class="flex items-center gap-4 lg:gap-7" aria-label="Hauptnavigation" data-sveltekit-preload-code="viewport">
       {#each links as link}
         <a href={link.href} class="top-nav-link {link.match(path) ? 'active' : ''}">
           {#if link.shortLabel}

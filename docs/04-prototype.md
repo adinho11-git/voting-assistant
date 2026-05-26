@@ -304,6 +304,38 @@ Mobile Ansicht mit Bottom-Navigation und responsive optimiertem Layout.
 
 Admin-Dashboard mit Datenpflege-Einstiegen, Kennzahlen und transparentem Systemstatus. Der Screenshot zeigt den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
 
+### Admin-CRUD im Detail
+
+![Admin-Edit: Grunddaten](screenshots/14-admin-edit_1.png)
+
+Edit-Ansicht einer Vorlage im Admin-Bereich. Titel, Slug, Datum, Kategorie und Lesezeit sind editierbar; gespeichert wird direkt in die Collection `abstimmungen`.
+
+![Admin-Edit: Argumente](screenshots/14-admin-edit_2.png)
+
+Argument-Sektion derselben Edit-Seite. Pro- und Contra-Argumente lassen sich mit Quelle anlegen, bearbeiten und entfernen — das belegt den Create-/Update-/Delete-Teil der CRUD-Funktion sichtbar.
+
+### Erweiterte Argumentgewichtung
+
+![Argumentgewichtung mit Bulk-Aktionen](screenshots/15-argument-detail.png)
+
+Erweiterte Ansicht der Argumentgewichtung. Über die Bulk-Aktionen «Pro wichtig setzen» bzw. «Pro zurücksetzen» (analog für Contra) können Nutzer:innen die 0–3-Bewertung einer ganzen Spalte in einem Schritt anpassen.
+
+### Parteivergleich und Positionen-Matrix
+
+![Parteivergleich A vs. B](screenshots/16-parteivergleich.png)
+
+Direkter Parteivergleich mit Eckdaten, Gründungsdatum, Mitgliederzahl, Links-Rechts-Skala und Kernthemen.
+
+![Positionen-Matrix](screenshots/17-matrix.png)
+
+Positionen-Matrix der sechs Bundesparteien zu ausgewählten Vorlagen mit JA/NEIN-Parolen auf einen Blick.
+
+### Disclaimer-Ribbon
+
+![Disclaimer-Ribbon](screenshots/18-disclaimer.png)
+
+Global eingebundener Disclaimer-Ribbon mit Quellenverweis und Dismiss-Button. Der Status wird nutzerspezifisch in `localStorage` unter `disclaimer_dismissed_v1` gespeichert.
+
 ---
 
 **Nächste Phase:** [`05-validate.md`](05-validate.md) — Evaluationsplan, Durchführung, Auswertung.

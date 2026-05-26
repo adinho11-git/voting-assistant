@@ -208,7 +208,7 @@ Maßnahmen, die direkt aus der Evaluation hervorgegangen sind, mit Status zum ak
 | Quellen prominenter zeigen | U5 | Mittel | **Umgesetzt** | Quellen pro Argument inline, eigene Quellen- und Medienberichte-Seite; final mit Screenshot `docs/screenshots/10-quellen.png` dokumentiert |
 | Parteienraster und Parteikürzel klarer | U4 | Mittel | **Teilweise umgesetzt** | Parteien-Detailseiten ergänzt; Tooltip mit Volltext beim Hover steht offen |
 | Allgemeiner Design-Konsistenz-Pass (Workflow-Schritte vereinheitlichen, Hero straffen, Spektrum-Visualisierung im Kompass) | U9 | Mittel | **Offen / in Planung** | Im Repo dokumentiert in [`07-projektorganisation.md`](07-projektorganisation.md) |
-| Finalen Abgabestand visuell dokumentieren | Dokumentation | Mittel | **Umgesetzt** | Die finalen Screenshots liegen unter [`screenshots/`](screenshots/README.md) und werden in README sowie `04-prototype.md` referenziert |
+| Finalen Abgabestand visuell dokumentieren | Dokumentation | Mittel | **Umgesetzt** | Pflicht- und Zusatzscreenshots liegen unter [`screenshots/`](screenshots/README.md). Pflichtbestand `01-startseite.png` bis `13-admin.png`; ergänzend belegen `14-admin-edit_1.png`/`14-admin-edit_2.png` den CRUD-Vorgang, `16-parteivergleich.png` und `17-matrix.png` den Parteienbereich sowie `18-disclaimer.png` die rechtlich-ethische Kennzeichnung |
 
 ---
 
