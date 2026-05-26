@@ -39,7 +39,12 @@
 
 </script>
 
-<nav class="bottom-nav md:hidden" aria-label="Mobile Navigation" data-sveltekit-preload-code="viewport">
+<nav
+  class="bottom-nav md:hidden"
+  aria-label="Mobile Navigation"
+  data-sveltekit-preload-code="viewport"
+  data-sveltekit-preload-data="tap"
+>
   <div class="bottom-nav-theme" aria-label="Darstellung">
     <ThemeToggle />
   </div>
