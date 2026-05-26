@@ -22,7 +22,7 @@
 | VA-012 | Finaler Design-Konsistenz-Pass | open | medium | `ux`, `nice-to-have` |
 | VA-013 | Mobile Navigation und Dark Mode final prüfen | done | medium | `ux`, `accessibility` |
 | VA-014 | README und docs für finale Abgabe prüfen | done | high | `documentation` |
-| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | done | medium | `documentation`, `feature` |
+| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | in progress | medium | `documentation`, `feature` |
 | VA-016 | Zusatz-Screenshots (CRUD-Edit, Gewichtung, Parteivergleich, Matrix, Disclaimer) ergänzen | done | medium | `documentation` |
 
 ## Labels
@@ -421,7 +421,7 @@ Abgeschlossen. README, Phasen-Dokumente, Issue-Liste und Screenshot-Dokumentatio
 ## VA-015 — Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen
 
 **Labels:** `documentation`, `feature`
-**Status:** done
+**Status:** in progress
 **Priorität:** medium
 
 ### Beschreibung
@@ -441,7 +441,7 @@ Technische Qualität, Daten erstellen/aktualisieren: Der Admin-Bereich zeigt, da
 
 ### Ergebnis / Umsetzungshinweis
 
-Abgeschlossen. Der Admin-Bereich ist in [`04-prototype.md`](04-prototype.md) und [`07-projektorganisation.md`](07-projektorganisation.md) beschrieben. Visuell belegen drei Screenshots den CRUD-Stand: das Dashboard mit produktivem MongoDB-Atlas-Modus (`docs/screenshots/13-admin.png`) sowie die Edit-Ansicht einer Vorlage in zwei Teilen — Grunddaten (`docs/screenshots/14-admin-edit_1.png`) und Argument-Sektion mit Hinzufügen/Entfernen (`docs/screenshots/14-admin-edit_2.png`). Das Drehbuch in [`video-script.md`](video-script.md) sieht zusätzlich eine Live-Demo des CRUD-Vorgangs im Video vor; das Video selbst ist bewusst als finaler Abgabeschritt offen (siehe VA-011).
+Teilweise abgeschlossen. Der Admin-Bereich ist in [`04-prototype.md`](04-prototype.md) und [`07-projektorganisation.md`](07-projektorganisation.md) beschrieben. Visuell belegen drei Screenshots den CRUD-Stand: das Dashboard mit produktivem MongoDB-Atlas-Modus (`docs/screenshots/13-admin.png`) sowie die Edit-Ansicht einer Vorlage in zwei Teilen — Grunddaten (`docs/screenshots/14-admin-edit_1.png`) und Argument-Sektion mit Hinzufügen/Entfernen (`docs/screenshots/14-admin-edit_2.png`). Das Drehbuch in [`video-script.md`](video-script.md) sieht zusätzlich eine Live-Demo des CRUD-Vorgangs im Video vor. Der Status wird erst auf `done` gesetzt, wenn das finale Video aufgenommen, verlinkt und der Admin-/CRUD-Abschnitt darin sichtbar ist.
 
 ---
 

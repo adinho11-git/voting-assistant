@@ -3,8 +3,6 @@
   import ThemeToggle from './ThemeToggle.svelte';
 
   $: path = $page.url.pathname;
-  let pendingHref: string | null = null;
-  let pendingTimer: ReturnType<typeof setTimeout> | undefined;
 
   const tabs = [
     {
@@ -39,30 +37,9 @@
     }
   ];
 
-  $: if (pendingHref && (path === pendingHref || path.startsWith(`${pendingHref}/`))) {
-    pendingHref = null;
-  }
-
-  function markPending(href: string): void {
-    if (href === path) return;
-    pendingHref = href;
-    if (pendingTimer) clearTimeout(pendingTimer);
-    pendingTimer = setTimeout(() => {
-      pendingHref = null;
-    }, 900);
-  }
-
-  function isActive(tab: (typeof tabs)[number]): boolean {
-    return pendingHref === tab.href || (!pendingHref && tab.active(path));
-  }
 </script>
 
-<nav
-  class="bottom-nav md:hidden"
-  aria-label="Mobile Navigation"
-  data-sveltekit-preload-code="viewport"
-  data-sveltekit-preload-data="tap"
->
+<nav class="bottom-nav md:hidden" aria-label="Mobile Navigation">
   <div class="bottom-nav-theme" aria-label="Darstellung">
     <ThemeToggle />
   </div>
@@ -71,9 +48,8 @@
     {#each tabs as tab}
       <a
         href={tab.href}
-        class="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors {isActive(tab) ? 'text-brand' : 'text-ink-muted'}"
+        class="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors {tab.active(path) ? 'text-brand' : 'text-ink-muted'}"
         aria-current={tab.active(path) ? 'page' : undefined}
-        on:pointerdown={() => markPending(tab.href)}
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
           {@html tab.icon}

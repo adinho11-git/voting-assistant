@@ -20,7 +20,7 @@
 </svelte:head>
 
 <!-- HERO -->
-<section class="container-app home-hero pt-8 md:pt-14 pb-8 md:pb-12" data-sveltekit-preload-code="viewport">
+<section class="container-app home-hero pt-8 md:pt-14 pb-8 md:pb-12">
   <div class="hero-swiss-backdrop" aria-hidden="true">
     <SwissPartyMap variant="hero" id="hero" />
   </div>

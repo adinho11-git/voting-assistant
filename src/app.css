@@ -516,36 +516,16 @@ span {
 }
 
 .route-reveal {
-  animation: route-reveal 520ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
-  will-change: transform, opacity;
+  animation: route-reveal 150ms ease-out both;
+  will-change: auto;
 }
 
 @keyframes route-reveal {
   0% {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  58% {
-    opacity: 1;
+    opacity: 0.98;
+    transform: translateY(3px);
   }
   100% {
-    transform: translateY(0);
-  }
-}
-
-@media (max-width: 767px) {
-  .route-reveal {
-    animation: route-reveal-mobile 140ms ease-out both;
-    will-change: auto;
-  }
-}
-
-@keyframes route-reveal-mobile {
-  from {
-    opacity: 0.96;
-    transform: translateY(4px);
-  }
-  to {
     opacity: 1;
     transform: translateY(0);
   }
