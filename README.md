@@ -498,7 +498,7 @@ Kurzüberblick:
 
 ## Bekannte Grenzen und Future Work
 
-- **Inhalts-Scope:** Aktuell fokussiert auf eidgenössische Abstimmungen. Kantonale und kommunale Vorlagen sind nur exemplarisch als Demo enthalten.
+- **Inhalts-Scope:** Aktuell fokussiert auf eidgenössische Abstimmungen. Kantonale und kommunale Vorlagen sind nicht Bestandteil des finalen Datenbestands.
 - **Server-State:** Persönliche Stimmen sind bewusst nicht synchronisierbar (Datenschutz-Trade-off). Gerätewechsel verliert das Journal. Ein optionaler Export wäre ein sinnvoller nächster Schritt.
 - **Live-News-API:** Medienberichte sind eine kuratierte Auswahl, keine dynamische Anbindung.
 - **Tests:** Aktuell keine automatisierten Tests. Ein E2E-Smoke-Test für den Kern-Workflow ist als Future-Work-Punkt dokumentiert.

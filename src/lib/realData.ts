@@ -935,68 +935,11 @@ export const realAbstimmungen: Abstimmung[] = [
 ];
 
 // ============================================================
-// KANTONALE DEMO-VORLAGEN (Zürich)
-// Klar gelabelt als Demo-Inhalt für Prototyp-Zwecke
-// ============================================================
-export const cantonalDemoAbstimmungen: Abstimmung[] = [
-  {
-    id: 'zh-demo-mobilitaet-2026',
-    slug: 'zh-demo-mobilitaet-2026',
-    title: 'Demo: Kantonale Volksinitiative «Mobilität fair finanzieren» (Zürich)',
-    shortTitle: 'ZH Mobilitäts-Initiative',
-    date: '2026-09-27',
-    type: 'kantonal',
-    kanton: 'ZH',
-    category: 'Verkehr · Kantonal',
-    readTime: 2,
-    status: 'anstehend',
-    dataQuality: 'demo',
-    bundesratPosition: 'NEIN',
-    parlamentPosition: 'NEIN',
-    parlamentStimmen: { ja: 60, nein: 110 },
-    parlamentNote: 'DEMO-INHALT: Vorlage wurde für Prototyp-Zwecke konstruiert.',
-    aiSummary:
-      'DEMO-INHALT (illustrativ, nicht real): Eine fiktive kantonale Initiative würde Strassen- und ÖV-Investitionen im Kanton Zürich zu gleichen Teilen verteilen und eine Mobility-Abgabe für Vielfahrer einführen. Dieser Eintrag dient zur Veranschaulichung der Kantonalebene im Prototyp.',
-    summarySource: 'PROTOTYP-Demo',
-    summarySourceUrl: 'https://friendly-llama-b738d4.netlify.app/quellen',
-    summaryLastChecked: TODAY,
-    proArguments: [
-      {
-        id: 'zh-d-pro-1',
-        text: 'DEMO: Faire Verteilung der Verkehrsmittel-Investitionen',
-        source: 'PROTOTYP',
-        sourceUrl: 'https://friendly-llama-b738d4.netlify.app/quellen',
-        sourceDate: TODAY,
-        detail: 'DEMO-INHALT: Illustrativer Pro-Punkt für die Veranschaulichung kantonaler Themen im Prototyp.'
-      }
-    ],
-    contraArguments: [
-      {
-        id: 'zh-d-con-1',
-        text: 'DEMO: Zusatzabgaben belasten Pendler',
-        source: 'PROTOTYP',
-        sourceUrl: 'https://friendly-llama-b738d4.netlify.app/quellen',
-        sourceDate: TODAY,
-        detail: 'DEMO-INHALT: Illustrativer Contra-Punkt für die Veranschaulichung kantonaler Themen im Prototyp.'
-      }
-    ],
-    parteien: [
-      { kuerzel: 'SP', name: 'Sozialdemokratische Partei', position: 'JA', statement: '«DEMO: Fairer ÖV-Ausbau.»', color: '#E11D48' },
-      { kuerzel: 'GP', name: 'Grüne Partei', position: 'JA', statement: '«DEMO: Mobilitätswende stärken.»', color: '#16A34A' },
-      { kuerzel: 'GLP', name: 'Grünliberale', position: 'JA', statement: '«DEMO: Verursacherprinzip.»', color: '#0D9488' },
-      { kuerzel: 'Mitte', name: 'Die Mitte', position: 'NEIN', statement: '«DEMO: Belastet Pendler zu stark.»', color: '#EA580C' },
-      { kuerzel: 'FDP', name: 'FDP. Die Liberalen', position: 'NEIN', statement: '«DEMO: Neue Abgaben ablehnen.»', color: '#2563EB' },
-      { kuerzel: 'SVP', name: 'Schweizerische Volkspartei', position: 'NEIN', statement: '«DEMO: Strassenausbau hat Priorität.»', color: '#15803D' }
-    ]
-  }
-];
-
-// ============================================================
 // HELPER FUNCTIONS
 // ============================================================
 
 export function getAbstimmungBySlug(slug: string): Abstimmung | undefined {
-  return [...realAbstimmungen, ...cantonalDemoAbstimmungen].find((a) => a.slug === slug);
+  return realAbstimmungen.find((a) => a.slug === slug);
 }
 
 export function getArgumentById(slug: string, id: string) {

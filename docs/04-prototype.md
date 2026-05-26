@@ -144,7 +144,7 @@ interface Partei {
 }
 ```
 
-Strukturierte Schweizer Abstimmungsdaten sind in [`src/lib/realData.ts`](../src/lib/realData.ts) typsicher gepflegt (2 anstehende + 11 vergangene + 1 kantonale Demo-Vorlage, Stand: 23. Mai 2026). Parteien-Profile in [`src/lib/parteiData.ts`](../src/lib/parteiData.ts), Kompass-Fragen und -Algorithmus in [`src/lib/kompass.ts`](../src/lib/kompass.ts).
+Strukturierte Schweizer Abstimmungsdaten sind in [`src/lib/realData.ts`](../src/lib/realData.ts) typsicher gepflegt (2 anstehende + 11 vergangene eidgenössische Vorlagen, Stand: 23. Mai 2026). Parteien-Profile in [`src/lib/parteiData.ts`](../src/lib/parteiData.ts), Kompass-Fragen und -Algorithmus in [`src/lib/kompass.ts`](../src/lib/kompass.ts).
 
 ### Stores (Client-State)
 
