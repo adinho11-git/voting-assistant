@@ -38,13 +38,8 @@
     result: CantonResult;
   };
 
-  const clipId = `swiss-shape-${id}`;
   const shadowId = `swiss-shadow-${id}`;
   const redId = `swiss-red-${id}`;
-
-  // Stylized emblem for the fixed hero background.
-  const swissPath =
-    'M74 325 L96 303 L88 281 L116 270 L108 252 L132 241 L146 219 L170 216 L181 190 L208 186 L221 162 L250 155 L262 131 L293 140 L305 112 L337 119 L356 91 L384 106 L410 94 L436 108 L465 85 L495 96 L525 83 L554 111 L585 103 L607 122 L642 116 L665 138 L693 146 L708 174 L736 182 L754 208 L731 229 L772 244 L763 270 L737 276 L725 306 L691 305 L672 332 L694 358 L658 366 L634 349 L610 372 L588 365 L568 398 L539 392 L518 370 L498 391 L479 420 L448 410 L430 383 L403 392 L372 382 L352 357 L325 363 L301 343 L275 359 L245 344 L233 315 L202 316 L180 338 L152 324 L123 341 L103 332 Z';
 
   const topology = topoJson as unknown as Topology;
   const viewBox = { x: 90, y: 0, width: 790, height: 500 };
@@ -236,12 +231,8 @@
 
 {#if variant === 'hero'}
   <div class="swiss-party-map hero" aria-hidden="true">
-    <svg class="swiss-map-svg" viewBox="0 0 860 500">
+    <svg class="swiss-map-svg" viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}>
       <defs>
-        <clipPath id={clipId}>
-          <path d={swissPath} />
-        </clipPath>
-
         <filter id={shadowId} x="-20%" y="-20%" width="140%" height="150%">
           <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#000000" flood-opacity="0.24" />
           <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000000" flood-opacity="0.16" />
@@ -254,22 +245,24 @@
         </linearGradient>
       </defs>
 
-      <g class="map-depth" filter={`url(#${shadowId})`}>
-        <path class="depth-layer deep" d={swissPath} transform="translate(0 22)" />
-        <path class="depth-layer mid" d={swissPath} transform="translate(0 12)" />
-        <path class="map-top" d={swissPath} fill={`url(#${redId})`} />
+      <g class="hero-map-depth" filter={`url(#${shadowId})`}>
+        {#each cantons as canton}
+          <path class="hero-depth deep" d={canton.path} transform="translate(0 22)" />
+        {/each}
+        {#each cantons as canton}
+          <path class="hero-depth mid" d={canton.path} transform="translate(0 12)" />
+        {/each}
       </g>
 
-      <g clip-path={`url(#${clipId})`} class="map-surface">
-        <rect x="50" y="58" width="735" height="390" fill={`url(#${redId})`} />
-        <path class="flag-gloss" d="M82 304 C210 188 374 132 552 121 C642 116 718 148 776 230 L776 58 L50 58 L50 342 C60 326 70 314 82 304 Z" />
-        <g class="swiss-cross" transform="translate(420 238) rotate(-10)">
-          <rect x="-104" y="-30" width="208" height="60" rx="2" />
-          <rect x="-30" y="-104" width="60" height="208" rx="2" />
+      <g class="hero-map-top">
+        {#each cantons as canton}
+          <path class="hero-canton" d={canton.path} fill={`url(#${redId})`} />
+        {/each}
+        <g class="swiss-cross" transform="translate(486 248) rotate(-12)">
+          <rect x="-92" y="-27" width="184" height="54" rx="2" />
+          <rect x="-27" y="-92" width="54" height="184" rx="2" />
         </g>
       </g>
-
-      <path class="map-outline" d={swissPath} />
     </svg>
   </div>
 {:else}
@@ -387,32 +380,26 @@
     transform-origin: 52% 55%;
   }
 
-  .map-top {
-    stroke: color-mix(in srgb, #ffffff 24%, #7a0610);
-    stroke-width: 1.5;
-    vector-effect: non-scaling-stroke;
+  .hero-map-depth,
+  .hero-map-top {
+    transform-origin: 50% 55%;
   }
 
-  .depth-layer.deep {
+  .hero-depth.deep {
     fill: #7f0711;
     opacity: 0.44;
   }
 
-  .depth-layer.mid {
+  .hero-depth.mid {
     fill: color-mix(in srgb, var(--brand) 58%, #2a1010);
     opacity: 0.56;
   }
 
-  .map-outline {
-    fill: none;
-    stroke: color-mix(in srgb, #ffffff 26%, #7f0711);
-    stroke-width: 1.8;
+  .hero-canton {
+    stroke: color-mix(in srgb, #ff372f 82%, #980812);
+    stroke-width: 1.1;
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
-  }
-
-  .flag-gloss {
-    fill: rgba(255, 255, 255, 0.2);
   }
 
   .swiss-cross rect {
