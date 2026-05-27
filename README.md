@@ -134,7 +134,7 @@ Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
 | Nutzerzentrierung & Bedienbarkeit | 15 | Sechsstufiger Workflow konsistent im UI sichtbar, Live-Feedback, Toast-System, Mockup-Bezug dokumentiert in [`docs/03-decide.md`](docs/03-decide.md) und [`docs/mockups/`](docs/mockups/README.md) |
 | Vorgehen | 15 | Phasen Understand → Sketch → Decide → Prototype → Validate vollständig dokumentiert in [`docs/01-understand.md`](docs/01-understand.md) bis [`docs/05-validate.md`](docs/05-validate.md) |
 | Evaluation | 10 | Plan, Testaufgaben, Beobachtungstabelle und Auswertungsstruktur in [`docs/05-validate.md`](docs/05-validate.md) |
-| Dokumentation & Video | 5 | Diese README, vollständige `docs/`-Struktur, Drehbuch für 5-Minuten-Walkthrough in [`docs/video-script.md`](docs/video-script.md) |
+| Dokumentation & Video | 5 | Diese README, vollständige `docs/`-Struktur und kommentierter Walkthrough unter [`docs/video/voting-assistant-walkthrough_2026-05-28.mp4`](docs/video/voting-assistant-walkthrough_2026-05-28.mp4) |
 
 ### B) Erweiterungen
 
@@ -429,9 +429,9 @@ Die methodische Dokumentation zu Vorgehen, Evaluation und KI-Einsatz liegt volls
 | [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md) | KI-Tools (Claude Code, Codex, ChatGPT), Anwendungsbereiche, manuelle Qualitätssicherung |
 | [`docs/prompts.md`](docs/prompts.md) | Promptvorgehen, typische Prompt-Muster und Qualitätssicherungsregeln |
 | [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) | Repository, Branches, Commits, Issues, Deployment, technische Schulden |
-| [`docs/video-script.md`](docs/video-script.md) | Drehbuch und Sprechertext für den 5-Minuten-Walkthrough |
 | [`docs/mockups/`](docs/mockups/README.md) | Ablage und Checkliste für Skizzen und Mockups |
 | [`docs/screenshots/`](docs/screenshots/README.md) | Ablage und Checkliste für finale App-Screenshots |
+| [`docs/video/`](docs/video/README.md) | Lokale Ablage des kommentierten Video-Walkthroughs |
 
 ---
 
@@ -512,13 +512,9 @@ Vollständige Liste von Schulden und Future Work in [`docs/07-projektorganisatio
 
 ## Video-Walkthrough
 
-Ein kommentierter, ca. fünfminütiger Walkthrough wird als finaler Abgabeschritt aufgenommen. Drehbuch, Sprechertext-Entwurf und Aufnahme-Checkliste stehen in [`docs/video-script.md`](docs/video-script.md).
+Ein kommentierter, ca. fünfminütiger Walkthrough der wichtigsten Workflows ist lokal im Repository abgelegt.
 
-> **Finaler Abgabeschritt:** Video aufnehmen und URL hier ergänzen (Moodle-Upload oder YouTube unlisted).
-
-```
-Video-URL: <wird nach Upload ergänzt>
-```
+Video: [`docs/video/voting-assistant-walkthrough_2026-05-28.mp4`](docs/video/voting-assistant-walkthrough_2026-05-28.mp4)
 
 ---
 

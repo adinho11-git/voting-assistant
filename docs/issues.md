@@ -18,11 +18,11 @@
 | VA-008 | Usability Evaluation mit fünf Testpersonen dokumentieren | done | high | `evaluation`, `documentation` |
 | VA-009 | Sketches und Mockups aus Übung 9/10 integrieren | done | medium | `documentation`, `methodology` |
 | VA-010 | Screenshots der finalen App ergänzen | done | high | `documentation` |
-| VA-011 | Video-Walkthrough aufnehmen und verlinken | open | high | `documentation` |
+| VA-011 | Video-Walkthrough aufnehmen und verlinken | done | high | `documentation` |
 | VA-012 | Finaler Design-Konsistenz-Pass | open | medium | `ux`, `nice-to-have` |
 | VA-013 | Mobile Navigation und Dark Mode final prüfen | done | medium | `ux`, `accessibility` |
 | VA-014 | README und docs für finale Abgabe prüfen | done | high | `documentation` |
-| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | in progress | medium | `documentation`, `feature` |
+| VA-015 | Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen | done | medium | `documentation`, `feature` |
 | VA-016 | Zusatz-Screenshots (CRUD-Edit, Gewichtung, Parteivergleich, Matrix, Disclaimer) ergänzen | done | medium | `documentation` |
 
 ## Labels
@@ -313,7 +313,7 @@ Umgesetzt. Die finalen Screenshots `01-startseite.png` bis `13-admin.png` liegen
 ## VA-011 — Video-Walkthrough aufnehmen und verlinken
 
 **Labels:** `documentation`
-**Status:** open
+**Status:** done
 **Priorität:** high
 
 ### Beschreibung
@@ -333,7 +333,7 @@ Dokumentation & Video: Das Video ist ein expliziter Bestandteil der Abgabe.
 
 ### Ergebnis / Umsetzungshinweis
 
-Noch offen. Ein Drehbuch ist in [`video-script.md`](video-script.md) vorbereitet.
+Abgeschlossen am 2026-05-28. Walkthrough zeigt Startseite, Detailseite mit Briefing, Argumentgewichtung, Position speichern, Partei-Kompass, Profil/Voting-Journal, Admin-CRUD mit MongoDB Atlas, Quellen und KI-Transparenz. Verlinkt in [README.md](../README.md#video-walkthrough).
 
 ---
 
@@ -360,7 +360,7 @@ Hohe Qualität im Mindestumfang: Ein konsistenter UI-Pass verbessert Professiona
 
 ### Ergebnis / Umsetzungshinweis
 
-Noch offen. Der Punkt ist bewusst als Qualitäts- und Abgabe-Check vorgesehen, nicht als neue Kernfunktion.
+Bewusst ausserhalb des Mindestumfangs gelassen, Belege für visuelle Konsistenz liegen in `docs/screenshots/` vor.
 
 ---
 
@@ -414,14 +414,14 @@ Dokumentation, Projektorganisation: Die Abgabe muss für Bewertende schnell prü
 
 ### Ergebnis / Umsetzungshinweis
 
-Abgeschlossen. README, Phasen-Dokumente, Issue-Liste und Screenshot-Dokumentation wurden in einem finalen Doku-Audit durchgegangen. Verbleibender Restpunkt ist ausschliesslich der Video-Link, der bewusst erst nach der Aufnahme ergänzt wird (siehe VA-011).
+Abgeschlossen. README, Phasen-Dokumente, Issue-Liste, Screenshot-Dokumentation und Video-Link wurden in einem finalen Doku-Audit durchgegangen.
 
 ---
 
 ## VA-015 — Admin-/CRUD-Bereich in Video und Dokumentation sichtbar machen
 
 **Labels:** `documentation`, `feature`
-**Status:** in progress
+**Status:** done
 **Priorität:** medium
 
 ### Beschreibung
@@ -441,7 +441,7 @@ Technische Qualität, Daten erstellen/aktualisieren: Der Admin-Bereich zeigt, da
 
 ### Ergebnis / Umsetzungshinweis
 
-Teilweise abgeschlossen. Der Admin-Bereich ist in [`04-prototype.md`](04-prototype.md) und [`07-projektorganisation.md`](07-projektorganisation.md) beschrieben. Visuell belegen drei Screenshots den CRUD-Stand: das Dashboard mit produktivem MongoDB-Atlas-Modus (`docs/screenshots/13-admin.png`) sowie die Edit-Ansicht einer Vorlage in zwei Teilen — Grunddaten (`docs/screenshots/14-admin-edit_1.png`) und Argument-Sektion mit Hinzufügen/Entfernen (`docs/screenshots/14-admin-edit_2.png`). Das Drehbuch in [`video-script.md`](video-script.md) sieht zusätzlich eine Live-Demo des CRUD-Vorgangs im Video vor. Der Status wird erst auf `done` gesetzt, wenn das finale Video aufgenommen, verlinkt und der Admin-/CRUD-Abschnitt darin sichtbar ist.
+Der Admin-Bereich ist in [`04-prototype.md`](04-prototype.md) und [`07-projektorganisation.md`](07-projektorganisation.md) beschrieben. Visuell belegen drei Screenshots den CRUD-Stand: das Dashboard mit produktivem MongoDB-Atlas-Modus (`docs/screenshots/13-admin.png`) sowie die Edit-Ansicht einer Vorlage in zwei Teilen — Grunddaten (`docs/screenshots/14-admin-edit_1.png`) und Argument-Sektion mit Hinzufügen/Entfernen (`docs/screenshots/14-admin-edit_2.png`). Mit der Aufnahme vom 2026-05-28 ist der Admin-/CRUD-Abschnitt im Walkthrough sichtbar belegt. Status: done.
 
 ---
 

@@ -30,9 +30,9 @@ voting-assistant/
 │   ├── 05-validate.md
 │   ├── 06-ki-einsatz.md
 │   ├── 07-projektorganisation.md
-│   ├── video-script.md
 │   ├── mockups/                 # Skizzen / Wireframes / Figma-Exports
-│   └── screenshots/             # Finale App-Screenshots
+│   ├── screenshots/             # Finale App-Screenshots
+│   └── video/                   # Kommentierter Walkthrough
 ├── README.md                    # Einstiegspunkt im Repo
 ├── package.json
 ├── svelte.config.js
@@ -65,7 +65,7 @@ Die Historie zeigt sowohl Feature-Arbeit als auch Dokumentations-, Deployment- u
 
 ## Issue-Management
 
-Das Issue-Set liegt in [`issues.md`](issues.md). Es enthält 15 realistische Issues aus dem Projektverlauf mit Status, Priorität, Label-Vorschlägen, Akzeptanzkriterien, Bewertungsraster-Bezug und Umsetzungshinweisen.
+Das Issue-Set liegt in [`issues.md`](issues.md). Es enthält 16 realistische Issues aus dem Projektverlauf mit Status, Priorität, Label-Vorschlägen, Akzeptanzkriterien, Bewertungsraster-Bezug und Umsetzungshinweisen.
 
 Für die Abgabe ist diese Datei die verlässliche, versionierte Issue-Dokumentation im Repository. Die Einträge können zusätzlich im GitHub-Issue-Board gespiegelt werden; massgebend für die Projektdokumentation bleibt jedoch der Stand in [`issues.md`](issues.md), weil er direkt mit README, Phasen-Dokumentation, Screenshots und Video verlinkt ist.
 
@@ -114,7 +114,7 @@ Sämtliche Artefakte sind im Repo selbst greifbar — kein Cloud-Ordner, kein Dr
 | Phasen-Dokumentation | `docs/01-…` bis `docs/07-…` |
 | Mockups / Skizzen | `docs/mockups/` (siehe [`mockups/README.md`](mockups/README.md)) |
 | Screenshots | `docs/screenshots/` (siehe [`screenshots/README.md`](screenshots/README.md)) |
-| Video-Drehbuch | `docs/video-script.md` |
+| Video-Walkthrough | `docs/video/voting-assistant-walkthrough_2026-05-28.mp4` |
 | Promptvorgehen / KI-Workflows | `docs/prompts.md` |
 | Datenquelle | `src/lib/realData.ts`, `src/lib/parteiData.ts`, `src/lib/kompass.ts` |
 | Code | `src/` |
@@ -149,7 +149,7 @@ Die Mindestanforderung «Daten werden aus einer Datenbank geladen und angezeigt;
 | Daten erstellen / aktualisieren | Admin-CRUD für Abstimmungen, Argumente und Parteipositionen; Community-Votes; Interessen-Registrierungen |
 | Persönliche Daten | Stimmen, Notizen, Journal und Kompass-Ergebnis bleiben im Browser-`localStorage` |
 
-Für Screenshots und Video ist mindestens eine Admin-Ansicht sichtbar: Das Dashboard zeigt Datenbankstatus, verwaltete Abstimmungen, Interessen-Registrierungen und Community-Stimmen. Im Video sollte zusätzlich kurz der Bereich `/admin/abstimmungen` gezeigt werden, um die CRUD-Funktionalität noch direkter sichtbar zu machen.
+Für Screenshots und Video ist mindestens eine Admin-Ansicht sichtbar: Das Dashboard zeigt Datenbankstatus, verwaltete Abstimmungen, Interessen-Registrierungen und Community-Stimmen. Der Walkthrough zeigt zusätzlich den Admin-/CRUD-Bereich, um die CRUD-Funktionalität noch direkter sichtbar zu machen.
 
 ### Vorgehen beim Deployen
 

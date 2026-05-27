@@ -221,7 +221,7 @@ CRUD-Funktionen:
 | Interessen exportieren | `/api/admin/interessen.csv` | CSV aus `parteiInteressen` |
 | Persönliche Position / Notiz ändern | Detailseite und Profil | Update im Browser-`localStorage` |
 
-Für die Bewertung sollte im Video explizit gezeigt werden: Admin-Login, Dashboard mit MongoDB-Status, Bearbeiten einer Vorlage oder eines Arguments, sichtbare Änderung auf der öffentlichen Seite sowie ein Community-Vote mit aggregierter Anzeige.
+Im Walkthrough werden für die Bewertung explizit sichtbar gemacht: Admin-Login, Dashboard mit MongoDB-Status, Bearbeiten einer Vorlage oder eines Arguments, sichtbare Änderung auf der öffentlichen Seite sowie ein Community-Vote mit aggregierter Anzeige.
 
 ## Interaktivität — Highlights
 
