@@ -71,7 +71,7 @@ Beispiel:
 
 ```markdown
 ### Startseite
-![Startseite](docs/screenshots/01-startseite.png)
+![Startseite](01-startseite.png)
 Die Startseite zeigt den Countdown zur kommenden eidgenössischen Abstimmung, die anstehenden Vorlagen und die Workflow-Erklärung.
 ```
 

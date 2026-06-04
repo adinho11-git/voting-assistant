@@ -287,7 +287,7 @@ npm run check      # svelte-check / Type-Check
 
 ### Admin-Login
 
-Aufruf unter `/admin/login`. Login mit dem in `.env` gesetzten `ADMIN_PASSWORD`. Im Mock-Modus dient als Fallback ein Demo-Passwort, das ausschliesslich für den lokalen Prototyp gedacht ist und nicht in Produktion verwendet werden sollte.
+Aufruf unter `/admin/login`. Login mit dem in `.env` beziehungsweise in Netlify gesetzten `ADMIN_PASSWORD`. Es gibt keinen getrackten Demo-Fallback; ohne gesetzte Variable bleibt der Admin-Bereich bewusst gesperrt.
 
 ---
 

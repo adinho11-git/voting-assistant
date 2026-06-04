@@ -5,9 +5,9 @@ const ADMIN_COOKIE = 'admin_session';
 
 export const handle: Handle = async ({ event, resolve }) => {
   const { url, cookies } = event;
-  const expectedPwd = env.ADMIN_PASSWORD ?? 'zhaw2026admin';
+  const expectedPwd = env.ADMIN_PASSWORD;
   const sessionCookie = cookies.get(ADMIN_COOKIE);
-  const isAuthed = sessionCookie === expectedPwd;
+  const isAuthed = Boolean(expectedPwd) && sessionCookie === expectedPwd;
   event.locals.adminAuthed = isAuthed;
 
   const path = url.pathname;
