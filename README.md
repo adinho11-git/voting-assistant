@@ -1,538 +1,247 @@
-# Voting Assistant
+# Projektdokumentation – Voting Assistant
 
-> Interaktiver politischer Orientierungsassistent für Schweizer Abstimmungen und Parteien.
-> Studentischer Prototyp im Modul **Prototyping** (ZHAW, FS 2026) — **keine offizielle Abstimmungshilfe.**
+## Inhaltsverzeichnis
 
-[![Live](https://img.shields.io/badge/Live-friendly--llama--b738d4.netlify.app-C8102E)](https://friendly-llama-b738d4.netlify.app)
-[![GitHub](https://img.shields.io/badge/GitHub-adinho11--git%2Fvoting--assistant-333)](https://github.com/adinho11-git/voting-assistant)
-[![Stack](https://img.shields.io/badge/Stack-SvelteKit%202%20·%20TypeScript%20·%20MongoDB%20·%20Tailwind-003087)](#tech-stack)
-[![Data](https://img.shields.io/badge/Daten-admin.ch-065F46)](https://abstimmungen.admin.ch/)
+1. [Ausgangslage](#1-ausgangslage)
+2. [Lösungsidee](#2-lösungsidee)
+3. [Vorgehen & Artefakte](#3-vorgehen--artefakte)
+    1. [Understand & Define](#31-understand--define)
+    2. [Sketch](#32-sketch)
+    3. [Decide](#33-decide)
+    4. [Prototype](#34-prototype)
+    5. [Validate](#35-validate)
+4. [Erweiterungen [Optional]](#4-erweiterungen-optional)
+5. [Projektorganisation [Optional]](#5-projektorganisation-optional)
+6. [KI-Deklaration](#6-ki-deklaration)
+7. [Anhang [Optional]](#7-anhang-optional)
 
----
+> **Hinweis:** Massgeblich sind die im **Unterricht** und auf **Moodle** kommunizierten Anforderungen.
 
-## Inhalt
+<!-- WICHTIG: DIE KAPITELSTRUKTUR DARF NICHT VERÄNDERT WERDEN! -->
 
-1. [Projektüberblick](#projektüberblick)
-2. [Zielgruppe und Problem](#zielgruppe-und-problem)
-3. [Wichtigste User-Workflows](#wichtigste-user-workflows)
-4. [Features](#features)
-5. [Bezug zum Bewertungsraster](#bezug-zum-bewertungsraster)
-6. [Sketches, Mockups und Prototyping-Artefakte](#sketches-mockups-und-prototyping-artefakte)
-7. [Tech Stack](#tech-stack)
-8. [Architektur und Datenüberblick](#architektur-und-datenüberblick)
-9. [Setup und Installation](#setup-und-installation)
-10. [Deployment](#deployment)
-11. [Screenshots](#screenshots)
-12. [Projektdokumentation (`docs/`)](#projektdokumentation-docs)
-13. [Evaluation](#evaluation)
-14. [KI-Einsatz](#ki-einsatz)
-15. [Rechtliche und ethische Hinweise](#rechtliche-und-ethische-hinweise)
-16. [Bekannte Grenzen und Future Work](#bekannte-grenzen-und-future-work)
-17. [Video-Walkthrough](#video-walkthrough)
-18. [Projektkontext](#projektkontext)
+<!-- Diese README folgt der Moodle-Vorlage. Vertiefende Details bleiben in den verlinkten docs-Dateien versioniert. -->
 
----
+## 1. Ausgangslage
 
-## Projektüberblick
+- **Problem:** Schweizer Stimmberechtigte müssen vor eidgenössischen Abstimmungen viele Quellen einordnen: Abstimmungsbüchlein, admin.ch, Komitee-Texte, Parteiparolen, Medienberichte und Social Media. Diese Informationsmenge ist oft asymmetrisch, zeitintensiv und schwer in eine eigene, später nachvollziehbare Position zu übersetzen. Besonders problematisch sind fehlende Quellen-Transparenz, zu wenig Reflexionsunterstützung und der Eindruck von Black-Box-Empfehlungen bei politischen Quiz-Tools. Herleitung und Persona sind in [docs/01-understand.md](docs/01-understand.md) dokumentiert.
+- **Ziele:** Der Voting Assistant soll Stimmberechtigte neutral und quellenbasiert durch einen strukturierten Entscheidungsprozess führen, ohne eine politische Empfehlung auszusprechen. Die App soll Pro- und Contra-Argumente vergleichbar machen, persönliche Gewichtungen ermöglichen, eigene Positionen lokal speichern, Quellen sichtbar machen und über Admin-/CRUD-Funktionen eine realistische Datenpflege demonstrieren. Zusätzlich soll der Prototyp methodisch nachvollziehbar dokumentiert, evaluiert, online verfügbar und mit Screenshots sowie Video belegbar sein.
+- **Primäre Zielgruppe:** Stimmberechtigte in der Deutschschweiz, insbesondere Erst- und Gelegenheitswählende sowie digital affine Personen, die vor einer Abstimmung in wenigen Minuten einen strukturierten Einstieg suchen. Die Persona «Lea, 27, Berufseinsteigerin, Zürich» steht für Nutzer:innen mit mittlerem politischem Vorwissen, wenig Zeit und dem Wunsch nach neutralem Überblick, Quellenbezug und persönlicher Notiz.
+- **Weitere Stakeholder [Optional]:** Bewertende im Modul Prototyping, Mitstudierende in der Evaluation, Stimmberechtigte als potenzielle Nutzer:innen, amtliche Quellen wie admin.ch/bk.admin.ch als Referenzquellen sowie Parteien und Medien als klar gekennzeichnete Informationsquellen. Die App ist ein studentischer Prototyp und keine offizielle Abstimmungshilfe.
 
-Der **Voting Assistant** ist eine SvelteKit-Webanwendung, die Stimmberechtigte in der Schweiz vor jeder eidgenössischen Abstimmung durch einen klaren Sechs-Schritte-Workflow führt:
+## 2. Lösungsidee
 
-> **Verstehen → Abwägen → Gewichten → Einordnen → Entscheiden → Speichern**
+- **Kernfunktionalität:** Der Prototyp ist eine SvelteKit-Web-App für eidgenössische Abstimmungen vom 14. Juni 2026. Der Hauptworkflow führt Nutzer:innen pro Vorlage durch **Verstehen → Abwägen → Gewichten → Einordnen → Entscheiden → Speichern**. Ergänzend gibt es einen Partei-Kompass mit 18 Szenario-Fragen, ein Profil/Voting-Journal, Parteienübersicht und Parteivergleich, eine Quellen- und Medienberichte-Seite sowie einen passwortgeschützten Admin-Bereich zur Datenpflege. Die wichtigsten Workflows sind in [docs/04-prototype.md](docs/04-prototype.md) beschrieben.
+- **Annahmen [Optional]:** Der Prototyp prüft unter anderem, ob ein sechsstufiger Workflow als Hilfe verstanden wird, ob eine 0-3-Gewichtung pro Argument ausreichend klar ist, ob eine Live-Tendenz als Reflexion statt als Empfehlung gelesen wird, ob lokale Speicherung politisch sensibler persönlicher Daten akzeptiert wird und ob die Trennung amtlich / Parteien / Medien die Quellen-Einordnung verbessert. Die Annahmen A1-A6 sind in [docs/01-understand.md](docs/01-understand.md) aufgeführt.
+- **Abgrenzung [Optional]:** Die App ist keine offizielle Abstimmungshilfe, keine Wahlempfehlung, keine wissenschaftliche Wahlstudie, keine Live-News-Plattform und kein Produktivsystem mit Nutzerkonten. Persönliche Stimmen, Notizen, Bookmarks, Kompass-Ergebnisse und Argumentgewichtungen bleiben im Browser-`localStorage`. Der Admin-Bereich ist als prototypische Datenpflege umgesetzt; für ein Produktivsystem wären Rollen, Hashing und ein Session-Store nötig. Diese Abgrenzungen sind in [docs/03-decide.md](docs/03-decide.md), [docs/04-prototype.md](docs/04-prototype.md) und [docs/07-projektorganisation.md](docs/07-projektorganisation.md) dokumentiert.
 
-Statt nur Informationen aufzubereiten oder eine fertige Wahlempfehlung zu liefern, ermöglicht die App den Nutzer:innen, **selbstständig** Argumente zu gewichten, eine eigene Position mit Sicherheit und Notiz festzuhalten und im **persönlichen Voting-Journal** zu dokumentieren. Alle persönlichen Daten bleiben lokal im Browser.
+## 3. Vorgehen & Artefakte
 
-Ergänzt wird der Hauptworkflow durch einen **Partei-Kompass** mit 18 Szenario-Fragen, einen **Parteienbereich** mit Vergleich und Positionen-Matrix sowie eine **Quellen- und Medienberichte-Seite**, die amtliche Grundlagen, Parteiquellen und journalistische Einordnungen sauber trennt.
+Die Projektdokumentation folgt den Phasen **Understand & Define**, **Sketch**, **Decide**, **Prototype** und **Validate**. Die Detaildokumente liegen unter [docs/](docs/) und sind als vertiefende Belege zu dieser README gedacht.
 
----
+### 3.1 Understand & Define
 
-## Zielgruppe und Problem
+- **Zielgruppenverständnis:** In der ersten Phase wurden Problemraum, Zielgruppe, Persona, Bedürfnisse, Annahmen und Risiken politischer Inhalte beschrieben. Die primäre Persona ist «Lea, 27, Berufseinsteigerin, Zürich»: mobil unterwegs, politisch interessiert, aber unter Zeitdruck und mit dem Wunsch nach neutraler, quellenbasierter Übersicht. Dokumentiert in [docs/01-understand.md](docs/01-understand.md).
+- **Wesentliche Erkenntnisse:**
+  - Nutzer:innen brauchen einen schnellen, neutralen Einstieg pro Vorlage.
+  - Pro und Contra müssen gleichwertig sichtbar sein.
+  - Quellen müssen direkt am Argument und auf einer eigenen Quellen-Seite auffindbar sein.
+  - Persönliche politische Daten sind sensibel und sollen ohne Konto lokal bleiben.
+  - Die App darf keine Wahlempfehlung geben, sondern nur eigene Eingaben spiegeln.
+  - Bei politischen Inhalten sind Disclaimer, Quellenstand, KI-Transparenz und vorsichtige Sprache Teil der UX, nicht nachträgliche Ergänzungen.
 
-### Problem
+### 3.2 Sketch
 
-Vor jeder eidgenössischen Abstimmung in der Schweiz konkurrieren Bundesbüchlein, Komitee-Kampagnen, Parteiparolen, Medienberichte und Social-Media-Beiträge um Aufmerksamkeit. Die Folge:
+- **Variantenüberblick:** In der Sketch-Phase wurden fünf Produktvarianten geprüft: reine Info-Website, Voting-Assistent mit Argumentgewichtung, Partei-Kompass, Voting-Journal-First sowie Quellen- und Medien-Aggregator. Variante B wurde als Kern gewählt, ergänzt durch C, D und E. Die Begründung steht in [docs/02-sketch.md](docs/02-sketch.md).
+- **Skizzen:** Die Originalartefakte liegen unter [docs/mockups/](docs/mockups/README.md). [docs/mockups/Uebung9_Abgabe_Adi_Lama.pdf](docs/mockups/Uebung9_Abgabe_Adi_Lama.pdf) dokumentiert Crazy-8s, acht Varianten des Abstimmungs-Briefing-Screens, Dot-Voting, Peer-Feedback und eine Happy-Path-Skizze. Besonders prägend waren der Split Screen Pro/Contra, das Parteien-Meinungsraster und der Wunsch nach sichtbarer Quellen-Transparenz.
 
-- **Informations-Überlastung** bei begrenzter Zeit.
-- **Asymmetrische Quellen** (Komitee-Texte sind einseitig, News-Aggregatoren ordnen Argumente selten Pro/Contra-strukturiert).
-- **Fehlende Reflexionsstütze**: Wer wenige Wochen nach der Abstimmung gefragt wird, warum so gestimmt wurde, kann die eigenen Gründe oft nicht mehr rekonstruieren.
-- **Black-Box-Effekt** bei bestehenden Quiz-Apps: Wahlempfehlungen wirken algorithmisch, der Berechnungsweg ist nicht immer offen.
+### 3.3 Decide
 
-### Zielgruppe
+- **Gewählte Variante & Begründung:** Entschieden wurde ein interaktiver Voting-Assistent mit Argumentgewichtung als Kern, ergänzt um Partei-Kompass, Voting-Journal und Quellen-Seite. Die Entscheidung erfolgte anhand von Zielgruppenmehrwert, Mindestumfang, Risiko politischer Inhalte und realistischer Umsetzbarkeit. Die MoSCoW-Priorisierung unterscheidet Must-have, Should-have, Could-have und bewusst ausgeschlossene Won't-have-Features. Beleg: [docs/03-decide.md](docs/03-decide.md).
+- **End-to-End-Ablauf:** Die folgende Tabelle ist die User Journey Map in tabellarischer Form (**Schritt → Nutzerziel → Touchpoint → Schmerzpunkt / Bedürfnis → Beleg**) und verbindet Persona-Bedürfnisse aus [docs/01-understand.md](docs/01-understand.md) mit den im Prototyp umgesetzten Touchpoints.
 
-Stimmberechtigte in der Schweiz, die sich strukturiert eine eigene Meinung bilden möchten — insbesondere:
+| Journey-Schritt | Nutzerziel | Touchpoint im Prototyp | Schmerzpunkt / Bedürfnis | Beleg |
+|---|---|---|---|---|
+| 1. Einstieg | Verstehen, wofür die App da ist | `/` Startseite mit Countdown, Disclaimer, CTAs und Workflow-Erklärung | Reizüberflutung reduzieren, schneller neutraler Einstieg | [Screenshot 01](docs/screenshots/01-startseite.png), [docs/04-prototype.md](docs/04-prototype.md) |
+| 2. Vorlage wählen | Anstehende oder vergangene Vorlage finden | `/abstimmungen` mit Tabs, Suche, Filter und Karten | Begrenzte Zeit, Bedarf nach übersichtlicher Auswahl | [Screenshot 02](docs/screenshots/02-abstimmungen.png) |
+| 3. Vorlage verstehen | Briefing, Bundesrat-/Parlamentsposition und Quellenstand prüfen | `/abstimmungen/[slug]` | Neutrale Zusammenfassung statt verstreuter Einzelquellen | [Screenshot 03](docs/screenshots/03-detail-briefing.png) |
+| 4. Argumente abwägen | Pro/Contra lesen, vertiefen und Quellen prüfen | Detailseite und `/abstimmungen/[slug]/argumente/[id]` | Beide Seiten gleich sichtbar, Quellen direkt prüfbar | [Screenshot 04](docs/screenshots/04-gewichtung.png), [Screenshot 15](docs/screenshots/15-argument-detail.png) |
+| 5. Argumente gewichten | Eigene Prioritäten setzen und Live-Tendenz verstehen | `ArgumentWeighting.svelte` auf der Detailseite | Eigene Gewichtung statt fremder Wahlempfehlung | [src/lib/components/ArgumentWeighting.svelte](src/lib/components/ArgumentWeighting.svelte) |
+| 6. Politisch einordnen | Parteipositionen und Kompass-Ergebnis als Orientierung nutzen | `/parteien`, `/abstimmungen/[slug]/parteien`, `/kompass` | Black-Box-Risiko politischer Quiz-Tools vermeiden | [Screenshot 05](docs/screenshots/05-kompass-frage.png), [Screenshot 06](docs/screenshots/06-kompass-ergebnis.png), [Screenshot 16](docs/screenshots/16-parteivergleich.png), [Screenshot 17](docs/screenshots/17-matrix.png) |
+| 7. Entscheiden und speichern | Position, Sicherheit und Notiz festhalten | `VoteSection` und lokales Voting-Journal | Eigene Gründe dokumentieren, ohne Konto-Zwang | [docs/04-prototype.md](docs/04-prototype.md) |
+| 8. Wiederfinden und reflektieren | Gespeicherte Positionen, Notizen und Aktivitäten prüfen | `/profil` | Später nachvollziehen, warum eine Position gewählt wurde | [Screenshot 07](docs/screenshots/07-profil.png) |
+| 9. Transparenz prüfen | Quellen, Medienberichte und KI-Methodik einordnen | `/quellen` | Vertrauen durch Trennung amtlich / Parteien / Medien / KI | [Screenshot 10](docs/screenshots/10-quellen.png) |
+| 10. Daten pflegen | Inhalte administrativ erstellen, ändern oder löschen | `/admin/*` | Politische Inhalte veralten und müssen aktualisierbar bleiben | [Screenshot 13](docs/screenshots/13-admin.png), [Screenshot 14a](docs/screenshots/14-admin-edit_1.png), [Screenshot 14b](docs/screenshots/14-admin-edit_2.png) |
 
-- **Erst- und Gelegenheitswählende**, die einen verständlichen Einstieg brauchen.
-- **Politisch interessierte Personen**, die mehrere Quellen kompakt vergleichen möchten.
-- **Mobile-First-Nutzer:innen**, die sich kurz vor der Abstimmung unterwegs informieren.
+- **Mockup:** Das Referenz-Mockup aus [docs/mockups/Uebung10_Abgabe_Adi_Lama.pdf](docs/mockups/Uebung10_Abgabe_Adi_Lama.pdf) war ein Mobile-First-Figma-Prototyp mit Home, Abstimmungsliste, Briefing, Argument-Detail, Parteipositionen sowie Quellen & FAQ. Eine separate externe Figma-URL ist im Repository und in [docs/mockups/README.md](docs/mockups/README.md) nicht dokumentiert; belegbar sind die PDF-Artefakte im Repo. Die Übertragung vom Mockup in den finalen Prototyp ist in [docs/03-decide.md](docs/03-decide.md), [docs/04-prototype.md](docs/04-prototype.md) und [docs/mockups/README.md](docs/mockups/README.md) beschrieben.
 
-Eine ausführliche Persona-Beschreibung findet sich in [`docs/01-understand.md`](docs/01-understand.md).
+### 3.4 Prototype
 
----
+#### 3.4.1. Entwurf (Design)
 
-## Wichtigste User-Workflows
+> **Hinweis:** Hier wird der **Prototyp** beschrieben, nicht das **Mockup**.
 
-| # | Workflow | Schritte |
-|---|---|---|
-| 1 | **Abstimmung verstehen und Position speichern** | Startseite → Übersicht → Detailseite → Briefing lesen → Pro/Contra prüfen → Position mit Sicherheit und Notiz speichern |
-| 2 | **Argumente gewichten** | Detailseite → Abschnitt «Abwägen» → pro Argument 0–3 Punkte → Live-Tendenz beobachten → gewichtete Tendenz ins Journal übernehmen |
-| 3 | **Partei-Kompass absolvieren** | Bottom-Nav / Top-Nav «Kompass» → 18 Fragen beantworten (überspringbar) → Ranking + Themen-Breakdown ansehen → Ergebnis lokal speichern |
-| 4 | **Profil / Voting-Journal nutzen** | Profil → Statistiken, Kompass-Ergebnis, Merkliste, Partei-Übereinstimmung aus eigenen Stimmen, Aktivitäten-Timeline |
-| 5 | **Quellen prüfen** | Quellen & Medienberichte → amtliche Quellen, Parteiquellen, Medienberichte (filterbar) → direkter Sprung zur Originalquelle |
-| 6 | **Daten pflegen (Admin)** | `/admin/login` → Dashboard → Abstimmungen / Argumente / Parteipositionen pflegen, Interessen-Registrierungen als CSV exportieren |
+- **Informationsarchitektur:** Die App besteht aus öffentlichen Routen für Startseite, Abstimmungen, Detailseiten, Argument-Detail, Parteipositionen, Parteien, Partei-Kompass, Profil/Voting-Journal und Quellen. Der Admin-Bereich ist getrennt und passwortgeschützt. Mobile Navigation erfolgt über BottomNav, Desktop über TopNav. Die vollständige Seitenstruktur ist in [docs/04-prototype.md](docs/04-prototype.md) tabellarisch dokumentiert.
+- **User Interface Design:** Das Interface arbeitet mit ruhiger Informationsdichte, klaren Cards, sichtbaren Quellen, Data-Quality-Badges, Dark Mode, Toasts, Skip-Link, ARIA-Labels, `focus-visible` und `prefers-reduced-motion`. Die Sprache vermeidet politische Empfehlungen und nutzt Begriffe wie «Tendenz», «Orientierung» und «Nähe».
+- **Designentscheidungen:** Mobile First wurde aus dem Mockup übernommen, aber für Desktop mit TopNav, breiteren Containern und dichterer Darstellung erweitert. Pro/Contra werden gleichwertig gestaltet, persönliche Daten werden lokal gespeichert und die studentische Prototyp-Natur ist über den Disclaimer-Ribbon sichtbar. VA-012 («Finaler Design-Konsistenz-Pass») bleibt als offener Nice-to-have-Punkt dokumentiert, weil kein eigener abschliessender Design-Pass als Artefakt belegt ist ([docs/issues.md](docs/issues.md)).
 
-Detaillierte Beschreibung der Workflows mit konkreten Code-Referenzen in [`docs/04-prototype.md`](docs/04-prototype.md).
-
----
-
-## Features
-
-### Hauptbereich (öffentlich)
-
-| Bereich | Inhalt |
+| Screenshot | Zweck |
 |---|---|
-| **Startseite** | Hauptnutzen, Countdown zur nächsten Abstimmung, anstehende Vorlagen, Workflow-Erklärung, Methodik, vergangene Resultate, FAQ, KI-Transparenz |
-| **Abstimmungsübersicht** | Tabs «Anstehend» / «Vergangen», Suche, Filter, Resultats-Karten mit Stimmbeteiligung |
-| **Detailseite** | Geführter Entscheidungs-Assistent über fünf Sektionen (Überblick, Argumente, Parteien, Meine Position, Quellen) |
-| **Argument-Detail** | Erweiterte Erklärung pro Argument mit Originalquelle und Datum |
-| **Parteienübersicht** | 6 Bundesparteien (SP, GP, GLP, Mitte, FDP, SVP) mit Filter (Links/Mitte/Rechts), Spektrums-Visualisierung |
-| **Parteivergleich** | Zwei Parteien direkt nebeneinander mit Eckdaten und Slogan |
-| **Positionen-Matrix** | Alle sechs Parteien × ausgewählte Vorlagen — JA/NEIN auf einen Blick |
-| **Parteidetailseite** | Profil, Kernthemen, Spektrum 2D (Links-Rechts / Wirtschaft-Umwelt), Positionen zu aktuellen Vorlagen |
-| **Partei-Kompass** | 18 realistische Schweizer Szenario-Fragen aus 10 Themenbereichen, 5-Stufen-Skala, überspringbar, Ranking + Themen-Breakdown + transparente Erklärung der Berechnung |
-| **Profil / Voting-Journal** | Stimm-Historie, Kompass-Ergebnis, automatisch berechnete Partei-Übereinstimmung aus den eigenen Stimmen, Aktivitäten-Timeline |
-| **Quellen & Medienberichte** | Getrennte Auflistung amtlicher Quellen, Parteiquellen, Medienartikel mit Filter, expliziter Methodik-Hinweis |
-
-### Admin-Bereich (passwortgeschützt)
-
-| Bereich | Inhalt |
-|---|---|
-| **Dashboard** | System-Status (Mock-Modus / MongoDB Atlas), Zähler für Vorlagen / Interessen / Community-Votes |
-| **Vorlagen-CRUD** | Anlegen, Bearbeiten, Löschen; Argumente Pro/Contra hinzufügen oder entfernen; Parteipositionen pflegen |
-| **Interessen-Registrierungen** | Eingegangene Anfragen einsehen, CSV-Export mit UTF-8-BOM (Excel-kompatibel) |
-| **Community-Stimmen** | Aggregierte JA/NEIN-Statistik pro Vorlage |
-
-### Foundations
-
-- **Dark Mode** mit Theme-Persistenz (`localStorage`) und FOUC-freier Initialisierung.
-- **Disclaimer-Ribbon** (dismissbar) kennzeichnet die App als studentischen Prototyp.
-- **Datenqualitäts-Badges** (`official` / `official-pending` / `demo`) auf jeder Vorlage.
-- **Toast-Notifications** für alle Speicher-Aktionen.
-- **Accessibility**: Skip-Link, ARIA-Labels, `focus-visible`, `prefers-reduced-motion`.
-- **Responsive**: Top-Nav (Desktop) und Bottom-Nav (Mobile) ohne horizontalen Overflow.
-- **SEO**: pro Seite Title und Description, Canonical-URLs, OG-Tags.
-
----
-
-## Bezug zum Bewertungsraster
-
-Die Tabelle zeigt, wo im Repo welches Kriterium belegt ist.
-
-### A) Mindestumfang
-
-| Kriterium | Punkte | Beleg im Projekt |
-|---|---|---|
-| Kernfunktionalität & technische Qualität | 15 | Mehrere Pages und Workflows, MongoDB mit In-Memory-Fallback, Admin-CRUD, strukturiertes Datenmodell in [`src/lib/types.ts`](src/lib/types.ts) |
-| Nutzerzentrierung & Bedienbarkeit | 15 | Sechsstufiger Workflow konsistent im UI sichtbar, Live-Feedback, Toast-System, Mockup-Bezug dokumentiert in [`docs/03-decide.md`](docs/03-decide.md) und [`docs/mockups/`](docs/mockups/README.md) |
-| Vorgehen | 15 | Phasen Understand → Sketch → Decide → Prototype → Validate vollständig dokumentiert in [`docs/01-understand.md`](docs/01-understand.md) bis [`docs/05-validate.md`](docs/05-validate.md) |
-| Evaluation | 10 | Plan, Testaufgaben, Beobachtungstabelle und Auswertungsstruktur in [`docs/05-validate.md`](docs/05-validate.md) |
-| Dokumentation & Video | 5 | Diese README, vollständige `docs/`-Struktur und kommentierter Walkthrough unter [`docs/video/voting-assistant-walkthrough_2026-05-28.mp4`](docs/video/voting-assistant-walkthrough_2026-05-28.mp4) |
-
-### B) Erweiterungen
-
-| Kriterium | Punkte | Beleg im Projekt |
-|---|---|---|
-| Hohe Qualität im Mindestumfang | 10 | Robuste Code-Struktur, TypeScript strict, Accessibility, Dark Mode, Mobile-First |
-| Produkt-/Funktions-Erweiterungen | 15 | Partei-Kompass, Argument-Gewichtung, Voting-Journal mit Activity-Timeline, Parteienvergleich, Positionen-Matrix, Community-Votes, CSV-Export, MongoDB-Anbindung, SwissPartyMap |
-| Zusätzliche Methoden / Artefakte | 10 | Persona, Crazy-8s, Dot-Voting, Figma-Wireframe, MoSCoW-Priorisierung, Mockup-Phase, Variantenvergleich, KI-Einsatz-Reflexion, technische Schulden mit Massnahmen — siehe [`docs/02-sketch.md`](docs/02-sketch.md), [`docs/03-decide.md`](docs/03-decide.md), [`docs/mockups/`](docs/mockups/README.md), [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) |
-| Projektorganisation | 5 | Repo-Struktur, Branch- und Commit-Strategie, Issue-Vorschläge, Deployment-Prozess, Artefakt-Ablage — siehe [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) |
-
-### Mindestanforderungen
-
-| Anforderung | Stand |
-|---|---|
-| SvelteKit-App | ✅ |
-| Online zugängliche App | ✅ Netlify-Deployment |
-| GitHub-Repository mit Code und Dokumentation | ✅ |
-| Mehrere Pages und Workflows | ✅ 19+ Routen |
-| Daten aus Datenquelle | ✅ MongoDB Atlas bei `MONGODB_URI` + `USE_MOCK_DATA=false`, mit Seed-/Fallback-Datenmodus |
-| Daten erstellen / aktualisieren | ✅ Admin-CRUD, Community-Votes, Interessen-Registrierungen und lokale persönliche Daten |
-| Evaluation mit Auswertung | ✅ Qualitative Evaluation mit P1–P5, Feedback Grid, Schweregrad-Skala, Auswertung und abgeleiteten Verbesserungen in [`docs/05-validate.md`](docs/05-validate.md) |
-| Rechtliche Rahmenbedingungen | ✅ Quellen verlinkt, Disclaimer, keine personenbezogene Server-Speicherung |
-| KI-Einsatz transparent | ✅ Doku in [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md), In-App-Transparenz auf Start- und Quellen-Seite |
-
----
-
-## Sketches, Mockups und Prototyping-Artefakte
-
-Die frühen Sketch- und Mockup-Artefakte sind unter [`docs/mockups/`](docs/mockups/README.md) abgelegt und in den Phasen-Dokumenten eingeordnet:
-
-- [`docs/02-sketch.md`](docs/02-sketch.md) dokumentiert Crazy-8s, acht Varianten des Briefing-Screens, Dot-Voting, Peer-Feedback und die Entscheidung für Split Screen Pro/Contra mit Parteienraster und Quellen-Transparenz.
-- [`docs/03-decide.md`](docs/03-decide.md) erklärt, wie der Mobile-First-Figma-Wireframe aus Übung 10 in eine responsive SvelteKit-Web-App übersetzt und erweitert wurde.
-- [`docs/04-prototype.md`](docs/04-prototype.md) zeigt tabellarisch, welche Mockup-Elemente im finalen Prototyp erkennbar umgesetzt und welche Funktionen später ergänzt wurden.
-
-Der finale Prototyp entstand damit nachvollziehbar aus **Crazy-8s → Dot-Voting → Figma-Wireframe → Evaluation → iterativer SvelteKit-Umsetzung**. Das Bewertungsraster-Kriterium, dass ein Mockup verwendet wurde und in UI beziehungsweise Flows erkennbar ist, wird durch diese Artefakte und die dokumentierte Überleitung erfüllt. Gleichzeitig ist die finale App keine 1:1-Kopie des Mockups, sondern eine erweiterte Web-App mit zusätzlichen Workflows wie Argumentgewichtung, Partei-Kompass und Voting-Journal.
-
----
-
-## Tech Stack
-
-| Bereich | Technologie |
-|---|---|
-| Framework | SvelteKit 2 (`@sveltejs/kit 2.5.28`) |
-| UI-Bibliothek | Svelte 4 (`4.2.20`) |
-| Sprache | TypeScript 5.4 (strict) |
-| Styling | Tailwind CSS 3.4 + eigenes CSS-Variablen-Token-System in [`src/app.css`](src/app.css) |
-| Datenbank | MongoDB 6.6 (Atlas) mit In-Memory-Fallback |
-| Hosting | Netlify (`@sveltejs/adapter-netlify 4.4.2`) |
-| Auth | Cookie-basiert in [`src/hooks.server.ts`](src/hooks.server.ts) |
-| Entwicklung | Vite, `svelte-check`, VS Code |
-
----
-
-## Architektur und Datenüberblick
-
-```
-voting-assistant/
-├── src/
-│   ├── app.css                  # Token-System + Dark Mode + Global Styles
-│   ├── app.html                 # FOUC-freie Theme-Initialisierung
-│   ├── hooks.server.ts          # Admin-Auth via Cookie
-│   ├── lib/
-│   │   ├── realData.ts          # Kuratierte Schweizer Abstimmungsdaten (admin.ch)
-│   │   ├── parteiData.ts        # 6 Bundesparteien mit Spektrums-Werten
-│   │   ├── kompass.ts           # Kompass-Fragen + Matching-Algorithmus
-│   │   ├── types.ts             # Zentrales Type-System
-│   │   ├── components/          # Wiederverwendbare UI-Komponenten (17+)
-│   │   ├── stores/              # votes, engagement, theme, toast, kompass
-│   │   └── server/              # DB-Abstraktion, dataLayer, In-Memory-Stores
-│   └── routes/
-│       ├── +page.svelte         # Startseite
-│       ├── abstimmungen/        # Übersicht + Detail + Argumente + Parteien
-│       ├── parteien/            # Übersicht + Detail
-│       ├── kompass/             # Partei-Kompass
-│       ├── profil/              # Voting-Journal
-│       ├── quellen/             # Quellen & Medienberichte
-│       ├── admin/               # CRUD, geschützt
-│       └── api/                 # Server-Endpoints (Voting, Interessen, CSV)
-├── docs/                        # Projekt-Dokumentation (Phasen, Mockups, Screenshots, Video)
-├── static/                      # Favicon u.a.
-└── scripts/seed.mjs             # Optionaler MongoDB-Seed
-```
+| [01-startseite.png](docs/screenshots/01-startseite.png) | Einstieg, Countdown, CTAs, Workflow-Erklärung |
+| [02-abstimmungen.png](docs/screenshots/02-abstimmungen.png) | Abstimmungsübersicht mit Suche, Tabs und Karten |
+| [03-detail-briefing.png](docs/screenshots/03-detail-briefing.png) | Briefing und Metadaten einer Vorlage |
+| [04-gewichtung.png](docs/screenshots/04-gewichtung.png) | Argumentgewichtung mit Live-Tendenz |
+| [05-kompass-frage.png](docs/screenshots/05-kompass-frage.png) | Kompass-Frage mit 5-Stufen-Skala |
+| [06-kompass-ergebnis.png](docs/screenshots/06-kompass-ergebnis.png) | Kompass-Ergebnis mit Ranking und Themen-Breakdown |
+| [07-profil.png](docs/screenshots/07-profil.png) | Profil und Voting-Journal |
+| [08-parteien.png](docs/screenshots/08-parteien.png) | Parteienübersicht |
+| [09-parteidetail.png](docs/screenshots/09-parteidetail.png) | Parteiprofil mit Kernthemen und Positionen |
+| [10-quellen.png](docs/screenshots/10-quellen.png) | Quellen und Medienberichte |
+| [11-darkmode.png](docs/screenshots/11-darkmode.png) | Dark Mode |
+| [12-mobile.png](docs/screenshots/12-mobile.png) | Mobile Ansicht mit BottomNav |
+| [13-admin.png](docs/screenshots/13-admin.png) | Admin-Dashboard mit Systemstatus |
+| [14-admin-edit_1.png](docs/screenshots/14-admin-edit_1.png) | Admin-Edit Grunddaten |
+| [14-admin-edit_2.png](docs/screenshots/14-admin-edit_2.png) | Admin-Edit Argumente |
+| [15-argument-detail.png](docs/screenshots/15-argument-detail.png) | Erweiterte Gewichtung mit Bulk-Aktionen |
+| [16-parteivergleich.png](docs/screenshots/16-parteivergleich.png) | Parteivergleich |
+| [17-matrix.png](docs/screenshots/17-matrix.png) | Positionen-Matrix |
+| [18-disclaimer.png](docs/screenshots/18-disclaimer.png) | Disclaimer-Ribbon |
+
+#### 3.4.2. Umsetzung (Technik)
+
+- **Technologie-Stack:** SvelteKit 2.5.28, Svelte 4.2.20, TypeScript 5.4 strict, Tailwind CSS 3.4, MongoDB 6.6, `@sveltejs/adapter-netlify` 4.4.2. Beleg: [package.json](package.json).
+- **Tooling:** VS Code, Vite, `svelte-check`, Netlify Deployment, optionales MongoDB-Seed-Script [scripts/seed.mjs](scripts/seed.mjs). Der KI-Einsatz wird separat in Kapitel 6 deklariert.
+- **Struktur & Komponenten:** Routen liegen unter [src/routes/](src/routes/), wiederverwendbare Komponenten unter [src/lib/components/](src/lib/components/), Stores unter [src/lib/stores/](src/lib/stores/) und Server-Utilities unter [src/lib/server/](src/lib/server/). Wichtige Komponenten sind [VotingAssistant.svelte](src/lib/components/VotingAssistant.svelte), [ArgumentWeighting.svelte](src/lib/components/ArgumentWeighting.svelte), `VoteSection`, `VotingJournal`, `TopNav`, `BottomNav`, `DisclaimerRibbon` und `FeedbackForm`.
+- **Daten & Schnittstellen:** MongoDB Atlas wird verwendet, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt. Ohne diese Konfiguration nutzt die App Seed-/In-Memory-Fallback-Daten. Collections: `abstimmungen`, `communityVotes`, `parteiInteressen`. Persönliche Daten bleiben im `localStorage`. API-Endpunkte existieren für Community-Votes, Interessen-Registrierung und CSV-Export. Belege: [src/lib/server/db.ts](src/lib/server/db.ts), [src/lib/server/dataLayer.ts](src/lib/server/dataLayer.ts), [docs/04-prototype.md](docs/04-prototype.md).
+- **Deployment:** Die Live-App ist unter <https://friendly-llama-b738d4.netlify.app> erreichbar. Netlify baut aus dem `main`-Branch. Produktiv relevante Environment-Variablen sind `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD`; echte Werte werden nicht im Repo dokumentiert. Siehe [docs/07-projektorganisation.md](docs/07-projektorganisation.md).
+- **Besondere Entscheidungen:** MongoDB mit Fallback, lokale Speicherung persönlicher Daten, SvelteKit/Netlify als Deployment-Stack, KI-Unterstützung mit Quellenprüfung sowie Kompass/Argumentgewichtung sind als ADRs dokumentiert: [docs/adr/001-mongodb-mit-fallback.md](docs/adr/001-mongodb-mit-fallback.md), [docs/adr/002-localstorage-fuer-persoenliche-daten.md](docs/adr/002-localstorage-fuer-persoenliche-daten.md), [docs/adr/003-ki-unterstuetzung-mit-quellenpruefung.md](docs/adr/003-ki-unterstuetzung-mit-quellenpruefung.md), [docs/adr/004-sveltekit-und-netlify.md](docs/adr/004-sveltekit-und-netlify.md), [docs/adr/005-kompass-und-argumentgewichtung.md](docs/adr/005-kompass-und-argumentgewichtung.md).
+
+### 3.5 Validate
+
+- **URL der getesteten Version** (separat deployt): Getestet wurde die öffentliche Netlify-Version <https://friendly-llama-b738d4.netlify.app>. Die Moodle-Vorlage fragt nach einer separat deployten getesteten Version; im Repo ist jedoch kein separates Zwischen-Deployment-Archiv der Testversion vom 20. Mai 2026 dokumentiert. Der finale Abgabestand wird deshalb zusätzlich über [docs/screenshots/](docs/screenshots/README.md) und den Video-Walkthrough in [docs/video/](docs/video/README.md) belegt. Diese Einschränkung ist in [docs/05-validate.md](docs/05-validate.md) transparent dokumentiert.
+- **Ziele der Prüfung:** Geprüft wurden Verständlichkeit, Neutralität, Interaktivität, Nutzerführung, UX/Design, Nutzen vor einer realen Abstimmung, Auffindbarkeit von Quellen sowie die Erklärbarkeit von Argumentgewichtung, Kompass und Voting-Journal.
+- **Vorgehen:** Moderierte, szenario-basierte Usability-Tests mit Think-Aloud, Beobachtung, Feedback Grid, Issue-Ableitung und 5-stufiger Bewertung. Politische Inhalte wurden nicht per Audio/Video aufgezeichnet, damit Testpersonen offen reagieren konnten.
+- **Stichprobe:** Insgesamt fünf anonymisierte Testpersonen: P1-P3 im Unterricht/ZHAW-Kontext am 20. Mai 2026, P4-P5 als private Nachtests am 24. Mai 2026. Die unterschiedlichen Protokolltiefen sind in [docs/05-validate.md](docs/05-validate.md) offengelegt.
+- **Aufgaben/Szenarien:** Abstimmung finden, Parteipositionen prüfen, Pro-/Contra-Argumente vergleichen, Argumente gewichten, Position mit Notiz speichern, Kompass absolvieren, gespeicherte Inhalte im Profil wiederfinden und Originalquellen prüfen.
+- **Kennzahlen & Beobachtungen:** Die quantitative Bewertung beruht auf der Unterrichtsevaluation mit **n=3** (P1-P3): durchschnittlich **4.2 / 5** über Bedienbarkeit/Navigation (4/5), Verständlichkeit (5/5), Neutralität (4/5), visuelles Design (4/5) und Gesamteindruck (4/5). **3 von 3** Unterrichtstestpersonen würden die App vor einer Abstimmung nutzen oder wahrscheinlich nutzen. Insgesamt sind **7 Szenario-Aufgaben (A-G)**, **5 anonymisierte Testpersonen** und **9 konsolidierte Usability-Issues (U1-U9)** dokumentiert. Die Schweregrad-Verteilung der konsolidierten Issues: **2 Issues mit Schweregrad 3**, **6 Issues mit Schweregrad 2**, **1 Issue mit Schweregrad 1-2**, **0 Issues mit Schweregrad 4**. Die privaten Nachtests P4-P5 ergänzen die Evaluation qualitativ; sie wurden nicht in die 4.2/5-Kennzahl eingerechnet.
+- **Zusammenfassung der Resultate:** Grundidee, Pro/Contra-Trennung, KI-Briefing und ruhiges Design wurden positiv aufgenommen. Kritische Punkte lagen bei Interaktionssignalen, Desktop-Layout, Erklärbarkeit der Live-Tendenz, Auffindbarkeit von Quellen und Wunsch nach persönlicher Reflexion.
+- **Abgeleitete Verbesserungen:** Umgesetzt wurden unter anderem stärkere Workflow-Führung, Argumentgewichtung, Position/Sicherheit/Notiz, Kompass-Erklärung, Profil/Voting-Journal, Desktop-Layout, prominente Quellen, Admin-/CRUD-Belege und zusätzliche Screenshots. Offen bleibt VA-012 als bewusst dokumentierter Design-Konsistenz-Pass.
+
+## 4. Erweiterungen [Optional]
+
+Dokumentiert Erweiterungen über den Mindestumfang hinaus. Jede Erweiterung ist separat nach dem vorgegebenen Schema beschrieben.
+
+### 4.1 Argumentgewichtung mit Live-Tendenz
+
+- **Beschreibung & Nutzen:** Nutzer:innen gewichten Pro- und Contra-Argumente auf einer 0-3-Skala. Die App berechnet daraus eine Live-Tendenz und zeigt die stärksten gewichteten Gründe. Das macht den Entscheidungsprozess aktiv und nachvollziehbar, ohne eine Empfehlung auszusprechen.
+- **Wo umgesetzt:**
+  - **Frontend:** [src/lib/components/ArgumentWeighting.svelte](src/lib/components/ArgumentWeighting.svelte), eingebunden auf der Detailseite.
+  - **Backend:** Kein eigener Backend-Zwang; persönliche Gewichtungen bleiben lokal.
+  - **Datenbank:** Keine Speicherung persönlicher Gewichtungen in MongoDB, bewusst aus Datenschutzgründen.
+- **Referenz:** [docs/04-prototype.md](docs/04-prototype.md), [docs/screenshots/04-gewichtung.png](docs/screenshots/04-gewichtung.png), [docs/screenshots/15-argument-detail.png](docs/screenshots/15-argument-detail.png), [docs/adr/005-kompass-und-argumentgewichtung.md](docs/adr/005-kompass-und-argumentgewichtung.md).
+- **Aus Evaluation abgeleitet?:** Ja, aus U7 und der Notwendigkeit, Live-Tendenz als Reflexion statt Empfehlung zu erklären.
+
+### 4.2 Partei-Kompass
+
+- **Beschreibung & Nutzen:** Ein eigenständiger Orientierungsworkflow mit 18 Szenario-Fragen aus 10 Themenbereichen zeigt parteipolitische Nähe als Ranking und Themen-Breakdown. Er ergänzt die konkrete Abstimmungsvorbereitung um eine breitere politische Selbsteinordnung.
+- **Wo umgesetzt:**
+  - **Frontend:** [src/routes/kompass/+page.svelte](src/routes/kompass/+page.svelte).
+  - **Backend:** Server-Load für vorhandene Datenbasis in [src/routes/kompass/+page.server.ts](src/routes/kompass/+page.server.ts).
+  - **Datenbank:** Kompass-Antworten und Resultat bleiben im `localStorage`; Parteien- und Fragenbasis liegt in TypeScript-Daten.
+- **Referenz:** [docs/04-prototype.md](docs/04-prototype.md), [docs/screenshots/05-kompass-frage.png](docs/screenshots/05-kompass-frage.png), [docs/screenshots/06-kompass-ergebnis.png](docs/screenshots/06-kompass-ergebnis.png), [docs/adr/005-kompass-und-argumentgewichtung.md](docs/adr/005-kompass-und-argumentgewichtung.md).
+- **Aus Evaluation abgeleitet?:** Teilweise. Der Kompass war als Erweiterung konzipiert; die vorsichtigere Ergebnis-Sprache und Berechnungs-Erklärung wurden aus U7 abgeleitet.
+
+### 4.3 Profil und Voting-Journal
+
+- **Beschreibung & Nutzen:** Gespeicherte Positionen, Notizen, Sicherheit, Bookmarks, Kompass-Ergebnis, Partei-Übereinstimmung und Aktivitäten werden im Profil zusammengeführt. Dadurch entsteht ein persönlicher Reflexionsraum statt einer einmaligen Interaktion.
+- **Wo umgesetzt:**
+  - **Frontend:** [src/routes/profil/+page.svelte](src/routes/profil/+page.svelte) und Journal-Komponenten.
+  - **Backend:** Server-Load für Abstimmungsdaten in [src/routes/profil/+page.server.ts](src/routes/profil/+page.server.ts).
+  - **Datenbank:** Persönliche Daten bleiben im `localStorage`; keine personenbezogene serverseitige Speicherung.
+- **Referenz:** [docs/04-prototype.md](docs/04-prototype.md), [docs/screenshots/07-profil.png](docs/screenshots/07-profil.png), [docs/adr/002-localstorage-fuer-persoenliche-daten.md](docs/adr/002-localstorage-fuer-persoenliche-daten.md).
+- **Aus Evaluation abgeleitet?:** Ja, aus U3 und U8: Wunsch nach Notiz, eigener Position und Wiederfinden im Profil.
+
+### 4.4 Parteienbereich, Parteivergleich und Positionen-Matrix
+
+- **Beschreibung & Nutzen:** Die App zeigt Parteienprofile, Kernthemen, Positionen zu Vorlagen, einen direkten Parteivergleich und eine Matrix der Parteiparolen. Das erweitert die einzelne Vorlage um politische Einordnung.
+- **Wo umgesetzt:**
+  - **Frontend:** [`src/routes/parteien/+page.svelte`](src/routes/parteien/+page.svelte), [`src/routes/parteien/[kuerzel]/+page.svelte`](src/routes/parteien/[kuerzel]/+page.svelte), [`src/routes/abstimmungen/[slug]/parteien/+page.svelte`](src/routes/abstimmungen/[slug]/parteien/+page.svelte).
+  - **Backend:** Server-Loads für Parteien- und Abstimmungsdaten.
+  - **Datenbank:** Parteipositionen sind Teil der `abstimmungen`-Daten; Parteienprofile liegen strukturiert in TypeScript-Daten.
+- **Referenz:** [docs/screenshots/08-parteien.png](docs/screenshots/08-parteien.png), [docs/screenshots/09-parteidetail.png](docs/screenshots/09-parteidetail.png), [docs/screenshots/16-parteivergleich.png](docs/screenshots/16-parteivergleich.png), [docs/screenshots/17-matrix.png](docs/screenshots/17-matrix.png).
+- **Aus Evaluation abgeleitet?:** Teilweise. Parteienraster und Parteikürzel waren in U4 relevant; Parteidetailseiten und grössere Darstellung wurden als Verbesserung umgesetzt, Tooltip bleibt offen.
+
+### 4.5 Admin-CRUD mit MongoDB Atlas und Fallback
+
+- **Beschreibung & Nutzen:** Der Admin-Bereich erlaubt Datenpflege für Abstimmungen, Argumente und Parteipositionen sowie Einsicht in Community-Votes und Interessen-Registrierungen. Damit wird die Bewertungsanforderung «Daten erstellen/aktualisieren» sichtbar erfüllt.
+- **Wo umgesetzt:**
+  - **Frontend:** [src/routes/admin/](src/routes/admin/) mit Dashboard, Login, Abstimmungsübersicht, New/Edit, Community und Interessen.
+  - **Backend:** Form Actions und Data Layer in [src/lib/server/dataLayer.ts](src/lib/server/dataLayer.ts).
+  - **Datenbank:** MongoDB Collections `abstimmungen`, `communityVotes`, `parteiInteressen`; bei fehlender Konfiguration In-Memory-Fallback.
+- **Referenz:** [docs/04-prototype.md](docs/04-prototype.md), [docs/07-projektorganisation.md](docs/07-projektorganisation.md), [docs/screenshots/13-admin.png](docs/screenshots/13-admin.png), [docs/screenshots/14-admin-edit_1.png](docs/screenshots/14-admin-edit_1.png), [docs/screenshots/14-admin-edit_2.png](docs/screenshots/14-admin-edit_2.png), [docs/adr/001-mongodb-mit-fallback.md](docs/adr/001-mongodb-mit-fallback.md).
+- **Aus Evaluation abgeleitet?:** Nein, primär aus technischer Mindestanforderung und Abgabe-Risiko abgeleitet. VA-015 dokumentiert die Sichtbarmachung in Doku und Video.
+
+### 4.6 Quellen- und Medienberichte-Seite
+
+- **Beschreibung & Nutzen:** Amtliche Quellen, Parteiquellen, Medienberichte und Methodik/KI-Transparenz werden getrennt dargestellt. Das stärkt Vertrauen und macht politische Inhalte prüfbar.
+- **Wo umgesetzt:**
+  - **Frontend:** [src/routes/quellen/+page.svelte](src/routes/quellen/+page.svelte).
+  - **Backend:** Keine komplexe Backend-Logik; kuratierte Quellen liegen in der App-Datenbasis.
+  - **Datenbank:** Quellenangaben pro Abstimmung und Argument sind Teil der strukturierten Daten.
+- **Referenz:** [docs/04-prototype.md](docs/04-prototype.md), [docs/05-validate.md](docs/05-validate.md), [docs/screenshots/10-quellen.png](docs/screenshots/10-quellen.png).
+- **Aus Evaluation abgeleitet?:** Ja, aus U5: Quellenhinweise wurden ursprünglich übersehen und wurden danach prominenter platziert.
 
-**Datenflüsse:**
+### 4.7 Community-Votes und Interessen-Registrierungen
 
-- **MongoDB / Server-Daten** (Abstimmungen, Argumente, Parteipositionen, Community-Votes, Interessen-Registrierungen): über die `dataLayer`-Schicht aus MongoDB Atlas geladen, wenn `MONGODB_URI` gesetzt ist und `USE_MOCK_DATA=false` gilt.
-- **Seed-/Fallback-Daten**: Wenn MongoDB nicht aktiv oder nicht erreichbar ist, nutzt die App strukturierte Seed-Daten aus `realData.ts` sowie In-Memory-Stores. Dadurch bleibt der Prototyp lokal und im Demo-Fall lauffähig.
-- **Statische strukturierte Daten**: Parteienprofile und Kompass-Fragen liegen in TypeScript-Dateien (`parteiData.ts`, `kompass.ts`), weil sie keine User- oder Admin-Daten sind.
-- **Persönliche User-Daten** (Stimmen, Notizen, Sicherheit, Bookmarks, Kompass-Resultate, Argumentgewichtungen): ausschliesslich im `localStorage`.
-- **Admin-CRUD**: persistiert bei aktiver MongoDB-Verbindung direkt in die Collection `abstimmungen`, sonst im In-Memory-Fallback.
+- **Beschreibung & Nutzen:** Nutzer:innen können anonym aggregierte Community-Votes abgeben. Zusätzlich können Interessen-Registrierungen aus dem Parteienbereich serverseitig erfasst und im Admin-Bereich als CSV exportiert werden.
+- **Wo umgesetzt:**
+  - **Frontend:** Vote-Interaktion in Detailseiten, Interessenbereich in Parteien-Workflows, Admin-Ansichten.
+  - **Backend:** [`src/routes/api/abstimmungen/[slug]/vote/+server.ts`](src/routes/api/abstimmungen/[slug]/vote/+server.ts), [`src/routes/api/parteien/interesse/+server.ts`](src/routes/api/parteien/interesse/+server.ts), [`src/routes/api/admin/interessen.csv/+server.ts`](src/routes/api/admin/interessen.csv/+server.ts).
+  - **Datenbank:** `communityVotes` und `parteiInteressen` bei aktivem MongoDB-Modus.
+- **Referenz:** [docs/04-prototype.md](docs/04-prototype.md), [docs/07-projektorganisation.md](docs/07-projektorganisation.md).
+- **Aus Evaluation abgeleitet?:** Nein, primär als Produkt- und Datenbankerweiterung umgesetzt.
 
-**MongoDB-Collections:**
+### 4.8 Dark Mode, Responsive Navigation und Disclaimer-Ribbon
 
-| Collection | Zweck |
-|---|---|
-| `abstimmungen` | Vorlagen, Briefings, Pro-/Contra-Argumente und Parteipositionen |
-| `communityVotes` | Anonyme aggregierte JA/NEIN-Stimmen pro Vorlage |
-| `parteiInteressen` | Interessen-Registrierungen aus dem Parteienbereich |
+- **Beschreibung & Nutzen:** Dark Mode, mobile BottomNav, Desktop TopNav, Skip-Link, Fokuszustände und Disclaimer-Ribbon verbessern Bedienbarkeit, Zugänglichkeit und rechtlich-ethische Transparenz.
+- **Wo umgesetzt:**
+  - **Frontend:** Layout und globale Komponenten in [src/routes/+layout.svelte](src/routes/+layout.svelte), [src/lib/components/TopNav.svelte](src/lib/components/TopNav.svelte), [src/lib/components/BottomNav.svelte](src/lib/components/BottomNav.svelte), [src/lib/components/DisclaimerRibbon.svelte](src/lib/components/DisclaimerRibbon.svelte), globale Styles in [src/app.css](src/app.css).
+  - **Backend:** Nicht erforderlich.
+  - **Datenbank:** Theme- und Disclaimer-Status bleiben im `localStorage`.
+- **Referenz:** [docs/screenshots/11-darkmode.png](docs/screenshots/11-darkmode.png), [docs/screenshots/12-mobile.png](docs/screenshots/12-mobile.png), [docs/screenshots/18-disclaimer.png](docs/screenshots/18-disclaimer.png), [docs/issues.md](docs/issues.md).
+- **Aus Evaluation abgeleitet?:** Teilweise. Desktop- und Mobile-Verbesserungen wurden aus U2/U9 abgeleitet; der Disclaimer folgt aus rechtlich-ethischer Abgrenzung des Prototyps.
 
-**CRUD-Erfüllung für das Bewertungsraster:**
+## 5. Projektorganisation [Optional]
 
-- Admin kann Abstimmungen erstellen, bearbeiten und löschen.
-- Admin kann Metadaten, Pro-/Contra-Argumente und Parteipositionen pflegen.
-- User können Community-Votes abgeben; bestehende Stimmen werden pro Browser-Cookie aktualisiert.
-- User können persönliche Positionen, Notizen, Argumentgewichtungen, Feedback und Kompass-Ergebnisse lokal speichern, ändern oder löschen.
-- Interessen-Registrierungen werden serverseitig erfasst und im Admin-Bereich als CSV exportierbar gemacht.
+- **Repository & Struktur:** Das öffentliche GitHub-Repository liegt unter <https://github.com/adinho11-git/voting-assistant>. Die App-Struktur trennt `src/` für Anwendungscode, `docs/` für Projektartefakte, `docs/mockups/` für Sketch/Mockup-PDFs, `docs/screenshots/` für finale Screenshots und `docs/video/` für den Walkthrough. Die vollständige Struktur ist in [docs/07-projektorganisation.md](docs/07-projektorganisation.md) beschrieben.
+- **Issue-Management:** Die versionierte Issue-Dokumentation liegt in [docs/issues.md](docs/issues.md). Sie enthält VA-001 bis VA-016 mit Status, Priorität, Labels, Akzeptanzkriterien und Bewertungsraster-Bezug. VA-012 bleibt bewusst offen, weil kein expliziter finaler Design-Konsistenz-Pass als eigenes Artefakt belegt ist. Die übrigen abgaberelevanten Dokumentations-, Evaluations-, Screenshot-, Video- und Admin-/CRUD-Punkte sind als erledigt dokumentiert.
+- **Commit-Praxis:** Das Projekt ist eine Einzelarbeit mit `main` als langlebigem Branch und automatischem Netlify-Deployment. Die Commit-Historie enthält Feature-, Dokumentations-, Deployment- und Abschluss-Commits; Beispiele sind in [docs/07-projektorganisation.md](docs/07-projektorganisation.md) aufgeführt. Vor finalen Deployments werden `npm run check`, `npm run build`, Netlify-Status, zentrale Live-Routen und Admin-Konfiguration geprüft.
+- **Artefakt-Ablage:** Alle abgaberelevanten Artefakte sind im Repo greifbar: Phasendoku [docs/01-understand.md](docs/01-understand.md) bis [docs/07-projektorganisation.md](docs/07-projektorganisation.md), Mockups, Screenshots, Video, KI-Deklaration, Promptvorgehen, ADRs und Issue-Set. Dadurch ist die Abgabe auch ohne externe Cloud-Ordner nachvollziehbar.
 
----
+## 6. KI-Deklaration
 
-## Setup und Installation
+Die folgende Deklaration ist verpflichtend und beschreibt den Einsatz von KI im Projekt. Die Langfassung steht in [docs/06-ki-einsatz.md](docs/06-ki-einsatz.md), das Promptvorgehen in [docs/prompts.md](docs/prompts.md).
 
-**Voraussetzungen:** Node.js 18+ (empfohlen 20+), npm.
+### 6.1 KI-Tools
 
-```bash
-# Repository klonen
-git clone https://github.com/adinho11-git/voting-assistant.git
-cd voting-assistant
+- **Eingesetzte Tools:** Claude Code (Anthropic), Codex (OpenAI) und ChatGPT (OpenAI).
+- **Zweck & Umfang:** Claude Code wurde für Code-Analyse, Refactoring-Vorschläge, Dokumentationsstruktur, UX-Reviews und technische Reviews eingesetzt. Codex wurde für fokussierte Coding-Tasks, UI-/Workflow-Verbesserungen, Code-Audits und finale Doku-Konsistenz genutzt. ChatGPT wurde für Projektstrategie, Bewertungsraster-Interpretation, Prompt-Erstellung, UX-Kritik, Priorisierung und Reflexion verwendet.
+- **Eigene Leistung (Abgrenzung):** Konzept, Zielgruppe, Workflow, finale Feature-Auswahl, Architekturentscheidungen, Quellenprüfung, politische Neutralität, finale Texte und Abgabeprioritäten wurden manuell entschieden und überprüft. KI war Arbeits- und Sparring-Werkzeug, nicht politische Quelle und nicht Entscheiderin.
 
-# Abhängigkeiten installieren
-npm install
+### 6.2 Prompt-Vorgehen
 
-# Lokal starten (Mock-Modus, keine DB nötig)
-npm run dev
-# → http://localhost:5173/
-```
+Das Prompting erfolgte iterativ und auf kleine Arbeitspakete bezogen. Typische Muster waren Code-Analyse, Komponenten-Umsetzung, UX-Review, Bewertungsraster-Abgleich und inhaltliche Verdichtung mit Quellenpflicht. Prompts enthielten konkrete Dateien, Ziele, Bewertungsbezug und klare Grenzen: keine Wahlempfehlungen, keine erfundenen Quellen, keine Secrets, keine personenbezogenen Daten. Repräsentative Muster sind in [docs/prompts.md](docs/prompts.md) dokumentiert.
 
-### Optional mit MongoDB Atlas
+### 6.3 Reflexion
 
-`.env`-Datei im Root anlegen:
+KI brachte vor allem Geschwindigkeit bei Boilerplate, Strukturierung, Review und Dokumentation. Die grössten Risiken waren Quellen-Halluzination, plausibel klingende falsche politische Inhalte, subtiler Bias, Code-Edge-Cases und ungewollt empfehlende Sprache. Gegenmassnahmen waren manuelle Quellenprüfung, Type-Check/Build, bewusst neutrale Formulierungen, In-App-KI-Transparenz und klare Verantwortung beim Entwickler. Die App nutzt KI zur Verdichtung und Strukturierung, aber nicht als politische Autorität.
 
-```env
-MONGODB_URI="mongodb+srv://<user>:<pw>@<cluster>/?retryWrites=true&w=majority"
-USE_MOCK_DATA=false
-ADMIN_PASSWORD="dein-sicheres-passwort"
-```
+## 7. Anhang [Optional]
 
-Anschliessend optional initial seeden:
-
-```bash
-npm run seed
-```
-
-### Weitere Scripts
-
-```bash
-npm run build      # Produktions-Build
-npm run preview    # Build lokal testen
-npm run check      # svelte-check / Type-Check
-```
-
-### Admin-Login
-
-Aufruf unter `/admin/login`. Login mit dem in `.env` beziehungsweise in Netlify gesetzten `ADMIN_PASSWORD`. Es gibt keinen getrackten Demo-Fallback; ohne gesetzte Variable bleibt der Admin-Bereich bewusst gesperrt.
-
----
-
-## Deployment
-
-- **Plattform:** Netlify, Adapter `@sveltejs/adapter-netlify`.
-- **Build-Auslöser:** jeder Push auf `main` löst automatisch ein Netlify-Build aus.
-- **Aktuelle URL:** <https://friendly-llama-b738d4.netlify.app>
-- **Custom Domain:** keine Custom Domain geplant; die finale Abgabe verweist auf die Netlify-URL.
-- **Produktiver Datenmodus:** Für MongoDB Atlas müssen in Netlify `MONGODB_URI`, `USE_MOCK_DATA=false` und `ADMIN_PASSWORD` gesetzt sein. Die tatsächlichen Secret-Werte werden nicht im Repository dokumentiert.
-
----
-
-## Screenshots
-
-Die finalen Screenshots liegen unter [`docs/screenshots/`](docs/screenshots/README.md). Sie zeigen den abgaberelevanten Stand der wichtigsten Ansichten und Workflows.
-
-### Startseite
-
-![Startseite](docs/screenshots/01-startseite.png)
-
-Die Startseite zeigt Hauptnutzen, Navigation, Countdown zur nächsten Abstimmung, primäre CTAs und den Einstieg in aktuelle Vorlagen.
-
-### Abstimmungsübersicht
-
-![Abstimmungsübersicht](docs/screenshots/02-abstimmungen.png)
-
-Die Übersicht bündelt anstehende und vergangene Vorlagen mit Tabs, Suche, Filterung und Kartenlayout.
-
-### Abstimmungsdetail und Briefing
-
-![Detailseite mit Briefing](docs/screenshots/03-detail-briefing.png)
-
-Die Detailseite führt in eine Vorlage ein und zeigt Briefing, Metadaten, Quellenstand und Workflow-Struktur.
-
-### Argumentgewichtung
-
-![Argumentgewichtung](docs/screenshots/04-gewichtung.png)
-
-Die Argumentgewichtung macht den Entscheidungsprozess interaktiv: Nutzer:innen gewichten Pro- und Contra-Argumente und sehen daraus eine Live-Tendenz.
-
-### Partei-Kompass
-
-![Partei-Kompass Frage](docs/screenshots/05-kompass-frage.png)
-
-Der Partei-Kompass nutzt Szenario-Fragen mit 5-Stufen-Skala als zweiten Orientierungsworkflow.
-
-![Partei-Kompass Ergebnis](docs/screenshots/06-kompass-ergebnis.png)
-
-Das Ergebnis zeigt Parteiennähe, Ranking und Themen-Breakdown transparent und ohne Wahlempfehlung.
-
-### Profil und Voting-Journal
-
-![Profil und Voting-Journal](docs/screenshots/07-profil.png)
-
-Das Profil zeigt gespeicherte Positionen, Kompass-Ergebnis und persönliche Reflexion im Voting-Journal.
-
-### Parteien
-
-![Parteienübersicht](docs/screenshots/08-parteien.png)
-
-Die Parteienübersicht zeigt die sechs Bundesparteien mit Filter, Vergleich und politischer Einordnung.
-
-![Parteidetailseite](docs/screenshots/09-parteidetail.png)
-
-Die Parteidetailseite zeigt Profil, Kernthemen, Spektrum und Positionen zu aktuellen Vorlagen.
-
-### Quellen
-
-![Quellen und Medienberichte](docs/screenshots/10-quellen.png)
-
-Die Quellen-Seite trennt amtliche Quellen, Parteiquellen, Medienberichte und Methodik transparent.
-
-### Dark Mode
-
-![Dark Mode](docs/screenshots/11-darkmode.png)
-
-Der Dark Mode zeigt, dass zentrale Workflows auch im dunklen Theme lesbar und konsistent bleiben.
-
-### Mobile Ansicht
-
-![Mobile Ansicht](docs/screenshots/12-mobile.png)
-
-Die mobile Ansicht zeigt Bottom-Navigation, responsive Layouts und die Nutzbarkeit auf Smartphone-Grösse.
-
-### Admin
-
-![Admin Dashboard](docs/screenshots/13-admin.png)
-
-Das Admin-Dashboard dokumentiert Datenpflege, Systemstatus und die technische Grundlage für CRUD-Funktionen. Der Screenshot zeigt den produktiven MongoDB-Atlas-Modus mit `USE_MOCK_DATA=false`.
-
-### Admin-CRUD: Vorlage bearbeiten
-
-![Admin-Edit Grunddaten](docs/screenshots/14-admin-edit_1.png)
-
-Die Edit-Ansicht im Admin-Bereich zeigt die Grunddaten einer Vorlage — Titel, Kurztitel, Slug, Datum, Kategorie und Lesezeit — und belegt damit den Update-Teil der CRUD-Funktionalität auf der `abstimmungen`-Collection.
-
-![Admin-Edit Argumente](docs/screenshots/14-admin-edit_2.png)
-
-Die Argument-Sektion derselben Edit-Seite ermöglicht das Anlegen, Bearbeiten und Entfernen einzelner Pro- und Contra-Argumente mit Quelle. Damit wird das Erstellen und Aktualisieren von Inhalten in der Datenbank direkt sichtbar.
-
-### Argumentgewichtung mit Bulk-Aktionen
-
-![Argumentgewichtung mit Schnellaktionen](docs/screenshots/15-argument-detail.png)
-
-Detailansicht der Argumentgewichtung mit Schnellaktionen pro Spalte («Pro wichtig setzen», «Pro zurücksetzen» und analog für Contra). Sie ergänzt die einzelne 0–3-Bewertung um eine effiziente Bulk-Bedienung des Gewichtungs-Workflows.
-
-### Parteivergleich
-
-![Parteivergleich](docs/screenshots/16-parteivergleich.png)
-
-Der direkte Parteivergleich stellt zwei Parteien — hier SVP und SP — mit Gründungsdatum, Mitgliederzahl, Links-Rechts-Verortung und Kernthemen gegenüber.
-
-### Positionen-Matrix
-
-![Positionen-Matrix](docs/screenshots/17-matrix.png)
-
-Die Positionen-Matrix bündelt die JA/NEIN-Parolen aller sechs Bundesparteien zu ausgewählten Vorlagen und bietet eine kompakte parteipolitische Orientierung ergänzend zum geführten Workflow.
-
-### Disclaimer-Ribbon
-
-![Disclaimer-Ribbon](docs/screenshots/18-disclaimer.png)
-
-Der dismissbare Disclaimer-Ribbon ist global im Layout eingebunden und kennzeichnet die App auf allen Routen als studentischen Prototyp mit Verweis auf die offiziellen Quellen.
-
----
-
-## Projektdokumentation (`docs/`)
-
-Die methodische Dokumentation zu Vorgehen, Evaluation und KI-Einsatz liegt vollständig im Ordner [`docs/`](docs/) und ergänzt die in dieser README zusammengefassten Highlights.
-
-| Dokument | Inhalt |
-|---|---|
-| [`docs/01-understand.md`](docs/01-understand.md) | Phase 1 — Problemraum, Persona, Annahmen, Risiken bei politischen Themen |
-| [`docs/02-sketch.md`](docs/02-sketch.md) | Phase 2 — Frühe Ideen, Variantenvergleich, Skizzen |
-| [`docs/03-decide.md`](docs/03-decide.md) | Phase 3 — Gewählte Lösung, MoSCoW-Priorisierung, Abgrenzungen |
-| [`docs/04-prototype.md`](docs/04-prototype.md) | Phase 4 — Finale Seitenstruktur, Workflows, technische Umsetzung |
-| [`docs/05-validate.md`](docs/05-validate.md) | Phase 5 — Evaluationsplan, Testaufgaben, Beobachtungstabelle, Schweregrad-Skala |
-| [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md) | KI-Tools (Claude Code, Codex, ChatGPT), Anwendungsbereiche, manuelle Qualitätssicherung |
-| [`docs/prompts.md`](docs/prompts.md) | Promptvorgehen, typische Prompt-Muster und Qualitätssicherungsregeln |
-| [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md) | Repository, Branches, Commits, Issues, Deployment, technische Schulden |
-| [`docs/mockups/`](docs/mockups/README.md) | Ablage und Checkliste für Skizzen und Mockups |
-| [`docs/screenshots/`](docs/screenshots/README.md) | Ablage und Checkliste für finale App-Screenshots |
-| [`docs/video/`](docs/video/README.md) | Lokale Ablage des kommentierten Video-Walkthroughs |
-
----
-
-## Evaluation
-
-Eine qualitative Usability-Evaluation wurde mit **fünf anonymisierten Testpersonen (P1–P5)** durchgeführt:
-
-- **P1–P3** im Unterricht / ZHAW-Kontext (Haupttest am **20. Mai 2026**, je ca. 10 Minuten).
-- **P4–P5** als private Nachtests, um die Stichprobe zu vergrössern und die erweiterten Workflows (Argumentgewichtung, Voting-Journal, Partei-Kompass) ergänzend zu prüfen.
-
-**Bewertung aus der dokumentierten Unterrichts-Evaluation:** **4.2 / 5** im Durchschnitt — Verständlichkeit der Inhalte 5/5, Bedienbarkeit, Neutralität, Design und Gesamteindruck je 4/5. **3 von 3** im Unterricht befragten Personen würden die App vor einer Abstimmung nutzen oder wahrscheinlich nutzen.
-
-**Wichtigste Erkenntnisse:**
-
-- Grundidee, Pro/Contra-Trennung und KI-Briefing wurden positiv aufgenommen.
-- Hauptprobleme lagen **nicht in der Grundfunktion**, sondern in **Interaktivitäts-Signalen** (Karten wirken nicht klar anklickbar), im **Desktop-Layout** (zu mobile-artig), in der **Erklärbarkeit** (Live-Tendenz vs. Empfehlung, Kompass-Berechnung) und in der **Nutzerführung** (Wunsch nach Notizen, Reflexion, geführtem Workflow).
-- Quellen wurden bei direkter Frage erkannt, aber im ursprünglichen Footer übersehen.
-
-**Wichtigste umgesetzte Verbesserungen aus der Evaluation:**
-
-- **Startseite** und **Detailseite** auf den Hauptworkflow Verstehen → Abwägen → Gewichten → Einordnen → Entscheiden → Speichern fokussiert.
-- **Argumentgewichtung mit Live-Tendenz** erklärbarer dargestellt.
-- **Eigene Position mit Sicherheit und Notiz** speicherbar (`VoteSection` + `localStorage`).
-- **Kompass-Ergebnis** vorsichtiger und transparenter (Sprache «Nähe / Tendenz», ausklappbare Erklärung der Berechnung, Hinweis bei knappem Ergebnis).
-- **Profil / Voting-Journal** als persönlicher Reflexionsraum mit Übereinstimmung zu Parteipositionen und Aktivitäten-Timeline.
-- **Desktop-Layout** mit eigener TopNav, Full-Width-Container und konsistenter Informationsdichte.
-- **Quellen** prominenter pro Argument und auf einer eigenen Quellen- und Medienberichte-Seite.
-
-**Vollständige Dokumentation** mit Fragestellungen, Testaufgaben, Feedback Grid, konsolidierter Issue-Liste (Nielsen-Schweregrad 0–4), Bewertungstabelle, abgeleiteten Verbesserungen und ehrlicher Reflexion zu Limitationen: [`docs/05-validate.md`](docs/05-validate.md).
-
-> **Verbleibende Punkte:** Tooltip für Parteikürzel und ein letzter Design-Konsistenz-Pass bleiben als bewusst abgegrenzte Restpunkte dokumentiert. Die finalen Screenshots des Abgabestands liegen unter [`docs/screenshots/`](docs/screenshots/README.md).
-
-In der App selbst sammelt zusätzlich das [`FeedbackForm`](src/lib/components/FeedbackForm.svelte) am Ende jeder Detailseite niederschwellig Werte zu Clarity, Neutrality und Usefulness — als sekundäre Datenquelle.
-
----
-
-## KI-Einsatz
-
-Der Voting Assistant ist mit Unterstützung mehrerer KI-Werkzeuge entstanden. Die volle Deklaration mit Anwendungsbereichen, manueller Qualitätssicherung und Reflexion steht in [`docs/06-ki-einsatz.md`](docs/06-ki-einsatz.md).
-
-Kurzüberblick:
-
-| Tool | Hauptzweck |
-|---|---|
-| **Claude Code** (Anthropic) | Code-Analyse, Refactoring, Dokumentationsstruktur, UX-Verbesserungen, technische Reviews |
-| **Codex** (OpenAI) | Fokussierte Coding-Tasks, UI- und Workflow-Verbesserungen, Code-Audits, einzelne Features und Fixes |
-| **ChatGPT** (OpenAI) | Projektstrategie, Bewertungsraster-Interpretation, Prompt-Erstellung, UX-Kritik, Priorisierung, Reflexion |
-
-**Wichtig:** Politische Inhalte, Quellen, Neutralität, Funktionalität und finale Entscheidungen wurden manuell überprüft. Die KI hat keine politische Meinung vorgegeben und keine Wahlempfehlung erstellt. Die App ist auf Startseite und Quellen-Seite zusätzlich in-app transparent dazu.
-
----
-
-## Rechtliche und ethische Hinweise
-
-- **Politische Neutralität.** Pro- und Contra-Argumente werden gleichwertig dargestellt. Die App spricht durchgängig von Tendenz, Orientierung oder Nähe, nicht von Empfehlung.
-- **Keine Wahlempfehlung.** Der Voting Assistant ist eine Orientierungshilfe für die persönliche Meinungsbildung und ersetzt weder das Abstimmungsbüchlein noch die Originaltexte der Vorlagen.
-- **Quellen.** Briefings und Argumente stützen sich auf admin.ch und bk.admin.ch. Jede Aussage trägt einen Quellen-Link mit Datum. Medienberichte sind kuratierte externe Links (SRF, Watson) und klar als journalistische Perspektive markiert.
-- **Datenschutz.** Persönliche Stimmen, Notizen, Bookmarks und Kompass-Ergebnisse bleiben **ausschliesslich lokal** im Browser (`localStorage`). Community-Votes werden anonym aggregiert.
-- **KI-Transparenz.** Texte wurden mit KI-Werkzeugen strukturiert und sprachlich verdichtet, anschliessend manuell auf Genauigkeit und Neutralität geprüft. KI generiert keine politischen Empfehlungen.
-- **Urheberrecht.** Externe Inhalte werden via Link auf die Originalquelle referenziert. Zusammenfassungen sind eigene Formulierungen auf Basis der amtlichen Quellen.
-- **Studentischer Prototyp.** Die App ist eine Modulleistung und keine offizielle Plattform. Ein Disclaimer-Ribbon macht das im UI sichtbar.
-
----
-
-## Bekannte Grenzen und Future Work
-
-- **Inhalts-Scope:** Aktuell fokussiert auf eidgenössische Abstimmungen. Kantonale und kommunale Vorlagen sind nicht Bestandteil des finalen Datenbestands.
-- **Server-State:** Persönliche Stimmen sind bewusst nicht synchronisierbar (Datenschutz-Trade-off). Gerätewechsel verliert das Journal. Ein optionaler Export wäre ein sinnvoller nächster Schritt.
-- **Live-News-API:** Medienberichte sind eine kuratierte Auswahl, keine dynamische Anbindung.
-- **Tests:** Aktuell keine automatisierten Tests. Ein E2E-Smoke-Test für den Kern-Workflow ist als Future-Work-Punkt dokumentiert.
-- **Datenpflege:** Die Datenquelle `realData.ts` wird manuell gehalten. Mittelfristig wäre ein Sync gegen die Bundeskanzlei-API denkbar.
-- **Kompass-Visualisierung:** Eine 2D-Spektrum-Anzeige (Links↔Rechts / Wirtschaft↔Umwelt) ist als sinnvolle Erweiterung dokumentiert, die Datenbasis dafür existiert bereits.
-- **Evaluation:** Die qualitative Evaluation ist abgeschlossen und in [`docs/05-validate.md`](docs/05-validate.md) dokumentiert. Für ein Produktivsystem wären zusätzliche Tests mit breiterer Stichprobe sinnvoll.
-
-Vollständige Liste von Schulden und Future Work in [`docs/07-projektorganisation.md`](docs/07-projektorganisation.md).
-
----
-
-## Video-Walkthrough
-
-Ein kommentierter, ca. fünfminütiger Walkthrough der wichtigsten Workflows ist lokal im Repository abgelegt.
-
-Video: [`docs/video/voting-assistant-walkthrough_2026-05-28.mp4`](docs/video/voting-assistant-walkthrough_2026-05-28.mp4)
-
----
-
-## Projektkontext
-
-| Bereich | Information |
-|---|---|
-| Modul | Prototyping (FS 2026) |
-| Hochschule | ZHAW School of Management and Law |
-| Studiengang | Wirtschaftsinformatik |
-| Klasse | WIN24TZb |
-| Entwickler | Adi Lama |
-| Arbeitsform | Einzelarbeit |
-
----
-
-## Lizenz und Hinweis
-
-Studentisches Prototyping-Projekt im Modul Prototyping (ZHAW FS 2026). Code zur freien Verwendung im Modul-Kontext. Inhalte sind sinngemäss aus offiziellen Quellen abgeleitet — bei Wiederverwendung bitte auf admin.ch verweisen.
-
-**Dieser Prototyp ist keine offizielle Abstimmungshilfe.** Für rechtsverbindliche Informationen zur eidgenössischen Abstimmung vom 14. Juni 2026 sind ausschliesslich [admin.ch](https://www.admin.ch/de/eidgenoessische-abstimmungen) und das Abstimmungsbüchlein massgebend.
+- **Quellen:** Amtliche Grundlagen und Resultate stammen aus admin.ch, bk.admin.ch und abstimmungen.admin.ch. Parteipositionen und Medienberichte sind als Partei- beziehungsweise Medienquellen gekennzeichnet. Die Quellen- und Methodikdarstellung ist in der App unter `/quellen` sichtbar und in [docs/screenshots/10-quellen.png](docs/screenshots/10-quellen.png) belegt.
+- **Testskript & Materialien:** Evaluationsziele, Testaufgaben A-G, Stichprobe P1-P5, Feedback Grid, Schweregrad-Skala, Resultate und Verbesserungen stehen in [docs/05-validate.md](docs/05-validate.md). Die In-App-Feedback-Komponente ist in [src/lib/components/FeedbackForm.svelte](src/lib/components/FeedbackForm.svelte) belegt.
+- **Rohdaten/Auswertung:** Die Auswertung ist qualitativ und anonymisiert in [docs/05-validate.md](docs/05-validate.md) dokumentiert. Es wurden keine privaten Chatlogs, personenbezogenen Testdaten oder politischen Rohaufnahmen ins Repo gelegt.
+- **Mockups und Skizzen:** [docs/mockups/Uebung9_Abgabe_Adi_Lama.pdf](docs/mockups/Uebung9_Abgabe_Adi_Lama.pdf), [docs/mockups/Uebung10_Abgabe_Adi_Lama.pdf](docs/mockups/Uebung10_Abgabe_Adi_Lama.pdf), Übersicht in [docs/mockups/README.md](docs/mockups/README.md).
+- **Screenshots:** Alle finalen Screenshots 01-18 liegen unter [docs/screenshots/](docs/screenshots/README.md).
+- **Video-Walkthrough:** Der kommentierte Walkthrough liegt im Repository unter [docs/video/voting-assistant-walkthrough_2026-05-28.mp4](docs/video/voting-assistant-walkthrough_2026-05-28.mp4) und wird gemäss Abgabevorgaben zusätzlich als Datei eingereicht. Details stehen in [docs/video/README.md](docs/video/README.md).
+- **ADRs:** Architekturentscheidungen liegen unter [docs/adr/](docs/adr/).
+- **Rechtlicher Hinweis:** Der Voting Assistant ist ein studentischer Prototyp im Modul Prototyping (ZHAW FS 2026), keine offizielle Abstimmungshilfe und keine Wahlempfehlung. Für rechtsverbindliche Informationen sind die offiziellen Quellen massgebend.
