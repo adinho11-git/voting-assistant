@@ -4,10 +4,62 @@
   import Badge from '$lib/components/Badge.svelte';
   import ParteiReflection from '$lib/components/ParteiReflection.svelte';
   import { formatDate } from '$lib/mockData';
+  import { showToast } from '$lib/stores/toast';
 
   export let data: PageData;
 
   let selectedTopic = '';
+
+  // --- Interessensmeldung (öffentliches Formular → /api/parteien/interesse) ---
+  const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  let interesseName = '';
+  let interesseEmail = '';
+  let interesseNachricht = '';
+  let interesseStatus: 'idle' | 'submitting' | 'success' | 'error' = 'idle';
+  let interesseError = '';
+
+  async function submitInteresse(): Promise<void> {
+    interesseError = '';
+    if (interesseName.trim().length < 2) {
+      interesseError = 'Bitte gib deinen Namen an (mindestens 2 Zeichen).';
+      return;
+    }
+    if (!EMAIL_RX.test(interesseEmail.trim())) {
+      interesseError = 'Bitte gib eine gültige E-Mail-Adresse an.';
+      return;
+    }
+    if (interesseNachricht.length > 2000) {
+      interesseError = 'Die Nachricht ist zu lang (max. 2000 Zeichen).';
+      return;
+    }
+
+    interesseStatus = 'submitting';
+    try {
+      const res = await fetch('/api/parteien/interesse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parteiKuerzel: p.kuerzel,
+          name: interesseName.trim(),
+          email: interesseEmail.trim(),
+          nachricht: interesseNachricht.trim() || undefined
+        })
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message || 'Anfrage fehlgeschlagen.');
+      }
+      interesseStatus = 'success';
+      interesseName = '';
+      interesseEmail = '';
+      interesseNachricht = '';
+      showToast('Danke! Deine Interessensmeldung wurde erfasst.', 'success');
+    } catch (err) {
+      interesseStatus = 'error';
+      interesseError = err instanceof Error ? err.message : 'Unbekannter Fehler.';
+      showToast('Senden fehlgeschlagen. Bitte versuch es erneut.', 'error');
+    }
+  }
 
   $: p = data.partei;
   $: mitgliederFmt = new Intl.NumberFormat('de-CH').format(p.mitglieder);
@@ -855,7 +907,146 @@
   <ParteiReflection parteiKuerzel={p.kuerzel} parteiName={p.name} parteiFarbe={p.farbe} />
 </section>
 
+<!-- INTERESSENSMELDUNG -->
+<section class="container-app pb-20" style="--party-color: {p.farbe}; --party-soft: {p.farbeLight};">
+  <div class="interesse-card card p-6 md:p-8">
+    <p class="section-eyebrow mb-2">Mitmachen</p>
+    <h2 class="font-display text-2xl text-ink mb-3">Interesse an der {p.kuerzel} bekunden</h2>
+    <p class="text-sm text-ink-muted leading-relaxed mb-6 max-w-2xl">
+      Möchtest du mehr über die Positionen der {p.name} erfahren oder mit der Partei in Kontakt treten?
+      Hinterlasse deine Angaben – sie werden ausschliesslich für diese unverbindliche Interessensmeldung erfasst.
+    </p>
+
+    {#if interesseStatus === 'success'}
+      <div class="interesse-success" role="status">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <div>
+          <p class="font-semibold text-ink">Vielen Dank!</p>
+          <p class="text-sm text-ink-muted">Deine Interessensmeldung für die {p.kuerzel} wurde erfasst.</p>
+        </div>
+        <button type="button" class="btn-ghost ml-auto" on:click={() => (interesseStatus = 'idle')}>
+          Weitere Meldung
+        </button>
+      </div>
+    {:else}
+      <form class="interesse-form" on:submit|preventDefault={submitInteresse} novalidate>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <label class="interesse-field">
+            <span class="interesse-label">Name<span aria-hidden="true" class="interesse-req">*</span></span>
+            <input
+              type="text"
+              bind:value={interesseName}
+              class="interesse-input"
+              autocomplete="name"
+              required
+              minlength="2"
+              placeholder="Vor- und Nachname"
+            />
+          </label>
+          <label class="interesse-field">
+            <span class="interesse-label">E-Mail<span aria-hidden="true" class="interesse-req">*</span></span>
+            <input
+              type="email"
+              bind:value={interesseEmail}
+              class="interesse-input"
+              autocomplete="email"
+              required
+              placeholder="name@beispiel.ch"
+            />
+          </label>
+        </div>
+        <label class="interesse-field mt-4">
+          <span class="interesse-label">Nachricht <span class="text-ink-subtle font-normal">(optional)</span></span>
+          <textarea
+            bind:value={interesseNachricht}
+            class="interesse-input"
+            rows="4"
+            maxlength="2000"
+            placeholder="Worüber möchtest du mehr erfahren?"
+          ></textarea>
+        </label>
+
+        {#if interesseError}
+          <p class="interesse-error" role="alert">{interesseError}</p>
+        {/if}
+
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-5">
+          <button type="submit" class="btn-primary" disabled={interesseStatus === 'submitting'}>
+            {interesseStatus === 'submitting' ? 'Wird gesendet …' : 'Interesse senden'}
+          </button>
+          <p class="text-xs text-ink-subtle leading-relaxed">
+            Studentischer Prototyp – deine Angaben werden nur zu Demonstrationszwecken gespeichert.
+          </p>
+        </div>
+      </form>
+    {/if}
+  </div>
+</section>
+
 <style>
+  .interesse-card {
+    border-top: 3px solid var(--party-color);
+  }
+
+  .interesse-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .interesse-label {
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .interesse-req {
+    color: var(--party-color);
+    margin-left: 0.15rem;
+  }
+
+  .interesse-input {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.95rem;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .interesse-input:focus {
+    outline: none;
+    border-color: var(--party-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--party-color) 18%, transparent);
+  }
+
+  .interesse-error {
+    margin-top: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, #c8102e 12%, transparent);
+    border: 1px solid color-mix(in srgb, #c8102e 32%, transparent);
+    color: #c8102e;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .interesse-success {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--party-color) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--party-color) 28%, transparent);
+    color: var(--party-color);
+    flex-wrap: wrap;
+  }
+
   .party-hero {
     background:
       radial-gradient(circle at left 55%, color-mix(in srgb, var(--party-soft) 72%, transparent), transparent 34%),

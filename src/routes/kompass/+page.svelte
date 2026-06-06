@@ -6,6 +6,8 @@
   import { kompassStore } from '$lib/stores/kompass';
   import { showToast } from '$lib/stores/toast';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
 
   type CompassPoint = {
     kuerzel: MatchResult['kuerzel'];
@@ -26,6 +28,17 @@
   let answers: Record<string, number> = {};
   let results: MatchResult[] = [];
   let expandedExplanation = false;
+
+  // Rehydrate a previously completed compass run so a page reload returns
+  // the user to their saved result instead of restarting at the intro.
+  onMount(() => {
+    const saved = get(kompassStore);
+    if (saved && saved.results?.length > 0) {
+      answers = { ...saved.answers };
+      results = saved.results;
+      currentStep = data.fragen.length + 1; // jump straight to the result step
+    }
+  });
 
   $: totalQuestions = data.fragen.length;
   $: progress = currentStep === 0 ? 0 : Math.min(100, Math.round((currentStep / totalQuestions) * 100));

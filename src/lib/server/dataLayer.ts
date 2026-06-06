@@ -152,7 +152,7 @@ interface VoteDoc {
 export async function recordCommunityVote(slug: string, position: Position, clientId?: string): Promise<CommunityResult> {
   const col = await getCollection<VoteDoc>(COLLECTIONS.communityVotes);
   if (!col) {
-    const c = memRecordVote(slug, position);
+    const c = memRecordVote(slug, position, clientId);
     return { ja: c.ja, nein: c.nein, total: c.ja + c.nein };
   }
   try {
@@ -169,7 +169,7 @@ export async function recordCommunityVote(slug: string, position: Position, clie
     return getCommunityVotes(slug);
   } catch (err) {
     console.error('[dataLayer] recordCommunityVote DB error:', err);
-    const c = memRecordVote(slug, position);
+    const c = memRecordVote(slug, position, clientId);
     return { ja: c.ja, nein: c.nein, total: c.ja + c.nein };
   }
 }
